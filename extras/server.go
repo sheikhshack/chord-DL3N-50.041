@@ -18,7 +18,7 @@ func main() {
 		log.Fatalf("failed to listen: %v", err)
 	}
 
-	s := basic.Server{}
+	s := basic.Listener{}
 
 	grpcServer := grpc.NewServer()
 

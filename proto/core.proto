@@ -1,0 +1,14 @@
+syntax = "proto3";
+package basic;
+option go_package="github.com/sheikhshack/distributed-chaos-50.041/basic;basic";
+
+message NodeInfo {
+  uint32 id = 1;
+  string hostname = 2;
+  uint32 port = 3;
+  string status = 4;
+}
+
+service BasicService {
+  rpc SayHello(NodeInfo) returns (NodeInfo) {}
+}
