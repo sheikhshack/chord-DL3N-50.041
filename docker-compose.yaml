@@ -1,0 +1,20 @@
+version: '3.5'
+# have not configed network yet... in the future there will only
+# be one scaled service with dynamic port assignment. 
+services:
+  alpha:
+    image: sheikhshack/ds-node
+    ports:
+      - 9001
+      - 9002
+    environment:
+      - NODE_ID=1
+      - PEER_HOSTNAME=bravo
+  bravo:
+    image: sheikhshack/ds-node
+    ports:
+      - 9001
+      - 9002
+    environment:
+      - NODE_ID=2
+      - PEER_HOSTNAME=alpha
