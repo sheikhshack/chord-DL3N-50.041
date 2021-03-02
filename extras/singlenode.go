@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"github.com/sheikhshack/distributed-chaos-50.041/client"
 	"log"
 	"os"
@@ -31,13 +32,14 @@ func main () {
 	// get the other vars
 	samplePeer := client.RemoteNode{
 		Hostname: os.Getenv("PEER_HOSTNAME"),
-		Port: os.Getenv("PEER_PORT"),
+		Port: "9001",
 	}
 
 	SERVICE := client.New(idString, hostname, listenPort, sendPort, "ALIVE")
 	SERVICE.Start(samplePeer)
 
 	// scanf for troubleshootings
+	fmt.Scanf("Enter")
 
 
 

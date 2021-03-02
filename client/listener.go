@@ -82,7 +82,8 @@ func (n *Node) Ping(remote RemoteNode) {
 	message := basic.Message{Body: fmt.Sprintf("Ping from peer : %s", n.hostname)}
 	response, err := c.SayHello(context.Background(), &message)
 	if err != nil {
-		log.Fatalf("Error sending message: %v", err)
+		log.Printf("Error sending message: %v", err)
+		return
 	}
 	log.Printf("Response from server: %s", response.Body)
 }
