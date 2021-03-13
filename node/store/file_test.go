@@ -55,6 +55,6 @@ func TestDelete(t *testing.T) {
 	err = ioutil.WriteFile(filename, []byte(testString), 0666)
 	assert.Nilf(err, "error in creating file")
 
-	err = os.Remove(filename)
+	err = Delete("testdelete")
 	assert.Nilf(err, "error in removing file")
 }
