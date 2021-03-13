@@ -1,19 +1,18 @@
 package store
 
 import (
+	"github.com/kardianos/osext"
 	"os"
 	"path"
-
-	"github.com/kardianos/osext"
 )
 
-// getExePath returns the path of the dir the executable is located at
-func getExePath() (exPath string, err error) {
-	return osext.ExecutableFolder()
-}
-
 // getOrCreateChordDir gets the path for chord store and creates it if it doesn't exist
-func getOrCreateChordDir(exPath string) (dirPath string, err error) {
+func getOrCreateChordDir() (dirPath string, err error) {
+	exPath, err := osext.ExecutableFolder()
+	if err != nil {
+		return "", err
+	}
+
 	dirPath = path.Join(exPath, "chord")
 
 	if _, err := os.Stat(dirPath); os.IsNotExist(err) {
@@ -23,4 +22,13 @@ func getOrCreateChordDir(exPath string) (dirPath string, err error) {
 		}
 	}
 	return dirPath, nil
+}
+
+func getFilename(name string) (filename string, err error) {
+	if dirPath, err := getOrCreateChordDir(); err != nil {
+		return "", err
+	} else {
+		filename = path.Join(dirPath, name)
+		return filename, nil
+	}
 }

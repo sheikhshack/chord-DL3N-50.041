@@ -3,7 +3,6 @@ package store
 import (
 	"io/ioutil"
 	"os"
-	"path"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -16,10 +15,8 @@ func TestNew(t *testing.T) {
 	err := New("testwrite", []byte(testString))
 	assert.Nilf(err, "error in creating file")
 
-	exPath, err := getExePath()
-	assert.Nilf(err, "error in getting executable path")
-
-	filename := path.Join(exPath, "chord", "testwrite")
+	filename, err := getFilename("testwrite")
+	assert.Nilf(err, "error in obtaining filename")
 
 	defer os.Remove(filename)
 
@@ -34,12 +31,8 @@ func TestGet(t *testing.T) {
 	assert := assert.New(t)
 	testString := "clown see clown follow"
 
-	exPath, err := getExePath()
-	assert.Nilf(err, "error in getting executable path")
-	dirPath, err := getOrCreateChordDir(exPath)
-	assert.Nilf(err, "error in creating directory")
-
-	filename := path.Join(dirPath, "testread")
+	filename, err := getFilename("testread")
+	assert.Nilf(err, "error in obtaining filename")
 
 	err = ioutil.WriteFile(filename, []byte(testString), 0666)
 	assert.Nilf(err, "error in creating file")
@@ -51,4 +44,17 @@ func TestGet(t *testing.T) {
 
 	contentStr := string(content)
 	assert.EqualValuesf(testString, contentStr, "different contents")
+}
+
+func TestDelete(t *testing.T) {
+	assert := assert.New(t)
+	testString := "clowns live in the circus"
+
+	filename, err := getFilename("testdelete")
+	assert.Nilf(err, "error in obtaining filename")
+	err = ioutil.WriteFile(filename, []byte(testString), 0666)
+	assert.Nilf(err, "error in creating file")
+
+	err = os.Remove(filename)
+	assert.Nilf(err, "error in removing file")
 }
