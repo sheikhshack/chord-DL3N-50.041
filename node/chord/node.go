@@ -8,6 +8,7 @@ type Node struct {
 	ID          string // maybe IP address
 	fingers     []string
 	predecessor string
+	successor   string
 }
 
 // New creates and returns a new Node
