@@ -20,3 +20,18 @@ func slotHash(hashed []byte) (slot int) {
 	data := binary.BigEndian.Uint64(hashed)
 	return int(data % max_slot_capacity)
 }
+
+// IsInRange checks if an slot can be located between current slot and another slot
+func IsInRange(keySlot, localSlot, remoteSlot int) bool {
+	// check if range covers start of circle
+	if localSlot > remoteSlot {
+		// case of keySlot before start of circle: always in range
+		if keySlot >= localSlot {
+			return true
+		}
+		// case of keySlot located after start of circle
+		return (remoteSlot >= keySlot)
+	}
+
+	return (localSlot <= keySlot && keySlot <= remoteSlot)
+}
