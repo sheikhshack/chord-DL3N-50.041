@@ -24,7 +24,7 @@ func (n *Node) fixFingers() {
 		n.next = 0
 	}
 	x := int(math.Pow(2, float64(n.next-1)))
-	n.fingers[n.next] = n.findSuccessor(Hash(n.ID) + x)
+	n.fingers[n.next] = n.FindSuccessor(Hash(n.ID) + x)
 }
 
 // grpc (healthcheck)

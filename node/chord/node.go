@@ -1,11 +1,15 @@
 package chord
 
+import "github.com/sheikhshack/distributed-chaos-50.041/node/grpc"
+
 type Node struct {
 	ID          string // maybe IP address
 	fingers     []string
 	predecessor string
 	successor   string
 	next        int
+
+	Listener *grpc.Listener
 }
 
 // New creates and returns a new Node
@@ -18,17 +22,17 @@ func New(id string) Node {
 func (n *Node) Lookup(k string) (ip string) {
 	//listen on grpc
 	//findsuccessor and returns ip
-	return n.findSuccessor(Hash(k))
+	return n.FindSuccessor(Hash(k))
 
 }
 
 // grpc
-func (n *Node) findSuccessor(hashed int) string {
+func (n *Node) FindSuccessor(hashed int) string {
 	if IsInRange(hashed, Hash(n.ID), Hash(n.successor)+1) {
 		return n.successor
 	} else {
 		n_prime := n.closestPrecedingNode(hashed)
-		return n.findSuccessorRequest(n_prime, hashed)
+		return grpc.FindSuccessor(n_prime, hashed)
 	}
 }
 
@@ -44,14 +48,14 @@ func (n *Node) closestPrecedingNode(hashed int) string {
 }
 
 func (n *Node) initRing() {
-	n.setPredecessor("")
+	n.SetPredecessor("")
 	n.setSuccessor(n.ID)
 }
 
 // grpc
 func (n *Node) join(id string) {
-	successor := n.joinRequest(id)
-	n.setPredecessor("")
+	successor := grpc.Join(n.ID, id)
+	n.SetPredecessor("")
 	n.setSuccessor(successor)
 }
 
@@ -61,7 +65,12 @@ func (n *Node) setSuccessor(id string) {
 }
 
 //change predecessor
-func (n *Node) setPredecessor(id string) {
+func (n *Node) SetPredecessor(id string) {
 	//TODO: Need to have the case where id is ""
 	panic("not implemented")
+}
+
+// get predecessor
+func (n *Node) GetPredecessor() string {
+	return n.predecessor
 }
