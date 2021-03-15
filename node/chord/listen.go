@@ -8,15 +8,17 @@ import "github.com/sheikhshack/distributed-chaos-50.041/node/store"
  */
 
 // handler to findSuccessor
-func (n *Node) findSuccessorHandler(key string) (id string) {
+func (n *Node) findSuccessorHandler(key int) (id string) {
 	return n.findSuccessor(key)
 }
 
 // handler to join
-func (n *Node) joinHandler(id string) {
-	panic("not implemented")
+func (n *Node) joinHandler(k string) string {
+	//k= previous node's id
+	return n.findSuccessor(Hash(k))
 }
 
+//Not Used?
 // handler to get (Lookup)
 func (n *Node) getHandler(key string) ([]byte, error) {
 	return store.Get(key)
@@ -28,8 +30,15 @@ func (n *Node) healthcheckHandler() bool {
 	return true
 }
 
+func (n *Node) getPredecessorHandler() string {
+	return n.predecessor
+}
+
 // notifyHandler handles notify requests and returns if id is in between n.predecessor and n.
 // notifyHandler might also update n.predecessor and trigger data transfer if appropriate.
-func (n *Node) notifyHandler(id string) bool {
-	panic("not implemented")
+func (n *Node) notifyHandler(possible_pred string) {
+	//possible_pred is Request's pred
+	if (n.predecessor == "") || (IsInRange(Hash(possible_pred), Hash(n.predecessor), Hash(n.ID))) {
+		n.setPredecessor(possible_pred)
+	}
 }

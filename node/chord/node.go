@@ -1,45 +1,67 @@
 package chord
 
-import (
-	"github.com/sheikhshack/distributed-chaos-50.041/node/grpc"
-)
-
 type Node struct {
 	ID          string // maybe IP address
 	fingers     []string
 	predecessor string
 	successor   string
+	next        int
 }
 
 // New creates and returns a new Node
 func New(id string) Node {
-	panic("not implemented")
+	n := Node{ID: id}
+	return n
 }
 
 // grpc
-func (n *Node) Lookup(k string) []byte {
+func (n *Node) Lookup(k string) (ip string) {
 	//listen on grpc
 	//findsuccessor and returns ip
-	// grpc call (Get) to another node to retrieve the value
-	// feed value to gRPC (bytes, response)
-	grpc.Get("4", k)
-	panic("not implemented")
+	return n.findSuccessor(Hash(k))
+
 }
 
 // grpc
-func (n *Node) findSuccessor(k string) string {
-	panic("not implemented")
+func (n *Node) findSuccessor(hashed int) string {
+	if IsInRange(hashed, Hash(n.ID), Hash(n.successor)+1) {
+		return n.successor
+	} else {
+		n_prime := n.closestPrecedingNode(hashed)
+		return n.findSuccessorRequest(n_prime, hashed)
+	}
 }
 
-func (n *Node) closestPrecedingNode(k string) string {
-	panic("not implemented")
+//searches local table for highest predecessor of id
+func (n *Node) closestPrecedingNode(hashed int) string {
+	m := len(n.fingers)
+	for i := m; i > 0; i-- {
+		if IsInRange(Hash(n.fingers[i]), Hash(n.ID), hashed) {
+			return n.fingers[i]
+		}
+	}
+	return n.ID
 }
 
 func (n *Node) initRing() {
-	panic("not implemented")
+	n.setPredecessor("")
+	n.setSuccessor(n.ID)
 }
 
 // grpc
 func (n *Node) join(id string) {
+	successor := n.joinRequest(id)
+	n.setPredecessor("")
+	n.setSuccessor(successor)
+}
+
+//change successor
+func (n *Node) setSuccessor(id string) {
+	panic("not implemented")
+}
+
+//change predecessor
+func (n *Node) setPredecessor(id string) {
+	//TODO: Need to have the case where id is ""
 	panic("not implemented")
 }
