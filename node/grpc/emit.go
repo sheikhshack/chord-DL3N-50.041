@@ -27,13 +27,13 @@ func Healthcheck() bool {
 	panic("not implemented")
 }
 
-//Get the Predecessor of the node
+//Get the predecessor of the node
 func GetPredecessor(id string) string {
 	panic("not implmented")
 }
 
 // called by notify
-//n things it might be the Predecessor of id
+//n things it might be the predecessor of id
 // TODO: clarify if should return bool when handler doesn't
 func Notify(id string) bool {
 	//pred = n.ID

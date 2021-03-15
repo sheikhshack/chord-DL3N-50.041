@@ -13,7 +13,7 @@ func (n *Node) stabilize() {
 }
 
 // grpc
-//implemented differently from pseudocode, n thinks it might be the Predecessor of id
+//implemented differently from pseudocode, n thinks it might be the predecessor of id
 func (n *Node) notify(id string) {
 	n.notifyRequest(id)
 }

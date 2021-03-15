@@ -5,7 +5,7 @@ import "github.com/sheikhshack/distributed-chaos-50.041/node/grpc"
 type Node struct {
 	ID          string // maybe IP address
 	fingers     []string
-	Predecessor string
+	predecessor string
 	successor   string
 	next        int
 
@@ -36,7 +36,7 @@ func (n *Node) FindSuccessor(hashed int) string {
 	}
 }
 
-//searches local table for highest Predecessor of id
+//searches local table for highest predecessor of id
 func (n *Node) closestPrecedingNode(hashed int) string {
 	m := len(n.fingers)
 	for i := m; i > 0; i-- {
@@ -64,8 +64,13 @@ func (n *Node) setSuccessor(id string) {
 	panic("not implemented")
 }
 
-//change Predecessor
+//change predecessor
 func (n *Node) SetPredecessor(id string) {
 	//TODO: Need to have the case where id is ""
 	panic("not implemented")
+}
+
+// get predecessor
+func (n *Node) GetPredecessor() string {
+	return n.predecessor
 }

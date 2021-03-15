@@ -33,14 +33,19 @@ func (s *Listener) HealthcheckHandler() bool {
 }
 
 func (s *Listener) GetPredecessorHandler() string {
-	return s.node.Predecessor
+	return s.node.GetPredecessor()
 }
 
 // notifyHandler handles notify requests and returns if id is in between n.predecessor and n.
 // notifyHandler might also update n.predecessor and trigger data transfer if appropriate.
 func (s *Listener) NotifyHandler(possible_pred string) {
 	//possible_pred is Request's pred
-	if (s.node.Predecessor == "") || (chord.IsInRange(chord.Hash(possible_pred), chord.Hash(s.node.Predecessor), chord.Hash(s.node.ID))) {
+	if (s.node.GetPredecessor() == "") ||
+		(chord.IsInRange(
+			chord.Hash(possible_pred),
+			chord.Hash(s.node.GetPredecessor()),
+			chord.Hash(s.node.ID),
+		)) {
 		s.node.SetPredecessor(possible_pred)
 	}
 }
