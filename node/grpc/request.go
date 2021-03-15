@@ -18,8 +18,8 @@ const (
 	NotifyCmd         Command = "notify"
 )
 
-// remote ID is included in Request.Target
-// local ID in included in Request.Requester
+// remote ID is included req Request.Target
+// local ID req included req Request.Requester
 // TODO: possibly simplify since we need to multiplex depending Request.Command anyways
 type RequestBody struct {
 	FindSuccessor  *KeySlotBody

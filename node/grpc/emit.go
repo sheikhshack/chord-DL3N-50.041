@@ -5,12 +5,29 @@ package grpc
 // and packaging into Request struct to be sent
 
 // called by FindSuccessor
-func FindSuccessor(id string, key int) string {
-	panic("not implemented")
+func (s *Listener) FindSuccessor(id string, key int) string {
+	cmd := FindSuccessorCmd
+
+	req := Request{
+		Command:     cmd,
+		RequesterID: s.node.ID,
+		TargetID:    id,
+		Body: RequestBody{
+			FindSuccessor: &KeySlotBody{KeySlot: key},
+		},
+	}
+
+	reqChan := *s.AddrBook[id][cmd].req
+	reqChan <- req
+
+	resChan := *s.AddrBook[id][cmd].res
+	res := <-resChan
+
+	return res.Body.FindSuccessor.ID
 }
 
 // called by join
-func Join(fromID, toID string) string {
+func (s *Listener) Join(fromID, toID string) string {
 	//k = n.ID
 	panic("not implemented")
 }
@@ -18,24 +35,24 @@ func Join(fromID, toID string) string {
 // Not used?
 // Called by Lookup
 // TODO: move this method to exposed API package
-func Get(key string) ([]byte, error) {
+func (s *Listener) Get(key string) ([]byte, error) {
 	panic("not implemented")
 }
 
 // called by checkPredecessor
-func Healthcheck() bool {
+func (s *Listener) Healthcheck() bool {
 	panic("not implemented")
 }
 
 //Get the predecessor of the node
-func GetPredecessor(id string) string {
+func (s *Listener) GetPredecessor(id string) string {
 	panic("not implmented")
 }
 
 // called by notify
 //n things it might be the predecessor of id
 // TODO: clarify if should return bool when handler doesn't
-func Notify(id string) bool {
+func (s *Listener) Notify(id string) bool {
 	//pred = n.ID
 	panic("not implemented")
 }
