@@ -1,14 +1,10 @@
 package grpc
 
-import (
-	"github.com/sheikhshack/distributed-chaos-50.041/node/chord"
-)
-
 type Request struct {
-	Command   Command
-	Requester chord.Node
-	Target    chord.Node
-	Body      RequestBody
+	Command     Command
+	RequesterID string
+	TargetID    string
+	Body        RequestBody
 }
 
 type Command string
