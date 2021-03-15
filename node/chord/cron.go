@@ -1,11 +1,12 @@
 package chord
 
 import (
+	"github.com/sheikhshack/distributed-chaos-50.041/node/grpc"
 	"math"
 )
 
 func (n *Node) stabilize() {
-	x := n.getPredecessorRequest(n.successor)
+	x := grpc.GetPredecessor(n.successor)
 	if IsInRange(Hash(x), Hash(n.ID), Hash(n.successor)) {
 		n.setSuccessor(x)
 	}
@@ -15,7 +16,7 @@ func (n *Node) stabilize() {
 // grpc
 //implemented differently from pseudocode, n thinks it might be the predecessor of id
 func (n *Node) notify(id string) {
-	n.notifyRequest(id)
+	grpc.Notify(id)
 }
 
 func (n *Node) fixFingers() {
@@ -29,5 +30,5 @@ func (n *Node) fixFingers() {
 
 // grpc (healthcheck)
 func (n *Node) checkPredecessor() bool {
-	return n.healthcheckRequest()
+	return grpc.Healthcheck()
 }
