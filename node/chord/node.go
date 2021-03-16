@@ -12,13 +12,13 @@ type Node struct {
 	successor   string
 	next        int
 
-	Listener *gossip.Listener
+	Gossiper *gossip.Gossiper
 }
 
 // New creates and returns a new Node
 func New(id string) *Node {
 	n := &Node{ID: id}
-	n.Listener = &gossip.Listener{
+	n.Gossiper = &gossip.Gossiper{
 		Node: n,
 	}
 	return n
@@ -35,7 +35,7 @@ func (n *Node) FindSuccessor(hashed int) string {
 		return n.successor
 	} else {
 		n_prime := n.closestPrecedingNode(hashed)
-		return gossip.FindSuccessor(n.ID, n_prime, hashed)
+		return n.Gossiper.FindSuccessor(n.ID, n_prime, hashed)
 	}
 }
 
@@ -56,7 +56,7 @@ func (n *Node) InitRing() {
 }
 
 func (n *Node) join(id string) {
-	successor := gossip.Join(n.ID, id)
+	successor := n.Gossiper.Join(n.ID, id)
 	n.SetPredecessor("")
 	n.setSuccessor(successor)
 }

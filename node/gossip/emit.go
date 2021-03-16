@@ -1,9 +1,12 @@
 package gossip
 
 import (
+	"context"
 	"fmt"
 	"google.golang.org/grpc"
 	"log"
+
+	pb "github.com/sheikhshack/distributed-chaos-50.041/node/gossip/proto"
 )
 
 // Each method here will include the standard stuff of init-ing NewClient
@@ -14,9 +17,10 @@ const (
 	EMIT_PORT   = 9001
 )
 
-func dial(nodeAddr string) {
+func (g *Gossiper) emit(nodeAddr string, request *pb.Request) (*pb.Response, error) {
 	var conn *grpc.ClientConn
-	connectionParams := fmt.Sprintf("%s:%s", nodeAddr, LISTEN_PORT)
+	connectionParams := fmt.Sprintf("%s:%v", nodeAddr, LISTEN_PORT)
+	//log.Printf("%v\n", )
 	conn, err := grpc.Dial(connectionParams, grpc.WithInsecure())
 	if err != nil {
 		log.Fatalf("Cannot connect to: %s", err)
@@ -24,38 +28,53 @@ func dial(nodeAddr string) {
 	}
 	defer conn.Close()
 
-	response, err := c.SayHello(context.Background(), &message)
+	client := pb.NewInternalListenerClient(conn)
+	response, err := client.Emit(context.Background(), request)
 	if err != nil {
 		log.Printf("Error sending message: %v", err)
-		return
+		return nil, err
 	}
 	log.Printf("Response from server: %s", response.Body)
+
+	return response, nil
 }
 
 // called by FindSuccessor
-func FindSuccessor(fromID, toID string, key int) string {
+func (g *Gossiper) FindSuccessor(fromID, toID string, key int) string {
 	panic("not implemented")
 }
 
 // called by join
-func Join(fromID, toID string) string {
+func (g *Gossiper) Join(fromID, toID string) string {
 	//k = n.ID
 	panic("not implemented")
 }
 
 // called by checkPredecessor
-func Healthcheck(fromID, toID string) bool {
-	panic("not implemented")
+// TODO: change all method signatures to include error in return
+func (g *Gossiper) Healthcheck(fromID, toID string) (bool, error) {
+	req := &pb.Request{
+		Command:     pb.Command_HEALTHCHECK,
+		RequesterID: fromID,
+		TargetID:    toID,
+		Body:        &pb.Request_Body{Healthcheck: &pb.Request_NullBody{}},
+	}
+
+	res, err := g.emit(toID, req)
+	if err != nil {
+		return false, err
+	}
+	return res.GetBody().GetHealthcheck().GetSuccess(), nil
 }
 
 //Get the predecessor of the node
-func GetPredecessor(fromID, toID string) string {
+func (g *Gossiper) GetPredecessor(fromID, toID string) string {
 	panic("not implmented")
 }
 
 // called by notify
 //n things it might be the predecessor of id
-func Notify(fromID, toID string) {
+func (g *Gossiper) Notify(fromID, toID string) {
 	//pred = n.ID
 	panic("not implemented")
 }
@@ -63,6 +82,6 @@ func Notify(fromID, toID string) {
 // Not used?
 // Called by Lookup
 // TODO: move this method to exposed API package
-func Get(key string) ([]byte, error) {
+func (g *Gossiper) Get(fromID, toID, key string) ([]byte, error) {
 	panic("not implemented")
 }

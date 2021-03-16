@@ -12,15 +12,17 @@ import (
 )
 
 func main() {
-	server := chord.New("not relevant in example")
+	log.Printf("Starting Listener!!\n")
+	server := chord.New("localhost")
 	server.InitRing()
 
 	lis, err := net.Listen("tcp", fmt.Sprintf(":%v", gossip.LISTEN_PORT))
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
+
 	s := grpc.NewServer()
-	pb.RegisterInternalListenerServer(s, server.Listener)
+	pb.RegisterInternalListenerServer(s, server.Gossiper)
 	if err := s.Serve(lis); err != nil {
 		log.Fatalf("failed to serve: %v", err)
 	}
