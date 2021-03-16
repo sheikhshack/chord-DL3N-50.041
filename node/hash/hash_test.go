@@ -1,4 +1,4 @@
-package chord
+package hash
 
 import (
 	"github.com/stretchr/testify/assert"

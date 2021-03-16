@@ -1,4 +1,4 @@
-package chord
+package hash
 
 import (
 	"crypto/sha1"
@@ -22,7 +22,6 @@ func slotHash(hashed []byte) (slot int) {
 }
 
 // IsInRange checks if an slot can be located between current slot and another slot
-//TODO: Make it exclusive instead
 func IsInRange(keySlot, localSlot, remoteSlot int) bool {
 	// check if range covers start of circle
 	if localSlot > remoteSlot {

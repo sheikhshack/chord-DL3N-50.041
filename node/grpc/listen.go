@@ -1,23 +1,29 @@
 package grpc
 
 import (
-	"github.com/sheikhshack/distributed-chaos-50.041/node/chord"
+	"github.com/sheikhshack/distributed-chaos-50.041/node/hash"
 	"github.com/sheikhshack/distributed-chaos-50.041/node/store"
 )
 
+type node interface {
+	FindSuccessor(hashed int) string
+	GetPredecessor() string
+	NotifyHandler(possiblePredecessor string)
+}
+
 type Listener struct {
-	node *chord.Node
+	node *node
 }
 
 // handler to findSuccessor
 func (s *Listener) FindSuccessorHandler(key int) (id string) {
-	return s.node.FindSuccessor(key)
+	return (*s.node).FindSuccessor(key)
 }
 
 // handler to join
 func (s *Listener) JoinHandler(fromID string) string {
 	//fromID= previous node's id
-	return s.node.FindSuccessor(chord.Hash(fromID))
+	return (*s.node).FindSuccessor(hash.Hash(fromID))
 }
 
 //Not Used?
@@ -33,19 +39,11 @@ func (s *Listener) HealthcheckHandler() bool {
 }
 
 func (s *Listener) GetPredecessorHandler() string {
-	return s.node.GetPredecessor()
+	return (*s.node).GetPredecessor()
 }
 
 // notifyHandler handles notify requests and returns if id is in between n.predecessor and n.
 // notifyHandler might also update n.predecessor and trigger data transfer if appropriate.
 func (s *Listener) NotifyHandler(possiblePredecessor string) {
-	//possiblePredecessor is Request's pred
-	if (s.node.GetPredecessor() == "") ||
-		(chord.IsInRange(
-			chord.Hash(possiblePredecessor),
-			chord.Hash(s.node.GetPredecessor()),
-			chord.Hash(s.node.ID),
-		)) {
-		s.node.SetPredecessor(possiblePredecessor)
-	}
+	(*s.node).NotifyHandler(possiblePredecessor)
 }

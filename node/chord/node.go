@@ -1,6 +1,9 @@
 package chord
 
-import "github.com/sheikhshack/distributed-chaos-50.041/node/grpc"
+import (
+	"github.com/sheikhshack/distributed-chaos-50.041/node/grpc"
+	"github.com/sheikhshack/distributed-chaos-50.041/node/hash"
+)
 
 type Node struct {
 	ID          string // maybe IP address
@@ -21,11 +24,11 @@ func New(id string) Node {
 func (n *Node) Lookup(k string) (ip string) {
 	//listen on grpc
 	//findsuccessor and returns ip
-	return n.FindSuccessor(Hash(k))
+	return n.FindSuccessor(hash.Hash(k))
 }
 
 func (n *Node) FindSuccessor(hashed int) string {
-	if IsInRange(hashed, Hash(n.ID), Hash(n.successor)+1) {
+	if hash.IsInRange(hashed, hash.Hash(n.ID), hash.Hash(n.successor)+1) {
 		return n.successor
 	} else {
 		n_prime := n.closestPrecedingNode(hashed)
@@ -37,7 +40,7 @@ func (n *Node) FindSuccessor(hashed int) string {
 func (n *Node) closestPrecedingNode(hashed int) string {
 	m := len(n.fingers)
 	for i := m; i > 0; i-- {
-		if IsInRange(Hash(n.fingers[i]), Hash(n.ID), hashed) {
+		if hash.IsInRange(hash.Hash(n.fingers[i]), hash.Hash(n.ID), hashed) {
 			return n.fingers[i]
 		}
 	}
