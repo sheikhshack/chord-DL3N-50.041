@@ -1,1 +1,5 @@
 /.idea
+
+*.exe
+*.dl3n
+*.dl3nchunk.*
