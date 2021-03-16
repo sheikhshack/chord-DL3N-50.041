@@ -38,14 +38,14 @@ func (s *Listener) GetPredecessorHandler() string {
 
 // notifyHandler handles notify requests and returns if id is in between n.predecessor and n.
 // notifyHandler might also update n.predecessor and trigger data transfer if appropriate.
-func (s *Listener) NotifyHandler(possible_pred string) {
-	//possible_pred is Request's pred
+func (s *Listener) NotifyHandler(possible_predecessor string) {
+	//possible_predecessor is Request's pred
 	if (s.node.GetPredecessor() == "") ||
 		(chord.IsInRange(
-			chord.Hash(possible_pred),
+			chord.Hash(possible_predecessor),
 			chord.Hash(s.node.GetPredecessor()),
 			chord.Hash(s.node.ID),
 		)) {
-		s.node.SetPredecessor(possible_pred)
+		s.node.SetPredecessor(possible_predecessor)
 	}
 }

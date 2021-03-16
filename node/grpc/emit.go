@@ -5,7 +5,7 @@ package grpc
 // and packaging into Request struct to be sent
 
 // called by FindSuccessor
-func FindSuccessor(id string, key int) string {
+func FindSuccessor(toID string, key int) string {
 	panic("not implemented")
 }
 
@@ -23,19 +23,18 @@ func Get(key string) ([]byte, error) {
 }
 
 // called by checkPredecessor
-func Healthcheck() bool {
+func Healthcheck(toID string) bool {
 	panic("not implemented")
 }
 
 //Get the predecessor of the node
-func GetPredecessor(id string) string {
+func GetPredecessor(toID string) string {
 	panic("not implmented")
 }
 
 // called by notify
 //n things it might be the predecessor of id
-// TODO: clarify if should return bool when handler doesn't
-func Notify(id string) bool {
+func Notify(toID string) {
 	//pred = n.ID
 	panic("not implemented")
 }
