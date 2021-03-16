@@ -6,7 +6,7 @@ import (
 )
 
 // max_slot_capacity represents the maximum num of slots for consistent hashing
-const max_slot_capacity = 360
+const max_slot_capacity = 100000
 
 // Hash converts a string into an int corresponding to a consistent hashing slot
 func Hash(key string) int {
@@ -26,12 +26,12 @@ func IsInRange(keySlot, localSlot, remoteSlot int) bool {
 	// check if range covers start of circle
 	if localSlot > remoteSlot {
 		// case of keySlot before start of circle: always in range
-		if keySlot >= localSlot {
+		if keySlot > localSlot {
 			return true
 		}
 		// case of keySlot located after start of circle
-		return (remoteSlot >= keySlot)
+		return (remoteSlot > keySlot)
 	}
 
-	return (localSlot <= keySlot && keySlot <= remoteSlot)
+	return (localSlot < keySlot && keySlot < remoteSlot)
 }
