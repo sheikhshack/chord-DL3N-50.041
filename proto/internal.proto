@@ -1,6 +1,6 @@
 syntax = "proto3";
 package grpc;
-option go_package="github.com/sheikhshack/distributed-chaos-50.041/node/grpc";
+option go_package="github.com/sheikhshack/distributed-chaos-50.041/node/gossip";
 
 enum Command {
   FIND_SUCCESSOR = 0;
@@ -12,7 +12,7 @@ enum Command {
 }
 
 message Request {
-  message RequestBody {
+  message Body {
     KeySlotBody FindSuccessor = 1;
     NullBody Join = 2;
     NullBody Healthcheck = 3;
@@ -32,11 +32,11 @@ message Request {
   Command command = 1;
   string requesterID = 2;
   string targetID = 3;
-  RequestBody body = 4;
+  Body body = 4;
 }
 
 message Response {
-  message RequestBody {
+  message Body {
     IDBody FindSuccessor = 1;
     IDBody Join = 2;
     SuccessBody Healthcheck = 3;
@@ -59,7 +59,7 @@ message Response {
   Command command = 1;
   string requesterID = 2;
   string targetID = 3;
-  RequestBody body = 4;
+  Body body = 4;
 }
 
 service InternalListener {

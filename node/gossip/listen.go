@@ -1,6 +1,11 @@
-package grpc
+package gossip
 
 import (
+	"context"
+	"errors"
+	"log"
+
+	pb "github.com/sheikhshack/distributed-chaos-50.041/node/gossip/proto"
 	"github.com/sheikhshack/distributed-chaos-50.041/node/hash"
 	"github.com/sheikhshack/distributed-chaos-50.041/node/store"
 )
@@ -12,18 +17,37 @@ type node interface {
 }
 
 type Listener struct {
-	node *node
+	Node node
+	pb.UnimplementedInternalListenerServer
+}
+
+func (s *Listener) Emit(ctx context.Context, in *pb.Request) (*pb.Response, error) {
+	log.Printf("received: %+v\n", in)
+
+	switch in.Command {
+	case pb.Command_HEALTHCHECK:
+		resBool := s.HealthcheckHandler()
+		res := &pb.Response{
+			Body: &pb.Response_Body{
+				Healthcheck: &pb.Response_SuccessBody{Success: resBool},
+			},
+		}
+		log.Printf("sending out: %+v\n", res)
+		return res, nil
+	default:
+		return nil, errors.New("CMD not recognised?? use proto.equal???")
+	}
 }
 
 // handler to findSuccessor
 func (s *Listener) FindSuccessorHandler(key int) (id string) {
-	return (*s.node).FindSuccessor(key)
+	return s.Node.FindSuccessor(key)
 }
 
 // handler to join
 func (s *Listener) JoinHandler(fromID string) string {
 	//fromID= previous node's id
-	return (*s.node).FindSuccessor(hash.Hash(fromID))
+	return s.Node.FindSuccessor(hash.Hash(fromID))
 }
 
 //Not Used?
@@ -39,11 +63,11 @@ func (s *Listener) HealthcheckHandler() bool {
 }
 
 func (s *Listener) GetPredecessorHandler() string {
-	return (*s.node).GetPredecessor()
+	return s.Node.GetPredecessor()
 }
 
 // notifyHandler handles notify requests and returns if id is in between n.predecessor and n.
 // notifyHandler might also update n.predecessor and trigger data transfer if appropriate.
 func (s *Listener) NotifyHandler(possiblePredecessor string) {
-	(*s.node).NotifyHandler(possiblePredecessor)
+	s.Node.NotifyHandler(possiblePredecessor)
 }

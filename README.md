@@ -22,6 +22,6 @@ protoc --go_out=./node/grpc/ --go_opt=paths=source_relative \
 <!--- 
 for archiving
 ```bash
- protoc --go_out=plugins=grpc:../basic --go_opt=paths=source_relative basic.proto 
+ protoc --go_out=plugins=gossip:../basic --go_opt=paths=source_relative basic.proto 
 ```
 -->

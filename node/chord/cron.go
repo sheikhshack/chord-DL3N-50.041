@@ -1,13 +1,13 @@
 package chord
 
 import (
-	"github.com/sheikhshack/distributed-chaos-50.041/node/grpc"
+	"github.com/sheikhshack/distributed-chaos-50.041/node/gossip"
 	"github.com/sheikhshack/distributed-chaos-50.041/node/hash"
 	"math"
 )
 
 func (n *Node) stabilize() {
-	x := grpc.GetPredecessor(n.ID, n.successor)
+	x := gossip.GetPredecessor(n.ID, n.successor)
 	if hash.IsInRange(hash.Hash(x), hash.Hash(n.ID), hash.Hash(n.successor)) {
 		n.setSuccessor(x)
 	}
@@ -16,10 +16,10 @@ func (n *Node) stabilize() {
 
 //implemented differently from pseudocode, n thinks it might be the predecessor of id
 func (n *Node) notify(id string) {
-	grpc.Notify(n.ID, id)
+	gossip.Notify(n.ID, id)
 }
 
-// used as a handler func for grpc.Listener.NotifyHandler
+// used as a handler func for gossip.Listener.NotifyHandler
 func (n *Node) NotifyHandler(possiblePredecessor string) {
 	//possiblePredecessor is Request's pred
 	if (n.GetPredecessor() == "") ||
@@ -42,5 +42,5 @@ func (n *Node) fixFingers() {
 }
 
 func (n *Node) checkPredecessor() bool {
-	return grpc.Healthcheck(n.ID, n.predecessor)
+	return gossip.Healthcheck(n.ID, n.predecessor)
 }

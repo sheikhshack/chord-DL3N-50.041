@@ -1,4 +1,4 @@
-package grpc
+package gossip
 
 type Response struct {
 	command     Command
