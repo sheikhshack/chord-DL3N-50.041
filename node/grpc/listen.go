@@ -15,9 +15,9 @@ func (s *Listener) FindSuccessorHandler(key int) (id string) {
 }
 
 // handler to join
-func (s *Listener) JoinHandler(k string) string {
-	//k= previous node's id
-	return s.node.FindSuccessor(chord.Hash(k))
+func (s *Listener) JoinHandler(fromID string) string {
+	//fromID= previous node's id
+	return s.node.FindSuccessor(chord.Hash(fromID))
 }
 
 //Not Used?
@@ -38,14 +38,14 @@ func (s *Listener) GetPredecessorHandler() string {
 
 // notifyHandler handles notify requests and returns if id is in between n.predecessor and n.
 // notifyHandler might also update n.predecessor and trigger data transfer if appropriate.
-func (s *Listener) NotifyHandler(possible_predecessor string) {
-	//possible_predecessor is Request's pred
+func (s *Listener) NotifyHandler(possiblePredecessor string) {
+	//possiblePredecessor is Request's pred
 	if (s.node.GetPredecessor() == "") ||
 		(chord.IsInRange(
-			chord.Hash(possible_predecessor),
+			chord.Hash(possiblePredecessor),
 			chord.Hash(s.node.GetPredecessor()),
 			chord.Hash(s.node.ID),
 		)) {
-		s.node.SetPredecessor(possible_predecessor)
+		s.node.SetPredecessor(possiblePredecessor)
 	}
 }

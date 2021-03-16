@@ -18,21 +18,18 @@ func New(id string) Node {
 	return n
 }
 
-// grpc
 func (n *Node) Lookup(k string) (ip string) {
 	//listen on grpc
 	//findsuccessor and returns ip
 	return n.FindSuccessor(Hash(k))
-
 }
 
-// grpc
 func (n *Node) FindSuccessor(hashed int) string {
 	if IsInRange(hashed, Hash(n.ID), Hash(n.successor)+1) {
 		return n.successor
 	} else {
 		n_prime := n.closestPrecedingNode(hashed)
-		return grpc.FindSuccessor(n_prime, hashed)
+		return grpc.FindSuccessor(n.ID, n_prime, hashed)
 	}
 }
 
@@ -52,7 +49,6 @@ func (n *Node) initRing() {
 	n.setSuccessor(n.ID)
 }
 
-// grpc
 func (n *Node) join(id string) {
 	successor := grpc.Join(n.ID, id)
 	n.SetPredecessor("")
