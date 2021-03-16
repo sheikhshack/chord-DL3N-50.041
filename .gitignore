@@ -1,2 +1,9 @@
 /.idea
+<<<<<<< HEAD
 /tmp
+=======
+
+*.exe
+*.dl3n
+*.dl3nchunk.*
+>>>>>>> c3409ca (set up dl3n)
