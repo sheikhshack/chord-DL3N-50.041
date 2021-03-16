@@ -3,6 +3,8 @@ package main
 import (
 	"fmt"
 	"os"
+
+	"github.com/sheikhshack/distributed-chaos-50.041/dl3n"
 )
 
 func main() {
@@ -13,9 +15,16 @@ func main() {
 	}
 
 	cmd := os.Args[1]
-	// path := os.Args[2]
+	path := os.Args[2]
 
 	if cmd != "create" && cmd != "seed" && cmd != "get" {
 		fmt.Println(helpMessage)
 	}
+
+	if cmd == "create" {
+		d, err := dl3n.NewDL3NFromFile(path, 64)
+		fmt.Print(d)
+		fmt.Print(err)
+	}
+
 }
