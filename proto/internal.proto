@@ -1,0 +1,67 @@
+syntax = "proto3";
+package grpc;
+option go_package="github.com/sheikhshack/distributed-chaos-50.041/node/grpc";
+
+enum Command {
+  FIND_SUCCESSOR = 0;
+  JOIN = 1;
+  HEALTHCHECK = 2;
+  GET_PREDECESSOR = 3;
+  NOTIFY = 4;
+  LOOKUP= 5 ;
+}
+
+message Request {
+  message RequestBody {
+    KeySlotBody FindSuccessor = 1;
+    NullBody Join = 2;
+    NullBody Healthcheck = 3;
+    NullBody GetPredecessor = 4;
+    NullBody Notify = 5;
+    InfoHashBody Lookup = 6;
+  }
+
+  message KeySlotBody {
+    int64 KeySlot = 1;
+  }
+  message InfoHashBody {
+    string InfoHash = 1;
+  }
+  message NullBody {}
+
+  Command command = 1;
+  string requesterID = 2;
+  string targetID = 3;
+  RequestBody body = 4;
+}
+
+message Response {
+  message RequestBody {
+    IDBody FindSuccessor = 1;
+    IDBody Join = 2;
+    SuccessBody Healthcheck = 3;
+    IDBody GetPredecessor = 4;
+    SuccessBody Notify = 5;
+    DataBody Lookup = 6;
+  }
+
+  message IDBody {
+    string ID = 1;
+  }
+  message DataBody {
+    repeated string Data = 1;
+    bool IsErr = 2;
+  }
+  message SuccessBody {
+    bool Success = 1;
+  }
+
+  Command command = 1;
+  string requesterID = 2;
+  string targetID = 3;
+  RequestBody body = 4;
+}
+
+service InternalListener {
+  rpc Emit(Request) returns (Response) {}
+}

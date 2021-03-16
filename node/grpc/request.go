@@ -1,33 +1,33 @@
 package grpc
 
 type Request struct {
-	Command     Command
-	RequesterID string
-	TargetID    string
-	Body        RequestBody
+	command     Command
+	requesterID string
+	targetID    string
+	body        RequestBody
 }
 
 type Command string
 
 const (
-	FindSuccessorCmd  Command = "find_successor"
-	JoinCmd           Command = "join"
-	LookupCmd         Command = "lookup"
-	HealthcheckCmd    Command = "healthcheck"
-	GetPredecessorCmd Command = "get_predecessor"
-	NotifyCmd         Command = "notify"
+	FindSuccessorCmd  Command = "FIND_SUCCESSOR"
+	JoinCmd           Command = "JOIN"
+	HealthcheckCmd    Command = "HEALTHCHECK"
+	GetPredecessorCmd Command = "GET_PREDECESSOR"
+	NotifyCmd         Command = "NOTIFY"
+	LookupCmd         Command = "LOOKUP"
 )
 
 // remote ID is included in Request.Target
 // local ID in included in Request.Requester
-// TODO: possibly simplify since we need to multiplex depending Request.Command anyways
+// TODO: possibly simplify since we need to multiplex depending Request.command anyways
 type RequestBody struct {
-	FindSuccessor  *KeySlotBody
-	Join           *NullBody
-	Lookup         *InfoHashBody
-	Healthcheck    *NullBody
-	GetPredecessor *NullBody
-	Notify         *NullBody
+	FindSuccessor  KeySlotBody
+	Join           NullBody
+	Healthcheck    NullBody
+	GetPredecessor NullBody
+	Notify         NullBody
+	Lookup         InfoHashBody
 }
 
 type KeySlotBody struct {

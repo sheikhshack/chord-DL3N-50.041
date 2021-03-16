@@ -1,28 +1,28 @@
 package grpc
 
 type Response struct {
-	Command     Command
-	RequesterID string
-	TargetID    string
-	Body        ResponseBody
+	command     Command
+	requesterID string
+	targetID    string
+	body        ResponseBody
 }
 
 type ResponseBody struct {
-	FindSuccessor  *IDBody
-	Join           *IDBody
-	Lookup         *FileBody
-	Healthcheck    *SuccessBody
-	GetPredecessor *IDBody
-	Notify         *SuccessBody
+	FindSuccessor  IDBody
+	Join           IDBody
+	Healthcheck    SuccessBody
+	GetPredecessor IDBody
+	Notify         SuccessBody
+	Lookup         DataBody
 }
 
 type IDBody struct {
 	ID string
 }
 
-type FileBody struct {
-	File []byte
-	Err  error
+type DataBody struct {
+	Data  []string
+	IsErr bool // possibly turn this into error code enum
 }
 
 type SuccessBody struct {
