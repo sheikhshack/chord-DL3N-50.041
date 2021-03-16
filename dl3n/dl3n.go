@@ -2,6 +2,7 @@ package dl3n
 
 import (
 	"crypto/sha1"
+	"encoding/json"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -18,7 +19,7 @@ type DL3N struct {
 	Size      int64
 	ChunkSize int64
 	Chunks    []*DL3NChunk
-	Complete  bool // true if all chunks are available
+	Complete  bool `json:"-"` // true if all chunks are available
 }
 
 // DL3N chunk represents a chunk of a DL3N object
@@ -27,7 +28,7 @@ type DL3NChunk struct {
 	Hash      string
 	Size      int64
 	File      *os.File `json:"-"` // nil if not available
-	Available bool
+	Available bool     `json:"-"`
 }
 
 // Create a new DL3N struct from filepath
@@ -102,14 +103,37 @@ func NewDL3NFromFile(path string, chunkSize int64) (*DL3N, error) {
 	return &dl3n, nil
 }
 
-// Create an empty DL3N struct from metadata filepath (.dl3n, actually just a JSON file)
-func NewDL3NFromMeta(path string) (*DL3N, error) {
-	return nil, nil
+// WriteMetaFile writes a .dl3n file to filepath for that particular DL3N
+func (d *DL3N) WriteMetaFile(path string) error {
+	_, err := os.Create(path)
+	if err != nil {
+		return err
+	}
+
+	b, err := json.MarshalIndent(d, "", "  ")
+	if err != nil {
+		return err
+	}
+
+	ioutil.WriteFile(path, b, os.ModeAppend)
+
+	return nil
 }
 
-// WriteMetaFile writes a .dl3n file to filepath for that particular DL3N
-func (*DL3N) WriteMetaFile(path string) error {
-	return nil
+// Create an empty DL3N struct from metadata filepath (.dl3n, actually just a JSON file)
+func NewDL3NFromMeta(path string) (*DL3N, error) {
+	b, err := ioutil.ReadFile(path)
+	if err != nil {
+		return nil, err
+	}
+
+	d := DL3N{}
+	err = json.Unmarshal(b, &d)
+	if err != nil {
+		return nil, err
+	}
+
+	return &d, nil
 }
 
 // gets SHA-1 infohash
@@ -142,7 +166,7 @@ func chunkFile(f *os.File, infohash string, fileChunkSize int64) (int64, error) 
 
 		// write to disk
 		fileName := infohash + ".dl3nchunk." + strconv.FormatInt(i, 10)
-		_, err := os.Create("fileName")
+		_, err := os.Create(fileName)
 
 		if err != nil {
 			return 0, err

@@ -22,9 +22,13 @@ func main() {
 	}
 
 	if cmd == "create" {
-		d, err := dl3n.NewDL3NFromFile(path, 64)
-		fmt.Print(d)
-		fmt.Print(err)
+		d, _ := dl3n.NewDL3NFromFile(path, 64)
+		d.WriteMetaFile(path + ".dl3n")
+	}
+
+	if cmd == "get" {
+		d, _ := dl3n.NewDL3NFromMeta(path)
+		fmt.Printf("%+v\n", d)
 	}
 
 }
