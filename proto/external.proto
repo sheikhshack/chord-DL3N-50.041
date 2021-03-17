@@ -11,7 +11,7 @@ message UploadRequest {
 }
 
 // can merge
-message Request {
+message ExternalRequest {
   string key = 1;
 }
 
@@ -19,13 +19,13 @@ message IPResponse {
   string IP = 1;
 }
 
-message Response {
+message ExternalResponse {
   string value = 1;
 }
 
 // if boolean isFileHere = false, provide the client with the addr of the next node in chord
 service ExternalListener {
   rpc Upload(UploadRequest) returns (IPResponse) {}
-  rpc Download(Request) returns (Response) {}
+  rpc Download(ExternalRequest) returns (Response) {}
   rpc CheckIP(Request) returns (IPResponse) {}
 }
