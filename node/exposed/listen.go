@@ -3,13 +3,11 @@ package exposed
 import (
 	"context"
 	"fmt"
-	"log"
-	"net"
-
 	exposed "github.com/sheikhshack/distributed-chaos-50.041/node/exposed/proto"
-	pb "github.com/sheikhshack/distributed-chaos-50.041/node/gossip/proto"
 	"github.com/sheikhshack/distributed-chaos-50.041/node/store"
 	"google.golang.org/grpc"
+	"log"
+	"net"
 )
 
 type node interface {
@@ -19,7 +17,7 @@ type node interface {
 
 type ExternalService struct {
 	Node node
-	pb.UnimplementedInternalListenerServer
+	exposed.UnimplementedExternalListenerServer
 }
 
 func (e *ExternalService) NewServerAndListen(listenPort int) *grpc.Server {
@@ -29,7 +27,7 @@ func (e *ExternalService) NewServerAndListen(listenPort int) *grpc.Server {
 	}
 
 	s := grpc.NewServer()
-	pb.RegisterInternalListenerServer(s, g)
+	exposed.RegisterExternalListenerServer(s, e)
 	if err := s.Serve(lis); err != nil {
 		log.Fatalf("failed to serve: %v", err)
 	} else {
@@ -49,7 +47,7 @@ func (e *ExternalService) Upload(ctx context.Context, uploadRequest *exposed.Upl
 	return &exposed.IPResponse{IP: e.Node.GetID()}, output
 }
 
-func (e *ExternalService) LookupIP(ctx context.Context, lookupRequest *exposed.Request) (*exposed.IPResponse, error) {
+func (e *ExternalService) CheckIP(ctx context.Context, lookupRequest *exposed.Request) (*exposed.IPResponse, error) {
 	log.Printf("Lookup Method \n")
 	key := lookupRequest.Key
 	ip := e.Node.LookupIP(key)
