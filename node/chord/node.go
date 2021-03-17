@@ -62,7 +62,7 @@ func (n *Node) InitRing() {
 	n.setSuccessor(n.ID)
 }
 
-func (n *Node) join(id string) {
+func (n *Node) Join(id string) {
 	successor, err := n.Gossiper.Join(n.ID, id)
 	if err != nil {
 		// TODO: handle this error

@@ -3,7 +3,10 @@ package gossip
 import (
 	"context"
 	"errors"
+	"fmt"
+	"google.golang.org/grpc"
 	"log"
+	"net"
 
 	pb "github.com/sheikhshack/distributed-chaos-50.041/node/gossip/proto"
 	"github.com/sheikhshack/distributed-chaos-50.041/node/hash"
@@ -19,6 +22,22 @@ type Gossiper struct {
 	Node node
 
 	pb.UnimplementedInternalListenerServer
+}
+
+func (g *Gossiper) NewServerAndListen(listenPort int) *grpc.Server {
+	lis, err := net.Listen("tcp", fmt.Sprintf(":%v", listenPort))
+	if err != nil {
+		log.Fatalf("failed to listen: %v", err)
+	}
+
+	s := grpc.NewServer()
+	pb.RegisterInternalListenerServer(s, g)
+	if err := s.Serve(lis); err != nil {
+		log.Fatalf("failed to serve: %v", err)
+	} else {
+		log.Printf("Listening on port %v\n", listenPort)
+	}
+	return s
 }
 
 // This method is server-side
