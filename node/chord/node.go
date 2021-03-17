@@ -1,8 +1,9 @@
 package chord
 
 import (
-	"github.com/sheikhshack/distributed-chaos-50.041/node/exposed"
 	"log"
+
+	"github.com/sheikhshack/distributed-chaos-50.041/node/exposed"
 
 	"github.com/sheikhshack/distributed-chaos-50.041/node/gossip"
 	"github.com/sheikhshack/distributed-chaos-50.041/node/hash"
@@ -15,7 +16,7 @@ type Node struct {
 	successor   string
 	next        int
 
-	Gossiper *gossip.Gossiper
+	Gossiper        *gossip.Gossiper
 	ExternalService *exposed.ExternalService
 }
 
@@ -28,12 +29,6 @@ func New(id string) *Node {
 	n.ExternalService = &exposed.ExternalService{Node: n}
 	return n
 }
-
-//func (n *Node) Lookup(k string) (ip string) {
-//	//listen on gossip
-//	//findsuccessor and returns ip
-//	return n.FindSuccessor(hash.Hash(k))
-//}
 
 func (n *Node) FindSuccessor(hashed int) string {
 	// edge case of having only one node in ring

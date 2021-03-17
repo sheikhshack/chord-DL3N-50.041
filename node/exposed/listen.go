@@ -3,23 +3,23 @@ package exposed
 import (
 	"context"
 	"fmt"
-	exposed "github.com/sheikhshack/distributed-chaos-50.041/node/exposed/proto"
-	pb "github.com/sheikhshack/distributed-chaos-50.041/node/gossip/proto"
-	"google.golang.org/grpc"
 	"log"
 	"net"
+
+	exposed "github.com/sheikhshack/distributed-chaos-50.041/node/exposed/proto"
+	pb "github.com/sheikhshack/distributed-chaos-50.041/node/gossip/proto"
+	"github.com/sheikhshack/distributed-chaos-50.041/node/store"
+	"google.golang.org/grpc"
 )
 
 type node interface {
-
-
+	LookupIP(k string) (ip string)
+	GetID() (id string)
 }
 
 type ExternalService struct {
 	Node node
 	pb.UnimplementedInternalListenerServer
-
-
 }
 
 func (e *ExternalService) NewServerAndListen(listenPort int) *grpc.Server {
@@ -38,27 +38,33 @@ func (e *ExternalService) NewServerAndListen(listenPort int) *grpc.Server {
 	return s
 }
 
-
-func (e *ExternalService) Upload (ctx context.Context, uploadRequest *exposed.UploadRequest) (*exposed.IPResponse, error){
+func (e *ExternalService) Upload(ctx context.Context, uploadRequest *exposed.UploadRequest) (*exposed.IPResponse, error) {
 	log.Printf("Upload Method triggered \n")
 	key := uploadRequest.Key
 	val := uploadRequest.Value
-	// weeping carry on from here
-	return &exposed.IPResponse{IP: "IP"}, nil
+
+	fileByte := []byte(val)
+	output := store.New(key, fileByte)
+
+	return &exposed.IPResponse{IP: e.Node.GetID()}, output
 }
 
-func (e *ExternalService) LookupIP (ctx context.Context, lookupRequest *exposed.Request) (*exposed.IPResponse, error){
+func (e *ExternalService) LookupIP(ctx context.Context, lookupRequest *exposed.Request) (*exposed.IPResponse, error) {
 	log.Printf("Lookup Method \n")
 	key := lookupRequest.Key
-	// weeping carry on from here
-	return  &exposed.IPResponse{IP: "IP"},nil
+	ip := e.Node.LookupIP(key)
+	return &exposed.IPResponse{IP: ip}, nil
 }
 
-func (e *ExternalService) Download (ctx context.Context, downloadRequest *exposed.Request) (*exposed.Response, error) {
+func (e *ExternalService) Download(ctx context.Context, downloadRequest *exposed.Request) (*exposed.Response, error) {
 	log.Printf("Download Method triggered \n")
 	key := downloadRequest.Key
-	// weeping carry on from here
-	return &exposed.Response{Value: "SOME STUPID STRING"}, nil
+
+	fileByte, status := store.Get(key)
+	if status == nil {
+		v := string(fileByte)
+		return &exposed.Response{Value: v}, nil
+	} else {
+		return nil, status
+	}
 }
-
-
