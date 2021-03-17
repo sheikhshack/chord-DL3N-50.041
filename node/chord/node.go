@@ -1,6 +1,8 @@
 package chord
 
 import (
+	"log"
+
 	"github.com/sheikhshack/distributed-chaos-50.041/node/gossip"
 	"github.com/sheikhshack/distributed-chaos-50.041/node/hash"
 )
@@ -24,18 +26,23 @@ func New(id string) *Node {
 	return n
 }
 
-func (n *Node) Lookup(k string) (ip string) {
-	//listen on gossip
-	//findsuccessor and returns ip
-	return n.FindSuccessor(hash.Hash(k))
-}
+//func (n *Node) Lookup(k string) (ip string) {
+//	//listen on gossip
+//	//findsuccessor and returns ip
+//	return n.FindSuccessor(hash.Hash(k))
+//}
 
 func (n *Node) FindSuccessor(hashed int) string {
 	if hash.IsInRange(hashed, hash.Hash(n.ID), hash.Hash(n.successor)+1) {
 		return n.successor
 	} else {
 		n_prime := n.closestPrecedingNode(hashed)
-		return n.Gossiper.FindSuccessor(n.ID, n_prime, hashed)
+		successor, err := n.Gossiper.FindSuccessor(n.ID, n_prime, hashed)
+		if err != nil {
+			// TODO: handle this error
+			log.Fatalf("error in FindSuccessor: %+v\n", err)
+		}
+		return successor
 	}
 }
 
@@ -56,7 +63,12 @@ func (n *Node) InitRing() {
 }
 
 func (n *Node) join(id string) {
-	successor := n.Gossiper.Join(n.ID, id)
+	successor, err := n.Gossiper.Join(n.ID, id)
+	if err != nil {
+		// TODO: handle this error
+		// we can pass the error back and have main.go to exit gracefully with helpful message
+		log.Fatalf("error in join: %+v\n", err)
+	}
 	n.SetPredecessor("")
 	n.setSuccessor(successor)
 }

@@ -1,12 +1,18 @@
 package chord
 
 import (
-	"github.com/sheikhshack/distributed-chaos-50.041/node/hash"
+	"log"
 	"math"
+
+	"github.com/sheikhshack/distributed-chaos-50.041/node/hash"
 )
 
 func (n *Node) stabilize() {
-	x := n.Gossiper.GetPredecessor(n.ID, n.successor)
+	x, err := n.Gossiper.GetPredecessor(n.ID, n.successor)
+	if err != nil {
+		log.Printf("error in stabilize: %+v\n", err)
+		return
+	}
 	if hash.IsInRange(hash.Hash(x), hash.Hash(n.ID), hash.Hash(n.successor)) {
 		n.setSuccessor(x)
 	}
