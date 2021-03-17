@@ -3,8 +3,9 @@ package gossip
 import (
 	"context"
 	"fmt"
-	"google.golang.org/grpc"
 	"log"
+
+	"google.golang.org/grpc"
 
 	pb "github.com/sheikhshack/distributed-chaos-50.041/node/gossip/proto"
 )
@@ -19,6 +20,7 @@ const (
 func (g *Gossiper) emit(nodeAddr string, request *pb.Request) (*pb.Response, error) {
 	var conn *grpc.ClientConn
 	connectionParams := fmt.Sprintf("%s:%v", nodeAddr, LISTEN_PORT)
+	log.Printf("Sending to server: %+v, %+v", request, request.Command)
 
 	conn, err := grpc.Dial(connectionParams, grpc.WithInsecure())
 	if err != nil {
@@ -33,7 +35,7 @@ func (g *Gossiper) emit(nodeAddr string, request *pb.Request) (*pb.Response, err
 		log.Printf("Error sending message: %v", err)
 		return nil, err
 	}
-	log.Printf("Response from server: %s", response.Body)
+	log.Printf("Response from server: %+v", response)
 
 	return response, nil
 }

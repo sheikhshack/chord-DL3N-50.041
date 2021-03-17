@@ -20,3 +20,12 @@ services:
       - NODE_ID=bravo
       - PEER_HOSTNAME=alpha
     restart: "no"
+  charlie:
+    container_name: charlie
+    image: chord_node
+    ports:
+      - 9000
+    environment:
+      - NODE_ID=charlie
+      - PEER_HOSTNAME=alpha
+    restart: "no"

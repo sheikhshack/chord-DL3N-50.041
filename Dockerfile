@@ -3,7 +3,7 @@ FROM golang AS builder
 
 WORKDIR /app
 COPY . .
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -tags netgo -ldflags '-w' -o node_exec ./cmd/node/node.go
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -tags netgo -ldflags '-w' -o node_exec ./cmd/node/node_join.go
 
 # using alpine for this, remember to use APK
 FROM alpine

@@ -23,6 +23,11 @@ func slotHash(hashed []byte) (slot int) {
 
 // IsInRange checks if an slot can be located between current slot and another slot
 func IsInRange(keySlot, localSlot, remoteSlot int) bool {
+	if localSlot == remoteSlot {
+		return true
+	} else if keySlot == Hash("") {
+		return false
+	}
 	// check if range covers start of circle
 	if localSlot > remoteSlot {
 		// case of keySlot before start of circle: always in range

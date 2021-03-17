@@ -28,7 +28,6 @@ func main() {
 	} else {
 		time.Sleep(time.Millisecond * 5000)
 		node.Join(knownPeerID)
-
 	}
 
 	node.Gossiper.NewServerAndListen(gossip.LISTEN_PORT)

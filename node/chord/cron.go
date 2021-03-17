@@ -14,13 +14,17 @@ func (n *Node) stabilize() {
 		return
 	}
 	if hash.IsInRange(hash.Hash(x), hash.Hash(n.ID), hash.Hash(n.successor)) {
-		n.setSuccessor(x)
+		n.SetSuccessor(x)
 	}
 	n.notify(n.successor)
 }
 
 //implemented differently from pseudocode, n thinks it might be the predecessor of id
 func (n *Node) notify(id string) {
+	if id == n.ID {
+		log.Printf("Notified itself")
+		return
+	}
 	n.Gossiper.Notify(n.ID, id)
 }
 

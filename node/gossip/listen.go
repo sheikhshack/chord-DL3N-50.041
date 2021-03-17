@@ -4,9 +4,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"google.golang.org/grpc"
 	"log"
 	"net"
+
+	"google.golang.org/grpc"
 
 	pb "github.com/sheikhshack/distributed-chaos-50.041/node/gossip/proto"
 	"github.com/sheikhshack/distributed-chaos-50.041/node/hash"
@@ -15,6 +16,9 @@ import (
 type node interface {
 	FindSuccessor(hashed int) string
 	GetPredecessor() string
+	GetSuccessor() string
+	SetSuccessor(id string)
+	GetID() string
 	NotifyHandler(possiblePredecessor string)
 }
 
@@ -107,7 +111,7 @@ func (g *Gossiper) Emit(ctx context.Context, in *pb.Request) (*pb.Response, erro
 		return nil, errors.New("command not recognised")
 	}
 
-	log.Printf("sending out: %+v\n", res)
+	log.Printf("sending out: %+v, %+v\n", res, g.Node.GetPredecessor())
 	return res, nil
 }
 
@@ -119,6 +123,9 @@ func (g *Gossiper) findSuccessorHandler(key int) (id string) {
 // handler to join
 func (g *Gossiper) joinHandler(fromID string) string {
 	//fromID= previous node's id
+	if g.Node.GetID() == g.Node.GetSuccessor() {
+		g.Node.SetSuccessor(fromID)
+	}
 	return g.Node.FindSuccessor(hash.Hash(fromID))
 }
 

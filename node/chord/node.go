@@ -2,6 +2,7 @@ package chord
 
 import (
 	"log"
+	"time"
 
 	"github.com/sheikhshack/distributed-chaos-50.041/node/gossip"
 	"github.com/sheikhshack/distributed-chaos-50.041/node/hash"
@@ -63,7 +64,8 @@ func (n *Node) closestPrecedingNode(hashed int) string {
 
 func (n *Node) InitRing() {
 	n.SetPredecessor("")
-	n.setSuccessor(n.ID)
+	n.SetSuccessor(n.ID)
+	// go n.cron()
 }
 
 func (n *Node) Join(id string) {
@@ -74,11 +76,19 @@ func (n *Node) Join(id string) {
 		log.Fatalf("error in join: %+v\n", err)
 	}
 	n.SetPredecessor("")
-	n.setSuccessor(successor)
+	n.SetSuccessor(successor)
+	go n.cron()
+}
+
+func (n *Node) cron() {
+	for {
+		n.stabilize()
+		time.Sleep(time.Millisecond * 1000)
+	}
 }
 
 //change successor
-func (n *Node) setSuccessor(id string) {
+func (n *Node) SetSuccessor(id string) {
 	n.successor = id
 }
 
@@ -91,4 +101,12 @@ func (n *Node) SetPredecessor(id string) {
 // get predecessor
 func (n *Node) GetPredecessor() string {
 	return n.predecessor
+}
+
+func (n *Node) GetSuccessor() string {
+	return n.successor
+}
+
+func (n *Node) GetID() string {
+	return n.ID
 }
