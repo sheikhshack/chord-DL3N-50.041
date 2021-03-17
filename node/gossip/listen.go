@@ -4,15 +4,16 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/sheikhshack/distributed-chaos-50.041/node/store"
+	"google.golang.org/grpc"
 	"log"
 	"net"
-
-	"google.golang.org/grpc"
 
 	pb "github.com/sheikhshack/distributed-chaos-50.041/node/gossip/proto"
 	"github.com/sheikhshack/distributed-chaos-50.041/node/hash"
 )
 
+// methods avaiable to the gossiper via the node package
 type node interface {
 	FindSuccessor(hashed int) string
 	GetPredecessor() string
@@ -20,6 +21,7 @@ type node interface {
 	SetSuccessor(id string)
 	GetID() string
 	NotifyHandler(possiblePredecessor string)
+	LookupIP(k string) (ip string)
 }
 
 type Gossiper struct {
@@ -144,4 +146,35 @@ func (g *Gossiper) getPredecessorHandler() string {
 // notifyHandler might also update n.predecessor and trigger data transfer if appropriate.
 func (g *Gossiper) notifyHandler(possiblePredecessor string) {
 	g.Node.NotifyHandler(possiblePredecessor)
+}
+
+func (g *Gossiper) Upload(ctx context.Context, uploadRequest *pb.UploadRequest) (*pb.UploadResponse, error) {
+	log.Printf("Upload Method triggered \n")
+	key := uploadRequest.Key
+	val := uploadRequest.Value
+
+	fileByte := []byte(val)
+	output := store.New(key, fileByte)
+
+	return &pb.UploadResponse{IP: g.Node.GetID()}, output
+}
+
+func (g *Gossiper) CheckIP(ctx context.Context, lookupRequest *pb.CheckRequest) (*pb.CheckResponse, error) {
+	log.Printf("Lookup Method \n")
+	key := lookupRequest.Key
+	ip := g.Node.LookupIP(key)
+	return &pb.CheckResponse{IP: ip}, nil
+}
+
+func (g *Gossiper) Download(ctx context.Context, downloadRequest *pb.DownloadRequest) (*pb.DownloadResponse, error) {
+	log.Printf("Download Method triggered \n")
+	key := downloadRequest.Key
+
+	fileByte, status := store.Get(key)
+	if status == nil {
+		v := string(fileByte)
+		return &pb.DownloadResponse{Value: v}, nil
+	} else {
+		return nil, status
+	}
 }

@@ -19,6 +19,9 @@ const _ = grpc.SupportPackageIsVersion7
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type InternalListenerClient interface {
 	Emit(ctx context.Context, in *Request, opts ...grpc.CallOption) (*Response, error)
+	Upload(ctx context.Context, in *UploadRequest, opts ...grpc.CallOption) (*UploadResponse, error)
+	Download(ctx context.Context, in *DownloadRequest, opts ...grpc.CallOption) (*DownloadResponse, error)
+	CheckIP(ctx context.Context, in *CheckRequest, opts ...grpc.CallOption) (*CheckResponse, error)
 }
 
 type internalListenerClient struct {
@@ -31,7 +34,34 @@ func NewInternalListenerClient(cc grpc.ClientConnInterface) InternalListenerClie
 
 func (c *internalListenerClient) Emit(ctx context.Context, in *Request, opts ...grpc.CallOption) (*Response, error) {
 	out := new(Response)
-	err := c.cc.Invoke(ctx, "/grpc.InternalListener/Emit", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/internal.InternalListener/Emit", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *internalListenerClient) Upload(ctx context.Context, in *UploadRequest, opts ...grpc.CallOption) (*UploadResponse, error) {
+	out := new(UploadResponse)
+	err := c.cc.Invoke(ctx, "/internal.InternalListener/Upload", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *internalListenerClient) Download(ctx context.Context, in *DownloadRequest, opts ...grpc.CallOption) (*DownloadResponse, error) {
+	out := new(DownloadResponse)
+	err := c.cc.Invoke(ctx, "/internal.InternalListener/Download", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *internalListenerClient) CheckIP(ctx context.Context, in *CheckRequest, opts ...grpc.CallOption) (*CheckResponse, error) {
+	out := new(CheckResponse)
+	err := c.cc.Invoke(ctx, "/internal.InternalListener/CheckIP", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -43,6 +73,9 @@ func (c *internalListenerClient) Emit(ctx context.Context, in *Request, opts ...
 // for forward compatibility
 type InternalListenerServer interface {
 	Emit(context.Context, *Request) (*Response, error)
+	Upload(context.Context, *UploadRequest) (*UploadResponse, error)
+	Download(context.Context, *DownloadRequest) (*DownloadResponse, error)
+	CheckIP(context.Context, *CheckRequest) (*CheckResponse, error)
 	mustEmbedUnimplementedInternalListenerServer()
 }
 
@@ -52,6 +85,15 @@ type UnimplementedInternalListenerServer struct {
 
 func (UnimplementedInternalListenerServer) Emit(context.Context, *Request) (*Response, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Emit not implemented")
+}
+func (UnimplementedInternalListenerServer) Upload(context.Context, *UploadRequest) (*UploadResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Upload not implemented")
+}
+func (UnimplementedInternalListenerServer) Download(context.Context, *DownloadRequest) (*DownloadResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Download not implemented")
+}
+func (UnimplementedInternalListenerServer) CheckIP(context.Context, *CheckRequest) (*CheckResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CheckIP not implemented")
 }
 func (UnimplementedInternalListenerServer) mustEmbedUnimplementedInternalListenerServer() {}
 
@@ -76,10 +118,64 @@ func _InternalListener_Emit_Handler(srv interface{}, ctx context.Context, dec fu
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/grpc.InternalListener/Emit",
+		FullMethod: "/internal.InternalListener/Emit",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(InternalListenerServer).Emit(ctx, req.(*Request))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _InternalListener_Upload_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UploadRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(InternalListenerServer).Upload(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/internal.InternalListener/Upload",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(InternalListenerServer).Upload(ctx, req.(*UploadRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _InternalListener_Download_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DownloadRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(InternalListenerServer).Download(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/internal.InternalListener/Download",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(InternalListenerServer).Download(ctx, req.(*DownloadRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _InternalListener_CheckIP_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CheckRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(InternalListenerServer).CheckIP(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/internal.InternalListener/CheckIP",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(InternalListenerServer).CheckIP(ctx, req.(*CheckRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -88,12 +184,24 @@ func _InternalListener_Emit_Handler(srv interface{}, ctx context.Context, dec fu
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var InternalListener_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "grpc.InternalListener",
+	ServiceName: "internal.InternalListener",
 	HandlerType: (*InternalListenerServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
 			MethodName: "Emit",
 			Handler:    _InternalListener_Emit_Handler,
+		},
+		{
+			MethodName: "Upload",
+			Handler:    _InternalListener_Upload_Handler,
+		},
+		{
+			MethodName: "Download",
+			Handler:    _InternalListener_Download_Handler,
+		},
+		{
+			MethodName: "CheckIP",
+			Handler:    _InternalListener_CheckIP_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

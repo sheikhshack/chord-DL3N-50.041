@@ -2,6 +2,14 @@ version: '3.5'
 # have not configed network yet... in the future there will only
 # be one scaled service with dynamic port assignment. 
 services:
+  mike:
+    container_name: mike
+    image: chord_mike
+    environment:
+      - APP_NODE=alpha
+    depends_on:
+      - alpha
+      - bravo
   alpha:
     container_name: alpha
     image: chord_node
@@ -10,7 +18,6 @@ services:
     environment:
       - NODE_ID=alpha
       - PEER_HOSTNAME=
-    restart: "no"
   bravo:
     container_name: bravo
     image: chord_node
@@ -20,6 +27,8 @@ services:
       - NODE_ID=bravo
       - PEER_HOSTNAME=alpha
     restart: "no"
+    depends_on:
+      - alpha
   charlie:
     container_name: charlie
     image: chord_node
@@ -29,3 +38,5 @@ services:
       - NODE_ID=charlie
       - PEER_HOSTNAME=alpha
     restart: "no"
+    depends_on:
+      - bravo

@@ -4,6 +4,8 @@ import (
 	"log"
 	"time"
 
+	"github.com/sheikhshack/distributed-chaos-50.041/node/exposed"
+
 	"github.com/sheikhshack/distributed-chaos-50.041/node/gossip"
 	"github.com/sheikhshack/distributed-chaos-50.041/node/hash"
 )
@@ -15,7 +17,8 @@ type Node struct {
 	successor   string
 	next        int
 
-	Gossiper *gossip.Gossiper
+	Gossiper        *gossip.Gossiper
+	ExternalService *exposed.ExternalService
 }
 
 // New creates and returns a new Node
@@ -24,14 +27,12 @@ func New(id string) *Node {
 	n.Gossiper = &gossip.Gossiper{
 		Node: n,
 	}
+	n.ExternalService = &exposed.ExternalService{
+		Node: n,
+	}
+
 	return n
 }
-
-// func (n *Node) Lookup(k string) (ip string) {
-// 	//listen on gossip
-// 	//findsuccessor and returns ip
-// 	return n.FindSuccessor(hash.Hash(k))
-// }
 
 func (n *Node) FindSuccessor(hashed int) string {
 	// edge case of having only one node in ring

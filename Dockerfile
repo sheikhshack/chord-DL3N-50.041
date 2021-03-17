@@ -12,6 +12,6 @@ COPY --from=builder /app/node_exec /built-app/
 # ENVARS
 ENV NODE_ID=123
 ENV PEER_HOSTNAME=godbless
-EXPOSE 9000
+EXPOSE 9000 8888
 
 CMD  ["./node_exec"]
