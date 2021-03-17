@@ -1,4 +1,4 @@
-package chord
+package hash
 
 import (
 	"github.com/stretchr/testify/assert"
@@ -39,25 +39,26 @@ func TestIsInRange(t *testing.T) {
 			remoteSlot: 2,
 			expected:   false,
 		}, {
+			// test for exclusive of each end
 			keySlot:    1,
 			localSlot:  0,
 			remoteSlot: 1,
-			expected:   true,
+			expected:   false,
 		}, {
 			keySlot:    0,
 			localSlot:  0,
 			remoteSlot: 2,
-			expected:   true,
+			expected:   false,
 		}, {
 			keySlot:    max_slot_capacity - 1,
 			localSlot:  max_slot_capacity - 1,
 			remoteSlot: 1,
-			expected:   true,
+			expected:   false,
 		}, {
 			keySlot:    1,
 			localSlot:  max_slot_capacity - 1,
 			remoteSlot: 1,
-			expected:   true,
+			expected:   false,
 		},
 	}
 

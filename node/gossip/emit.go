@@ -1,0 +1,124 @@
+package gossip
+
+import (
+	"context"
+	"fmt"
+	"google.golang.org/grpc"
+	"log"
+
+	pb "github.com/sheikhshack/distributed-chaos-50.041/node/gossip/proto"
+)
+
+// Each method here will include the standard stuff of init-ing NewClient
+// and packaging into Request struct to be sent
+
+const (
+	LISTEN_PORT = 9000
+)
+
+func (g *Gossiper) emit(nodeAddr string, request *pb.Request) (*pb.Response, error) {
+	var conn *grpc.ClientConn
+	connectionParams := fmt.Sprintf("%s:%v", nodeAddr, LISTEN_PORT)
+
+	conn, err := grpc.Dial(connectionParams, grpc.WithInsecure())
+	if err != nil {
+		log.Fatalf("Cannot connect to: %s", err)
+
+	}
+	defer conn.Close()
+
+	client := pb.NewInternalListenerClient(conn)
+	response, err := client.Emit(context.Background(), request)
+	if err != nil {
+		log.Printf("Error sending message: %v", err)
+		return nil, err
+	}
+	log.Printf("Response from server: %s", response.Body)
+
+	return response, nil
+}
+
+// called by FindSuccessor
+func (g *Gossiper) FindSuccessor(fromID, toID string, key int) (string, error) {
+	req := &pb.Request{
+		Command:     pb.Command_FIND_SUCCESSOR,
+		RequesterID: fromID,
+		TargetID:    toID,
+		Body: &pb.Request_Body{
+			HashSlot: int64(key),
+		},
+	}
+
+	res, err := g.emit(toID, req)
+	if err != nil {
+		return "", err
+	}
+	return res.GetBody().GetID(), nil
+}
+
+// called by join
+func (g *Gossiper) Join(fromID, toID string) (string, error) {
+	//k = n.ID
+	req := &pb.Request{
+		Command:     pb.Command_JOIN,
+		RequesterID: fromID,
+		TargetID:    toID,
+		Body:        &pb.Request_Body{},
+	}
+
+	res, err := g.emit(toID, req)
+	if err != nil {
+		return "", err
+	}
+	return res.GetBody().ID, nil
+}
+
+// called by checkPredecessor
+// TODO: change all method signatures to include error in return
+func (g *Gossiper) Healthcheck(fromID, toID string) (bool, error) {
+	req := &pb.Request{
+		Command:     pb.Command_HEALTHCHECK,
+		RequesterID: fromID,
+		TargetID:    toID,
+		Body:        &pb.Request_Body{},
+	}
+
+	res, err := g.emit(toID, req)
+	if err != nil {
+		return false, err
+	}
+	return res.GetBody().IsHealthy, nil
+}
+
+//Get the predecessor of the node
+func (g *Gossiper) GetPredecessor(fromID, toID string) (string, error) {
+	req := &pb.Request{
+		Command:     pb.Command_GET_PREDECESSOR,
+		RequesterID: fromID,
+		TargetID:    toID,
+		Body:        &pb.Request_Body{},
+	}
+
+	res, err := g.emit(toID, req)
+	if err != nil {
+		return "", err
+	}
+	return res.GetBody().ID, nil
+}
+
+// called by notify
+//n things it might be the predecessor of id
+func (g *Gossiper) Notify(fromID, toID string) error {
+	req := &pb.Request{
+		Command:     pb.Command_NOTIFY,
+		RequesterID: fromID,
+		TargetID:    toID,
+		Body:        &pb.Request_Body{},
+	}
+
+	_, err := g.emit(toID, req)
+	if err != nil {
+		return err
+	}
+	return nil
+}

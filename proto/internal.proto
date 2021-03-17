@@ -1,0 +1,40 @@
+syntax = "proto3";
+package grpc;
+option go_package="github.com/sheikhshack/distributed-chaos-50.041/node/gossip";
+
+enum Command {
+  FIND_SUCCESSOR = 0;
+  JOIN = 1;
+  HEALTHCHECK = 2;
+  GET_PREDECESSOR = 3;
+  NOTIFY = 4;
+  LOOKUP= 5 ;
+}
+
+message Request {
+  message Body {
+    int64 HashSlot = 1;
+    string InfoHash = 2;
+  }
+
+  Command command = 1;
+  string requesterID = 2;
+  string targetID = 3;
+  Body body = 4;
+}
+
+message Response {
+  message Body {
+    string ID = 1;
+    bool IsHealthy = 4;
+  }
+
+  Command command = 1;
+  string requesterID = 2;
+  string targetID = 3;
+  Body body = 4;
+}
+
+service InternalListener {
+  rpc Emit(Request) returns (Response) {}
+}
