@@ -42,6 +42,9 @@ func (n *Node) FindSuccessor(hashed int) string {
 		return n.successor
 	} else {
 		n_prime := n.closestPrecedingNode(hashed)
+		if n_prime == n.ID {
+			return n.ID
+		}
 		successor, err := n.Gossiper.FindSuccessor(n.ID, n_prime, hashed)
 		if err != nil {
 			// TODO: handle this error
