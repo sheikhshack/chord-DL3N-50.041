@@ -1,15 +1,15 @@
 package chord
 
-// TODO: Hi weepz, for your doings, file is for exposed services within chord
+import (
+	"github.com/sheikhshack/distributed-chaos-50.041/node/hash"
+)
 
-func (n *Node) UploadFile (k, v string) (redirect bool, ip string ) {
-	panic("Not implemented")
+func (n *Node) LookupIP(k string) (ip string) {
+	//listen on gossip
+	//findsuccessor and returns ip
+	return n.FindSuccessor(hash.Hash(k))
 }
 
-func (n *Node) FindStoringNode (k string) (redirect bool, ip string ) {
-	panic("Not implemented")
-}
-
-func (n *Node) getID () (id string) {
+func (n *Node) GetID() (id string) {
 	return n.ID
 }
