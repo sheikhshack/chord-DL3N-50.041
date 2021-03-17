@@ -24,7 +24,7 @@ message CheckFileRequest {
 
 message Response {
   bool redirect = 1; // set to true if need contact other person
-  optional NodeInfo nodeInfo = 2;
+  NodeInfo nodeInfo = 2;
 }
 
 // if boolean isFileHere = false, provide the client with the addr of the next node in chord
