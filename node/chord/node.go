@@ -33,6 +33,10 @@ func New(id string) *Node {
 //}
 
 func (n *Node) FindSuccessor(hashed int) string {
+	// edge case of having only one node in ring
+	if n.successor == n.ID {
+		return n.ID
+	}
 	if hash.IsInRange(hashed, hash.Hash(n.ID), hash.Hash(n.successor)+1) {
 		return n.successor
 	} else {

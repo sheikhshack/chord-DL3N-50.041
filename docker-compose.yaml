@@ -3,18 +3,20 @@ version: '3.5'
 # be one scaled service with dynamic port assignment. 
 services:
   alpha:
-    image: sheikhshack/ds-node
+    container_name: alpha
+    image: chord_node
     ports:
-      - 9001
-      - 9002
+      - 9000
     environment:
-      - NODE_ID=1
-      - PEER_HOSTNAME=bravo
+      - NODE_ID=alpha
+      - PEER_HOSTNAME=
+    restart: "no"
   bravo:
-    image: sheikhshack/ds-node
+    container_name: bravo
+    image: chord_node
     ports:
-      - 9001
-      - 9002
+      - 9000
     environment:
-      - NODE_ID=2
+      - NODE_ID=bravo
       - PEER_HOSTNAME=alpha
+    restart: "no"
