@@ -2,12 +2,13 @@ package main
 
 import (
 	"fmt"
-	"github.com/sheikhshack/distributed-chaos-50.041/node/chord"
-	"github.com/sheikhshack/distributed-chaos-50.041/node/gossip"
-	"github.com/sheikhshack/distributed-chaos-50.041/node/utils"
 	"log"
 	"os"
 	"time"
+
+	"github.com/sheikhshack/distributed-chaos-50.041/node/chord"
+	"github.com/sheikhshack/distributed-chaos-50.041/node/gossip"
+	"github.com/sheikhshack/distributed-chaos-50.041/node/utils"
 )
 
 func main() {

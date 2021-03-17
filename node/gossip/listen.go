@@ -65,7 +65,6 @@ func (g *Gossiper) Emit(ctx context.Context, in *pb.Request) (*pb.Response, erro
 
 	case pb.Command_JOIN:
 		fromID := in.GetRequesterID()
-		log.Println(fromID)
 		id := g.joinHandler(fromID)
 		res = &pb.Response{
 			Command:     pb.Command_JOIN,

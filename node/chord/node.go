@@ -27,11 +27,11 @@ func New(id string) *Node {
 	return n
 }
 
-//func (n *Node) Lookup(k string) (ip string) {
-//	//listen on gossip
-//	//findsuccessor and returns ip
-//	return n.FindSuccessor(hash.Hash(k))
-//}
+// func (n *Node) Lookup(k string) (ip string) {
+// 	//listen on gossip
+// 	//findsuccessor and returns ip
+// 	return n.FindSuccessor(hash.Hash(k))
+// }
 
 func (n *Node) FindSuccessor(hashed int) string {
 	// edge case of having only one node in ring
@@ -81,10 +81,15 @@ func (n *Node) Join(id string) {
 }
 
 func (n *Node) cron() {
+	time.Sleep(time.Millisecond * 10000)
 	for {
 		log.Println(n.ID, "successor is", n.successor, ", predecessor is", n.predecessor)
 		n.stabilize()
 		time.Sleep(time.Millisecond * 1000)
+
+		// if n.ID == "alpha" {
+		// 	log.Println("LOOK HEREEEEEEEEEEEEEEEE -> Lookup('hello')'s sucessor is ", n.Lookup("hello"))
+		// }
 	}
 }
 
