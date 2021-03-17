@@ -2,37 +2,30 @@ syntax = "proto3";
 package grpc;
 option go_package="github.com/sheikhshack/distributed-chaos-50.041/node/exposed";
 
-enum Command {
-  UPLOAD = 0;
-  DOWNLOAD = 1;
-  CHECK = 2;
-}
+
 
 // In this proof of concept, we have the key and value sent from client -> chord node
-message NewFileRequest {
+message UploadRequest {
   string key = 1;
   string value = 2;
-  Command command = 3;
 }
 
 // can merge
-message CheckFileRequest {
+message Request {
   string key = 1;
-  Command command = 2;
+}
 
+message IPResponse {
+  string IP = 1;
 }
 
 message Response {
-  bool redirect = 1; // set to true if need contact other person
-  NodeInfo nodeInfo = 2;
+  string value = 1;
 }
 
 // if boolean isFileHere = false, provide the client with the addr of the next node in chord
-message NodeInfo {
-  string nodeID = 1; // who you should ask next
-}
-
 service ExternalListener {
-  rpc FileRequest(NewFileRequest) returns (Response) {}
-  rpc CheckFile(CheckFileRequest) returns (Response) {}
+  rpc Upload(UploadRequest) returns (IPResponse) {}
+  rpc Download(Request) returns (Response) {}
+  rpc CheckIP(Request) returns (IPResponse) {}
 }
