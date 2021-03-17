@@ -1,6 +1,6 @@
 syntax = "proto3";
 package grpc;
-option go_package="github.com/sheikhshack/distributed-chaos-50.041/node/gossip";
+option go_package="github.com/sheikhshack/distributed-chaos-50.041/node/exposed";
 
 enum Command {
   UPLOAD = 0;

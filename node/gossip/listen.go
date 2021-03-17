@@ -10,6 +10,7 @@ import (
 	"github.com/sheikhshack/distributed-chaos-50.041/node/store"
 )
 
+// methods avaiable to the gossiper via the node package
 type node interface {
 	FindSuccessor(hashed int) string
 	GetPredecessor() string
