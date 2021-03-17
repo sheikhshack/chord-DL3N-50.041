@@ -18,9 +18,9 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type ExternalListenerClient interface {
-	Upload(ctx context.Context, in *UploadRequest, opts ...grpc.CallOption) (*IPResponse, error)
-	Download(ctx context.Context, in *Request, opts ...grpc.CallOption) (*Response, error)
-	CheckIP(ctx context.Context, in *Request, opts ...grpc.CallOption) (*IPResponse, error)
+	Upload(ctx context.Context, in *UploadRequest, opts ...grpc.CallOption) (*UploadResponse, error)
+	Download(ctx context.Context, in *DownloadRequest, opts ...grpc.CallOption) (*DownloadResponse, error)
+	CheckIP(ctx context.Context, in *CheckRequest, opts ...grpc.CallOption) (*CheckResponse, error)
 }
 
 type externalListenerClient struct {
@@ -31,8 +31,8 @@ func NewExternalListenerClient(cc grpc.ClientConnInterface) ExternalListenerClie
 	return &externalListenerClient{cc}
 }
 
-func (c *externalListenerClient) Upload(ctx context.Context, in *UploadRequest, opts ...grpc.CallOption) (*IPResponse, error) {
-	out := new(IPResponse)
+func (c *externalListenerClient) Upload(ctx context.Context, in *UploadRequest, opts ...grpc.CallOption) (*UploadResponse, error) {
+	out := new(UploadResponse)
 	err := c.cc.Invoke(ctx, "/grpc.ExternalListener/Upload", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -40,8 +40,8 @@ func (c *externalListenerClient) Upload(ctx context.Context, in *UploadRequest, 
 	return out, nil
 }
 
-func (c *externalListenerClient) Download(ctx context.Context, in *Request, opts ...grpc.CallOption) (*Response, error) {
-	out := new(Response)
+func (c *externalListenerClient) Download(ctx context.Context, in *DownloadRequest, opts ...grpc.CallOption) (*DownloadResponse, error) {
+	out := new(DownloadResponse)
 	err := c.cc.Invoke(ctx, "/grpc.ExternalListener/Download", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -49,8 +49,8 @@ func (c *externalListenerClient) Download(ctx context.Context, in *Request, opts
 	return out, nil
 }
 
-func (c *externalListenerClient) CheckIP(ctx context.Context, in *Request, opts ...grpc.CallOption) (*IPResponse, error) {
-	out := new(IPResponse)
+func (c *externalListenerClient) CheckIP(ctx context.Context, in *CheckRequest, opts ...grpc.CallOption) (*CheckResponse, error) {
+	out := new(CheckResponse)
 	err := c.cc.Invoke(ctx, "/grpc.ExternalListener/CheckIP", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -62,9 +62,9 @@ func (c *externalListenerClient) CheckIP(ctx context.Context, in *Request, opts 
 // All implementations must embed UnimplementedExternalListenerServer
 // for forward compatibility
 type ExternalListenerServer interface {
-	Upload(context.Context, *UploadRequest) (*IPResponse, error)
-	Download(context.Context, *Request) (*Response, error)
-	CheckIP(context.Context, *Request) (*IPResponse, error)
+	Upload(context.Context, *UploadRequest) (*UploadResponse, error)
+	Download(context.Context, *DownloadRequest) (*DownloadResponse, error)
+	CheckIP(context.Context, *CheckRequest) (*CheckResponse, error)
 	mustEmbedUnimplementedExternalListenerServer()
 }
 
@@ -72,13 +72,13 @@ type ExternalListenerServer interface {
 type UnimplementedExternalListenerServer struct {
 }
 
-func (UnimplementedExternalListenerServer) Upload(context.Context, *UploadRequest) (*IPResponse, error) {
+func (UnimplementedExternalListenerServer) Upload(context.Context, *UploadRequest) (*UploadResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Upload not implemented")
 }
-func (UnimplementedExternalListenerServer) Download(context.Context, *Request) (*Response, error) {
+func (UnimplementedExternalListenerServer) Download(context.Context, *DownloadRequest) (*DownloadResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Download not implemented")
 }
-func (UnimplementedExternalListenerServer) CheckIP(context.Context, *Request) (*IPResponse, error) {
+func (UnimplementedExternalListenerServer) CheckIP(context.Context, *CheckRequest) (*CheckResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CheckIP not implemented")
 }
 func (UnimplementedExternalListenerServer) mustEmbedUnimplementedExternalListenerServer() {}
@@ -113,7 +113,7 @@ func _ExternalListener_Upload_Handler(srv interface{}, ctx context.Context, dec 
 }
 
 func _ExternalListener_Download_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(Request)
+	in := new(DownloadRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -125,13 +125,13 @@ func _ExternalListener_Download_Handler(srv interface{}, ctx context.Context, de
 		FullMethod: "/grpc.ExternalListener/Download",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ExternalListenerServer).Download(ctx, req.(*Request))
+		return srv.(ExternalListenerServer).Download(ctx, req.(*DownloadRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
 func _ExternalListener_CheckIP_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(Request)
+	in := new(CheckRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -143,7 +143,7 @@ func _ExternalListener_CheckIP_Handler(srv interface{}, ctx context.Context, dec
 		FullMethod: "/grpc.ExternalListener/CheckIP",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ExternalListenerServer).CheckIP(ctx, req.(*Request))
+		return srv.(ExternalListenerServer).CheckIP(ctx, req.(*CheckRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }

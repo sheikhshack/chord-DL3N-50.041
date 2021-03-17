@@ -19,7 +19,6 @@ services:
     environment:
       - NODE_ID=alpha
       - PEER_HOSTNAME=
-    restart: "no"
   bravo:
     container_name: bravo
     image: chord_node

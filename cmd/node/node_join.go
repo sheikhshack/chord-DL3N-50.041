@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/sheikhshack/distributed-chaos-50.041/node/chord"
+	"github.com/sheikhshack/distributed-chaos-50.041/node/exposed"
 	"github.com/sheikhshack/distributed-chaos-50.041/node/gossip"
 	"github.com/sheikhshack/distributed-chaos-50.041/node/utils"
 	"log"
@@ -31,4 +32,5 @@ func main() {
 	}
 
 	node.Gossiper.NewServerAndListen(gossip.LISTEN_PORT)
+	node.ExternalService.NewExternalServer(exposed.LISTEN_PORT)
 }

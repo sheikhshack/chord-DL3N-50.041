@@ -1,5 +1,5 @@
 syntax = "proto3";
-package grpc;
+package internal;
 option go_package="github.com/sheikhshack/distributed-chaos-50.041/node/gossip";
 
 enum Command {

@@ -1,5 +1,5 @@
 syntax = "proto3";
-package grpc;
+package external;
 option go_package="github.com/sheikhshack/distributed-chaos-50.041/node/exposed";
 
 
@@ -11,21 +11,29 @@ message UploadRequest {
 }
 
 // can merge
-message ExternalRequest {
+message DownloadRequest {
   string key = 1;
 }
 
-message IPResponse {
+message CheckRequest {
+  string key = 1;
+}
+
+message UploadResponse {
   string IP = 1;
 }
 
-message ExternalResponse {
+message CheckResponse {
+  string IP = 1;
+}
+
+message DownloadResponse {
   string value = 1;
 }
 
 // if boolean isFileHere = false, provide the client with the addr of the next node in chord
 service ExternalListener {
-  rpc Upload(UploadRequest) returns (IPResponse) {}
-  rpc Download(ExternalRequest) returns (Response) {}
-  rpc CheckIP(Request) returns (IPResponse) {}
+  rpc Upload(UploadRequest) returns (UploadResponse) {}
+  rpc Download(DownloadRequest) returns (DownloadResponse) {}
+  rpc CheckIP(CheckRequest) returns (CheckResponse) {}
 }

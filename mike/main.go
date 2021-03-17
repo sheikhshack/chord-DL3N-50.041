@@ -10,9 +10,10 @@ import (
 	"time"
 )
 
-func lookup (nodeAddr, key string) {
+func lookup(nodeAddr, key string) {
+	log.Printf("Attempting to lookup string %v", key)
 	var conn *grpc.ClientConn
-	connectionParams := fmt.Sprintf("%s:%v", nodeAddr, 8000)
+	connectionParams := fmt.Sprintf("%s:%v", nodeAddr, 8888)
 
 	conn, err := grpc.Dial(connectionParams, grpc.WithInsecure())
 	if err != nil {
@@ -21,7 +22,7 @@ func lookup (nodeAddr, key string) {
 	}
 	defer conn.Close()
 
-	checkRequest := &exposed.Request{Key: key}
+	checkRequest := &exposed.CheckRequest{Key: key}
 	client := exposed.NewExternalListenerClient(conn)
 	resp, err := client.CheckIP(context.Background(), checkRequest)
 	if err != nil {
@@ -34,8 +35,9 @@ func main(){
 	contactNode := os.Getenv("APP_NODE")
 
 	for {
-		time.Sleep(2*time.Second)
 		lookup(contactNode, "ORD")
+		time.Sleep(2*time.Second)
+
 
 	}
 }

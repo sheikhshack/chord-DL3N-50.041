@@ -26,7 +26,10 @@ func New(id string) *Node {
 	n.Gossiper = &gossip.Gossiper{
 		Node: n,
 	}
-	n.ExternalService = &exposed.ExternalService{Node: n}
+	n.ExternalService = &exposed.ExternalService{
+		Node: n,
+	}
+
 	return n
 }
 

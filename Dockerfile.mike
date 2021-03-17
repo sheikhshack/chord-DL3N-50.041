@@ -11,6 +11,6 @@ WORKDIR /built-app
 COPY --from=builder /app/mike_exec /built-app/
 # ENVARS
 ENV APP_NODE=godbless
-EXPOSE 1234
+EXPOSE 8888
 
 CMD  ["./mike_exec"]
