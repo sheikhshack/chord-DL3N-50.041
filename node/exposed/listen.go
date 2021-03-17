@@ -2,44 +2,63 @@ package exposed
 
 import (
 	"context"
-	pb "github.com/sheikhshack/distributed-chaos-50.041/node/exposed/proto"
+	"fmt"
+	exposed "github.com/sheikhshack/distributed-chaos-50.041/node/exposed/proto"
+	pb "github.com/sheikhshack/distributed-chaos-50.041/node/gossip/proto"
+	"google.golang.org/grpc"
 	"log"
+	"net"
 )
 
 type node interface {
-	UploadFile(k, v string) (redirect bool, ip string )
-	FindStoringNode(k string) (redirect bool, ip string )
-	getID() (id string)
+
 
 }
 
 type ExternalService struct {
 	Node node
-	pb.UnimplementedExternalListenerServer
+	pb.UnimplementedInternalListenerServer
+
+
 }
 
-func (e *ExternalService) AddNewFile (ctx context.Context, fr *pb.NewFileRequest) (*pb.Response, error) {
-	log.Printf("Received Request to add file with key %+v\n", fr.Key)
-	switch fr.Command {
-	// TODO: Implement other command cases here? actually wtf
-	case pb.Command_UPLOAD:
-		status, ip := e.Node.UploadFile(fr.Key, fr.Value)
-
-		return &pb.Response{
-			Redirect: status ,
-			NodeInfo: &pb.NodeInfo{NodeID: ip},
-		}, nil
-
-	default:
-		panic("Received irrelevant command in wrong methods")
-
+func (e *ExternalService) NewServerAndListen(listenPort int) *grpc.Server {
+	lis, err := net.Listen("tcp", fmt.Sprintf(":%v", listenPort))
+	if err != nil {
+		log.Fatalf("failed to listen: %v", err)
 	}
+
+	s := grpc.NewServer()
+	pb.RegisterInternalListenerServer(s, g)
+	if err := s.Serve(lis); err != nil {
+		log.Fatalf("failed to serve: %v", err)
+	} else {
+		log.Printf("Listening on port %v\n", listenPort)
+	}
+	return s
 }
 
-func (e* ExternalService) CheckFile (ctx context.Context, cr *pb.CheckFileRequest) (*pb.Response, error) {
-	log.Printf("Running fake Checkfile service that returns contacted node ID")
-	return &pb.Response{
-		Redirect: false,
-		NodeInfo: &pb.NodeInfo{NodeID: e.Node.getID()},
-	}, nil
+
+func (e *ExternalService) Upload (ctx context.Context, uploadRequest *exposed.UploadRequest) (*exposed.IPResponse, error){
+	log.Printf("Upload Method triggered \n")
+	key := uploadRequest.Key
+	val := uploadRequest.Value
+	// weeping carry on from here
+	return &exposed.IPResponse{IP: "IP"}, nil
 }
+
+func (e *ExternalService) LookupIP (ctx context.Context, lookupRequest *exposed.Request) (*exposed.IPResponse, error){
+	log.Printf("Lookup Method \n")
+	key := lookupRequest.Key
+	// weeping carry on from here
+	return  &exposed.IPResponse{IP: "IP"},nil
+}
+
+func (e *ExternalService) Download (ctx context.Context, downloadRequest *exposed.Request) (*exposed.Response, error) {
+	log.Printf("Download Method triggered \n")
+	key := downloadRequest.Key
+	// weeping carry on from here
+	return &exposed.Response{Value: "SOME STUPID STRING"}, nil
+}
+
+

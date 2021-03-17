@@ -1,6 +1,7 @@
 package chord
 
 import (
+	"github.com/sheikhshack/distributed-chaos-50.041/node/exposed"
 	"log"
 
 	"github.com/sheikhshack/distributed-chaos-50.041/node/gossip"
@@ -15,6 +16,7 @@ type Node struct {
 	next        int
 
 	Gossiper *gossip.Gossiper
+	ExternalService *exposed.ExternalService
 }
 
 // New creates and returns a new Node
@@ -23,6 +25,7 @@ func New(id string) *Node {
 	n.Gossiper = &gossip.Gossiper{
 		Node: n,
 	}
+	n.ExternalService = &exposed.ExternalService{Node: n}
 	return n
 }
 
