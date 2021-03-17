@@ -34,7 +34,36 @@ message Response {
   string targetID = 3;
   Body body = 4;
 }
+// In this proof of concept, we have the key and value sent from client -> chord node
+message UploadRequest {
+  string key = 1;
+  string value = 2;
+}
+
+// can merge
+message DownloadRequest {
+  string key = 1;
+}
+
+message CheckRequest {
+  string key = 1;
+}
+
+message UploadResponse {
+  string IP = 1;
+}
+
+message CheckResponse {
+  string IP = 1;
+}
+
+message DownloadResponse {
+  string value = 1;
+}
 
 service InternalListener {
   rpc Emit(Request) returns (Response) {}
+  rpc Upload(UploadRequest) returns (UploadResponse) {}
+  rpc Download(DownloadRequest) returns (DownloadResponse) {}
+  rpc CheckIP(CheckRequest) returns (CheckResponse) {}
 }

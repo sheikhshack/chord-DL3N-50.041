@@ -24,21 +24,23 @@ type ExternalService struct {
 	exposed.UnimplementedExternalListenerServer
 }
 
-func (e *ExternalService) NewServerAndListen(listenPort int) *grpc.Server {
-	lis, err := net.Listen("tcp", fmt.Sprintf(":%v", listenPort))
-	if err != nil {
-		log.Fatalf("failed to listen: %v", err)
-	}
-
-	s := grpc.NewServer()
-	exposed.RegisterExternalListenerServer(s, e)
-	if err := s.Serve(lis); err != nil {
-		log.Fatalf("failed to serve: %v", err)
-	} else {
-		log.Printf("Listening on port %v\n", listenPort)
-	}
-	return s
-}
+//func (e *ExternalService) NewServerAndListen(listenPort int) *grpc.Server {
+//	lis, err := net.Listen("tcp", fmt.Sprintf(":%v", listenPort))
+//	if err != nil {
+//		log.Fatalf("failed to listen: %v", err)
+//	}
+//
+//	s := grpc.NewServer()
+//	exposed.RegisterExternalListenerServer(s, e)
+//	if err := s.Serve(lis); err != nil {
+//		log.Fatalf("failed to serve: %v", err)
+//	} else {
+//		log.Printf("Listening on port %v\n", listenPort)
+//	}
+//	log.Printf("Succesfully registered EXPOSED")
+//	return s
+//
+//}
 
 func (e *ExternalService) Upload(ctx context.Context, uploadRequest *exposed.UploadRequest) (*exposed.UploadResponse, error) {
 	log.Printf("Upload Method triggered \n")

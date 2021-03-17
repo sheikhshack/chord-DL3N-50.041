@@ -3,7 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
-	exposed "github.com/sheikhshack/distributed-chaos-50.041/node/exposed/proto"
+	gossip "github.com/sheikhshack/distributed-chaos-50.041/node/gossip/proto"
 	"google.golang.org/grpc"
 	"log"
 	"os"
@@ -13,7 +13,7 @@ import (
 func lookup(nodeAddr, key string) {
 	log.Printf("Attempting to lookup string %v", key)
 	var conn *grpc.ClientConn
-	connectionParams := fmt.Sprintf("%s:%v", nodeAddr, 8888)
+	connectionParams := fmt.Sprintf("%s:%v", nodeAddr, 9000)
 
 	conn, err := grpc.Dial(connectionParams, grpc.WithInsecure())
 	if err != nil {
@@ -22,20 +22,23 @@ func lookup(nodeAddr, key string) {
 	}
 	defer conn.Close()
 
-	checkRequest := &exposed.CheckRequest{Key: key}
-	client := exposed.NewExternalListenerClient(conn)
+	checkRequest := &gossip.CheckRequest{Key: key}
+	client := gossip.NewInternalListenerClient(conn)
 	resp, err := client.CheckIP(context.Background(), checkRequest)
 	if err != nil {
 		log.Printf("Error sending message: %v", err)
 	}
-	log.Printf("Got the result for key %v : %+v\n", resp.IP)
+	log.Printf("Got the result for key %v found in node %v\n", key, resp.IP)
 }
 
 func main(){
 	contactNode := os.Getenv("APP_NODE")
+	keys := [4]string{"AAA", "BBB", "XXX", "UYEWTFBBQ"}
 
-	for {
-		lookup(contactNode, "ORD")
+	for i:=0; i < 999; i++{
+		fmt.Println("Trying a new key...")
+		// harcoded AAA -> bravo BBB -> alpha XXX -> charlie
+		lookup(contactNode, keys[i % 4])
 		time.Sleep(2*time.Second)
 
 
