@@ -3,11 +3,13 @@ package gossip
 import (
 	"context"
 	"errors"
+	"fmt"
+	"google.golang.org/grpc"
 	"log"
+	"net"
 
 	pb "github.com/sheikhshack/distributed-chaos-50.041/node/gossip/proto"
 	"github.com/sheikhshack/distributed-chaos-50.041/node/hash"
-	"github.com/sheikhshack/distributed-chaos-50.041/node/store"
 )
 
 // methods avaiable to the gossiper via the node package
@@ -23,24 +25,91 @@ type Gossiper struct {
 	pb.UnimplementedInternalListenerServer
 }
 
+func (g *Gossiper) NewServerAndListen(listenPort int) *grpc.Server {
+	lis, err := net.Listen("tcp", fmt.Sprintf(":%v", listenPort))
+	if err != nil {
+		log.Fatalf("failed to listen: %v", err)
+	}
+
+	s := grpc.NewServer()
+	pb.RegisterInternalListenerServer(s, g)
+	if err := s.Serve(lis); err != nil {
+		log.Fatalf("failed to serve: %v", err)
+	} else {
+		log.Printf("Listening on port %v\n", listenPort)
+	}
+	return s
+}
+
 // This method is server-side
 // TODO: consider that we need to spin up goroutine whenever we serve a new request
 func (g *Gossiper) Emit(ctx context.Context, in *pb.Request) (*pb.Response, error) {
 	log.Printf("received: %+v\n", in)
+	var res *pb.Response
 
 	switch in.Command {
-	case pb.Command_HEALTHCHECK:
-		resBool := g.healthcheckHandler()
-		res := &pb.Response{
+	case pb.Command_FIND_SUCCESSOR:
+		key := int(in.GetBody().HashSlot)
+		id := g.findSuccessorHandler(key)
+		res = &pb.Response{
+			Command:     pb.Command_FIND_SUCCESSOR,
+			RequesterID: in.GetRequesterID(),
+			TargetID:    in.GetTargetID(),
 			Body: &pb.Response_Body{
-				Success: resBool,
+				ID: id,
 			},
 		}
-		log.Printf("sending out: %+v\n", res)
-		return res, nil
+
+	case pb.Command_JOIN:
+		fromID := in.GetRequesterID()
+		id := g.joinHandler(fromID)
+		res = &pb.Response{
+			Command:     pb.Command_JOIN,
+			RequesterID: in.GetRequesterID(),
+			TargetID:    in.GetTargetID(),
+			Body: &pb.Response_Body{
+				ID: id,
+			},
+		}
+
+	case pb.Command_HEALTHCHECK:
+		isHealthy := g.healthcheckHandler()
+		res = &pb.Response{
+			Command:     pb.Command_HEALTHCHECK,
+			RequesterID: in.GetRequesterID(),
+			TargetID:    in.GetTargetID(),
+			Body: &pb.Response_Body{
+				IsHealthy: isHealthy,
+			},
+		}
+
+	case pb.Command_GET_PREDECESSOR:
+		predecessorID := g.getPredecessorHandler()
+		res = &pb.Response{
+			Command:     pb.Command_GET_PREDECESSOR,
+			RequesterID: in.GetRequesterID(),
+			TargetID:    in.GetTargetID(),
+			Body: &pb.Response_Body{
+				ID: predecessorID,
+			},
+		}
+
+	case pb.Command_NOTIFY:
+		possiblePredecessor := in.GetRequesterID()
+		g.notifyHandler(possiblePredecessor)
+		res = &pb.Response{
+			Command:     pb.Command_NOTIFY,
+			RequesterID: in.GetRequesterID(),
+			TargetID:    in.GetTargetID(),
+			Body:        &pb.Response_Body{},
+		}
+
 	default:
-		return nil, errors.New("CMD not recognised?? use proto.equal???")
+		return nil, errors.New("command not recognised")
 	}
+
+	log.Printf("sending out: %+v\n", res)
+	return res, nil
 }
 
 // handler to findSuccessor
@@ -68,10 +137,4 @@ func (g *Gossiper) getPredecessorHandler() string {
 // notifyHandler might also update n.predecessor and trigger data transfer if appropriate.
 func (g *Gossiper) notifyHandler(possiblePredecessor string) {
 	g.Node.NotifyHandler(possiblePredecessor)
-}
-
-//Not Used?
-// handler to get (Lookup)
-func (g *Gossiper) getHandler(key string) ([]byte, error) {
-	return store.Get(key)
 }

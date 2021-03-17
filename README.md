@@ -25,3 +25,26 @@ for archiving
  protoc --go_out=plugins=gossip:../basic --go_opt=paths=source_relative basic.proto 
 ```
 -->
+
+## Docker
+
+### Quick start (Build and Compose)
+```bash
+docker build -t chord_node . && docker-compose up
+```
+
+### Build using DockerFile
+To build a DockerFile as the image `chord_node`:
+```bash
+docker build -t chord_node .
+```
+
+Ensure that 4th step has been configured properly:
+```dockerfile
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -tags netgo -ldflags '-w' -o node_exec <file with main function>
+```
+
+### docker-compose
+```bash
+docker-compose up
+```
