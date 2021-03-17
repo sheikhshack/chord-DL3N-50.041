@@ -14,7 +14,6 @@ import (
 
 const (
 	LISTEN_PORT = 9000
-	EMIT_PORT   = 9001
 )
 
 func (g *Gossiper) emit(nodeAddr string, request *pb.Request) (*pb.Response, error) {
@@ -40,14 +39,38 @@ func (g *Gossiper) emit(nodeAddr string, request *pb.Request) (*pb.Response, err
 }
 
 // called by FindSuccessor
-func (g *Gossiper) FindSuccessor(fromID, toID string, key int) string {
-	panic("not implemented")
+func (g *Gossiper) FindSuccessor(fromID, toID string, key int) (string, error) {
+	req := &pb.Request{
+		Command:     pb.Command_FIND_SUCCESSOR,
+		RequesterID: fromID,
+		TargetID:    toID,
+		Body: &pb.Request_Body{
+			HashSlot: int64(key),
+		},
+	}
+
+	res, err := g.emit(toID, req)
+	if err != nil {
+		return "", err
+	}
+	return res.GetBody().GetID(), nil
 }
 
 // called by join
-func (g *Gossiper) Join(fromID, toID string) string {
+func (g *Gossiper) Join(fromID, toID string) (string, error) {
 	//k = n.ID
-	panic("not implemented")
+	req := &pb.Request{
+		Command:     pb.Command_JOIN,
+		RequesterID: fromID,
+		TargetID:    toID,
+		Body:        &pb.Request_Body{},
+	}
+
+	res, err := g.emit(toID, req)
+	if err != nil {
+		return "", err
+	}
+	return res.GetBody().ID, nil
 }
 
 // called by checkPredecessor
@@ -64,24 +87,38 @@ func (g *Gossiper) Healthcheck(fromID, toID string) (bool, error) {
 	if err != nil {
 		return false, err
 	}
-	return res.GetBody().GetSuccess(), nil
+	return res.GetBody().IsHealthy, nil
 }
 
 //Get the predecessor of the node
-func (g *Gossiper) GetPredecessor(fromID, toID string) string {
-	panic("not implmented")
+func (g *Gossiper) GetPredecessor(fromID, toID string) (string, error) {
+	req := &pb.Request{
+		Command:     pb.Command_GET_PREDECESSOR,
+		RequesterID: fromID,
+		TargetID:    toID,
+		Body:        &pb.Request_Body{},
+	}
+
+	res, err := g.emit(toID, req)
+	if err != nil {
+		return "", err
+	}
+	return res.GetBody().ID, nil
 }
 
 // called by notify
 //n things it might be the predecessor of id
-func (g *Gossiper) Notify(fromID, toID string) {
-	//pred = n.ID
-	panic("not implemented")
-}
+func (g *Gossiper) Notify(fromID, toID string) error {
+	req := &pb.Request{
+		Command:     pb.Command_NOTIFY,
+		RequesterID: fromID,
+		TargetID:    toID,
+		Body:        &pb.Request_Body{},
+	}
 
-// Not used?
-// Called by Lookup
-// TODO: move this method to exposed API package
-func (g *Gossiper) Get(fromID, toID, key string) ([]byte, error) {
-	panic("not implemented")
+	_, err := g.emit(toID, req)
+	if err != nil {
+		return err
+	}
+	return nil
 }

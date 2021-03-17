@@ -26,9 +26,7 @@ message Request {
 message Response {
   message Body {
     string ID = 1;
-    repeated string Data = 2;
-    bool IsErr = 3;
-    bool Success = 4;
+    bool IsHealthy = 4;
   }
 
   Command command = 1;
