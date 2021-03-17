@@ -23,7 +23,6 @@ func New(id string) *Node {
 	n.Gossiper = &gossip.Gossiper{
 		Node: n,
 	}
-	n.Gossiper.NewServerAndListen(gossip.LISTEN_PORT)
 	return n
 }
 
