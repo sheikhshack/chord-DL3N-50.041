@@ -47,7 +47,7 @@ func (g *Gossiper) NewServerAndListen(listenPort int) *grpc.Server {
 // This method is server-side
 // TODO: consider that we need to spin up goroutine whenever we serve a new request
 func (g *Gossiper) Emit(ctx context.Context, in *pb.Request) (*pb.Response, error) {
-	log.Printf("received: %+v\n", in)
+	log.Printf("Receving Request: %+v %+v\n", in, in.Command)
 	var res *pb.Response
 
 	switch in.Command {
@@ -65,6 +65,7 @@ func (g *Gossiper) Emit(ctx context.Context, in *pb.Request) (*pb.Response, erro
 
 	case pb.Command_JOIN:
 		fromID := in.GetRequesterID()
+		log.Println(fromID)
 		id := g.joinHandler(fromID)
 		res = &pb.Response{
 			Command:     pb.Command_JOIN,
@@ -111,7 +112,7 @@ func (g *Gossiper) Emit(ctx context.Context, in *pb.Request) (*pb.Response, erro
 		return nil, errors.New("command not recognised")
 	}
 
-	log.Printf("sending out: %+v, %+v\n", res, g.Node.GetPredecessor())
+	log.Printf("Sending Response: %+v \n", res)
 	return res, nil
 }
 
@@ -125,6 +126,7 @@ func (g *Gossiper) joinHandler(fromID string) string {
 	//fromID= previous node's id
 	if g.Node.GetID() == g.Node.GetSuccessor() {
 		g.Node.SetSuccessor(fromID)
+		return g.Node.GetID()
 	}
 	return g.Node.FindSuccessor(hash.Hash(fromID))
 }

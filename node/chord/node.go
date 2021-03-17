@@ -65,7 +65,7 @@ func (n *Node) closestPrecedingNode(hashed int) string {
 func (n *Node) InitRing() {
 	n.SetPredecessor("")
 	n.SetSuccessor(n.ID)
-	// go n.cron()
+	go n.cron()
 }
 
 func (n *Node) Join(id string) {
@@ -82,6 +82,7 @@ func (n *Node) Join(id string) {
 
 func (n *Node) cron() {
 	for {
+		log.Println(n.ID, "successor is", n.successor, ", predecessor is", n.predecessor)
 		n.stabilize()
 		time.Sleep(time.Millisecond * 1000)
 	}

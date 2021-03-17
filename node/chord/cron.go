@@ -8,6 +8,10 @@ import (
 )
 
 func (n *Node) stabilize() {
+	log.Println("Stabilizing", n.ID)
+	if n.successor == n.ID {
+		return
+	}
 	x, err := n.Gossiper.GetPredecessor(n.ID, n.successor)
 	if err != nil {
 		log.Printf("error in stabilize: %+v\n", err)
@@ -22,7 +26,6 @@ func (n *Node) stabilize() {
 //implemented differently from pseudocode, n thinks it might be the predecessor of id
 func (n *Node) notify(id string) {
 	if id == n.ID {
-		log.Printf("Notified itself")
 		return
 	}
 	n.Gossiper.Notify(n.ID, id)
