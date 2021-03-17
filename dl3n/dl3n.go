@@ -16,12 +16,11 @@ import (
 // all fields except complete (and file, size in DL3NChunk) should have the same values for the same file
 // struct should be marshallable to JSON (aka .dl3n file)
 type DL3N struct {
-	Mutex     sync.Mutex
+	Mutex     *sync.Mutex `json:"-"`
 	Hash      string
 	Size      int64
 	ChunkSize int64
 	Chunks    []*DL3NChunk
-	Complete  bool `json:"-"` // true if all chunks are available
 }
 
 // DL3N chunk represents a chunk of a DL3N object
@@ -63,12 +62,11 @@ func NewDL3NFromFile(path string, chunkSize int64) (*DL3N, error) {
 	}
 
 	dl3n := DL3N{
-		Mutex:     sync.Mutex{},
+		Mutex:     &sync.Mutex{},
 		Hash:      infohash,
 		Size:      fileSize,
 		ChunkSize: chunkSize,
 		Chunks:    make([]*DL3NChunk, 0),
-		Complete:  true,
 	}
 
 	for i := int64(0); i < chunkCount; i++ {
@@ -196,4 +194,15 @@ func joinChunks(chunks []*os.File, filename string) error {
 	}
 
 	return nil
+}
+
+// Complete returns if all DL3NChunks are available
+func (d *DL3N) Complete() bool {
+	for _, c := range d.Chunks {
+		if !c.Available {
+			return false
+		}
+	}
+
+	return true
 }
