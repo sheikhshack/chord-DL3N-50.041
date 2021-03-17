@@ -14,8 +14,8 @@
 ### Build/Rebuild gRPC library
 Build the generated protoc code with:
 ```bash
-protoc --go_out=./node/grpc/ --go_opt=paths=source_relative \
-       --go-grpc_out=./node/grpc/ --go-grpc_opt=paths=source_relative \
+protoc --go_out=./node/gossip/ --go_opt=paths=source_relative \
+       --go-grpc_out=./node/gossip/ --go-grpc_opt=paths=source_relative \
        ./proto/internal.proto
 ```
 

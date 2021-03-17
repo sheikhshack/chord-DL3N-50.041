@@ -13,21 +13,9 @@ enum Command {
 
 message Request {
   message Body {
-    KeySlotBody FindSuccessor = 1;
-    NullBody Join = 2;
-    NullBody Healthcheck = 3;
-    NullBody GetPredecessor = 4;
-    NullBody Notify = 5;
-    InfoHashBody Lookup = 6;
+    int64 HashSlot = 1;
+    string InfoHash = 2;
   }
-
-  message KeySlotBody {
-    int64 KeySlot = 1;
-  }
-  message InfoHashBody {
-    string InfoHash = 1;
-  }
-  message NullBody {}
 
   Command command = 1;
   string requesterID = 2;
@@ -37,23 +25,10 @@ message Request {
 
 message Response {
   message Body {
-    IDBody FindSuccessor = 1;
-    IDBody Join = 2;
-    SuccessBody Healthcheck = 3;
-    IDBody GetPredecessor = 4;
-    SuccessBody Notify = 5;
-    DataBody Lookup = 6;
-  }
-
-  message IDBody {
     string ID = 1;
-  }
-  message DataBody {
-    repeated string Data = 1;
-    bool IsErr = 2;
-  }
-  message SuccessBody {
-    bool Success = 1;
+    repeated string Data = 2;
+    bool IsErr = 3;
+    bool Success = 4;
   }
 
   Command command = 1;

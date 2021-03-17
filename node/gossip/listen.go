@@ -32,7 +32,7 @@ func (g *Gossiper) Emit(ctx context.Context, in *pb.Request) (*pb.Response, erro
 		resBool := g.healthcheckHandler()
 		res := &pb.Response{
 			Body: &pb.Response_Body{
-				Healthcheck: &pb.Response_SuccessBody{Success: resBool},
+				Success: resBool,
 			},
 		}
 		log.Printf("sending out: %+v\n", res)

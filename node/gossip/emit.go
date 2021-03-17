@@ -20,7 +20,7 @@ const (
 func (g *Gossiper) emit(nodeAddr string, request *pb.Request) (*pb.Response, error) {
 	var conn *grpc.ClientConn
 	connectionParams := fmt.Sprintf("%s:%v", nodeAddr, LISTEN_PORT)
-	//log.Printf("%v\n", )
+
 	conn, err := grpc.Dial(connectionParams, grpc.WithInsecure())
 	if err != nil {
 		log.Fatalf("Cannot connect to: %s", err)
@@ -57,14 +57,14 @@ func (g *Gossiper) Healthcheck(fromID, toID string) (bool, error) {
 		Command:     pb.Command_HEALTHCHECK,
 		RequesterID: fromID,
 		TargetID:    toID,
-		Body:        &pb.Request_Body{Healthcheck: &pb.Request_NullBody{}},
+		Body:        &pb.Request_Body{},
 	}
 
 	res, err := g.emit(toID, req)
 	if err != nil {
 		return false, err
 	}
-	return res.GetBody().GetHealthcheck().GetSuccess(), nil
+	return res.GetBody().GetSuccess(), nil
 }
 
 //Get the predecessor of the node
