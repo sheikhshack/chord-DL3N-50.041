@@ -9,12 +9,14 @@ import (
 	"math"
 	"os"
 	"strconv"
+	"sync"
 )
 
 // DL3N represents the DL3N object asssociated with a particular file
 // all fields except complete (and file, size in DL3NChunk) should have the same values for the same file
 // struct should be marshallable to JSON (aka .dl3n file)
 type DL3N struct {
+	Mutex     sync.Mutex
 	Hash      string
 	Size      int64
 	ChunkSize int64
@@ -27,8 +29,8 @@ type DL3NChunk struct {
 	Id        int64
 	Hash      string
 	Size      int64
-	File      *os.File `json:"-"` // nil if not available
-	Available bool     `json:"-"`
+	Filepath  string `json:"-"` // nil if not available
+	Available bool   `json:"-"`
 }
 
 // Create a new DL3N struct from filepath
@@ -61,6 +63,7 @@ func NewDL3NFromFile(path string, chunkSize int64) (*DL3N, error) {
 	}
 
 	dl3n := DL3N{
+		Mutex:     sync.Mutex{},
 		Hash:      infohash,
 		Size:      fileSize,
 		ChunkSize: chunkSize,
@@ -85,17 +88,11 @@ func NewDL3NFromFile(path string, chunkSize int64) (*DL3N, error) {
 		}
 		chunkFile.Close()
 
-		// open chunkfile again to attach to dl3nchunk
-		chunkFile, err = os.Open(chunkPath)
-		if err != nil {
-			return nil, err
-		}
-
 		dl3n.Chunks = append(dl3n.Chunks, &DL3NChunk{
 			Id:        i,
 			Hash:      chunkHash,
 			Size:      chunkFileSize,
-			File:      chunkFile,
+			Filepath:  chunkPath,
 			Available: true,
 		})
 	}
@@ -105,6 +102,9 @@ func NewDL3NFromFile(path string, chunkSize int64) (*DL3N, error) {
 
 // WriteMetaFile writes a .dl3n file to filepath for that particular DL3N
 func (d *DL3N) WriteMetaFile(path string) error {
+	d.Mutex.Lock()
+	defer d.Mutex.Unlock()
+
 	_, err := os.Create(path)
 	if err != nil {
 		return err
