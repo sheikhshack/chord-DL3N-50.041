@@ -8,7 +8,7 @@ import (
 )
 
 func (n *Node) stabilize() {
-	log.Println("Stabilizing", n.ID)
+	//log.Println("Stabilizing", n.ID)
 	if n.successor == n.ID {
 		return
 	}

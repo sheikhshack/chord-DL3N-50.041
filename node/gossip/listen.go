@@ -49,7 +49,7 @@ func (g *Gossiper) NewServerAndListen(listenPort int) *grpc.Server {
 // This method is server-side
 // TODO: consider that we need to spin up goroutine whenever we serve a new request
 func (g *Gossiper) Emit(ctx context.Context, in *pb.Request) (*pb.Response, error) {
-	log.Printf("Receving Request: %+v %+v\n", in, in.Command)
+	//log.Printf("Receving Request: %+v %+v\n", in, in.Command)
 	var res *pb.Response
 
 	switch in.Command {
@@ -64,7 +64,7 @@ func (g *Gossiper) Emit(ctx context.Context, in *pb.Request) (*pb.Response, erro
 				ID: id,
 			},
 		}
-
+		log.Printf("Sending Response: %+v \n", res)
 	case pb.Command_JOIN:
 		fromID := in.GetRequesterID()
 		id := g.joinHandler(fromID)
@@ -113,7 +113,7 @@ func (g *Gossiper) Emit(ctx context.Context, in *pb.Request) (*pb.Response, erro
 		return nil, errors.New("command not recognised")
 	}
 
-	log.Printf("Sending Response: %+v \n", res)
+	//log.Printf("Sending Response: %+v \n", res)
 	return res, nil
 }
 
@@ -161,7 +161,7 @@ func (g *Gossiper) Upload(ctx context.Context, uploadRequest *pb.UploadRequest) 
 
 func (g *Gossiper) CheckIP(ctx context.Context, lookupRequest *pb.CheckRequest) (*pb.CheckResponse, error) {
 	log.Printf("Lookup Method \n")
-	key := lookupRequest.Key
+	key := lookupRequest.GetKey()
 	ip := g.Node.LookupIP(key)
 	return &pb.CheckResponse{IP: ip}, nil
 }

@@ -20,7 +20,7 @@ const (
 func (g *Gossiper) emit(nodeAddr string, request *pb.Request) (*pb.Response, error) {
 	var conn *grpc.ClientConn
 	connectionParams := fmt.Sprintf("%s:%v", nodeAddr, LISTEN_PORT)
-	log.Printf("Sending Request: %+v, %+v", request, request.Command)
+	//log.Printf("Sending Request: %+v, %+v", request, request.Command)
 
 	conn, err := grpc.Dial(connectionParams, grpc.WithInsecure())
 	if err != nil {
@@ -35,7 +35,7 @@ func (g *Gossiper) emit(nodeAddr string, request *pb.Request) (*pb.Response, err
 		log.Printf("Error sending message: %v", err)
 		return nil, err
 	}
-	log.Printf("Receiving Response: %+v", response)
+	//log.Printf("Receiving Response: %+v", response)
 
 	return response, nil
 }
