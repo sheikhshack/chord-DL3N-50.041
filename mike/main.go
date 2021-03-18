@@ -31,7 +31,7 @@ func lookup(nodeAddr, key string) {
 		log.Printf("Error sending message: %v", err)
 	}
 	log.Printf("key %v (hash of %v) found in node %v\n", key, hash.Hash(key), resp.IP)
-	upload(resp.IP, key, fmt.Sprintf("%.23s\ndistributed systems is the best :)\n", time.Now().UTC()))
+	upload(resp.IP, key, fmt.Sprintf("%.23s | %s\ndistributed systems is the best :)\n", time.Now().UTC(), key))
 }
 
 func upload(nodeAddr, key, value string) {
