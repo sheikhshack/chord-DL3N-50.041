@@ -3,11 +3,13 @@ package main
 import (
 	"context"
 	"fmt"
-	pb "github.com/sheikhshack/distributed-chaos-50.041/node/gossip/proto"
-	"google.golang.org/grpc"
 	"log"
 	"net"
 	"sync"
+
+	"google.golang.org/grpc"
+
+	pb "github.com/sheikhshack/distributed-chaos-50.041/node/gossip/proto"
 )
 
 type Tower struct {
@@ -33,11 +35,6 @@ func (t *Tower) NewServerAndListen(listenPort int) *grpc.Server {
 }
 
 func (t *Tower) Debug(ctx context.Context, in *pb.DebugMessage) (*pb.DebugResponse, error) {
-	//log.Printf("%v: predecessor: %v | successor: %v\n",
-	//	in.GetFromID(),
-	//	in.GetPredecessor(),
-	//	in.GetSuccessor(),
-	//)
 	data := nodeData{
 		nodeID:      in.GetFromID(),
 		predecessor: in.GetPredecessor(),

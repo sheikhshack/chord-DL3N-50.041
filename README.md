@@ -3,10 +3,10 @@
 ## Panopticon
 The Panopticon is a debugger tool for viewing all chord nodes' predecessor and successor. Panopticon exists as a docker container that will sustain a consistent and easy to read table. Below is such an example 
  ```
-                             ID     predecessor       successor
-panopticon    |           alpha:     nodeCharlie       nodeBravo
-panopticon    |       nodeBravo:           alpha     nodeCharlie
-panopticon    |     nodeCharlie:       nodeBravo           alpha
+                                     ID             predecessor               successor stabilized
+panopticon    |           alpha (68601):     nodeCharlie (53816)       nodeBravo (96447)      true
+panopticon    |       nodeBravo (96447):           alpha (68601)     nodeCharlie (53816)      true
+panopticon    |     nodeCharlie (53816):       nodeBravo (96447)           alpha (68601)      true
 ```
 
 To use this, you can run the following command in one terminal (append more services at the end if there are more). Or add a `-d` if you wish to detach the stdout.

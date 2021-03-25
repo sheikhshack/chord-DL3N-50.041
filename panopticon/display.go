@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"sort"
 	"time"
+
+	"github.com/sheikhshack/distributed-chaos-50.041/node/hash"
 )
 
 type nodeData struct {
@@ -15,30 +17,35 @@ type nodeData struct {
 func (t Tower) display() {
 	for {
 		clearTerminal()
-		fmt.Printf("%31s %15s %15s\n", "ID", "predecessor", "successor")
+		fmt.Printf("%39s %23s %23s %10s\n", "ID", "predecessor", "successor", "stabilized")
 		var holder []nodeData
 		t.data.Range(func(k interface{}, v interface{}) bool {
 			node := v.(nodeData)
 			holder = append(holder, node)
-			//fmt.Printf("%15s: %15s %15s\n", id, node.predecessor, node.successor)
 			return true
 		})
+
 		sort.SliceStable(holder, func(i, j int) bool {
 			if holder[i].nodeID < holder[j].nodeID {
 				return true
 			}
 			return false
 		})
+
 		for _, node := range holder {
-			fmt.Printf("%15s: %15s %15s\n", node.nodeID, node.predecessor, node.successor)
+			hID := hash.Hash(node.nodeID)
+			hpredecessor := hash.Hash(node.predecessor)
+			hsuccessor := hash.Hash(node.successor)
+			stabilized := node.predecessor != "" && node.successor != "" && hash.IsInRange(hID, hpredecessor, hsuccessor)
+
+			fmt.Printf("%15s (%v): %15s (%v) %15s (%v) %9v\n",
+				node.nodeID, hID,
+				node.predecessor, hpredecessor,
+				node.successor, hsuccessor,
+				stabilized,
+			)
 		}
-		//t.data.Range(func(k interface{}, v interface{}) bool {
-		//	id := k.(string)
-		//	node := v.(nodeData)
-		//
-		//	fmt.Printf("%15s: %15s %15s\n", id, node.predecessor, node.successor)
-		//	return true
-		//})
+
 		time.Sleep(time.Millisecond * 500)
 	}
 }
