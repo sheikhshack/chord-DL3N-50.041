@@ -10,6 +10,9 @@ import (
 	"net"
 )
 
+/* Package exposed is not being used for now
+Currently only exists because sheikh wants to play with it next time
+*/
 const (
 	LISTEN_PORT = 8888
 )

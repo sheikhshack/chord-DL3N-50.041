@@ -4,13 +4,13 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/sheikhshack/distributed-chaos-50.041/node/store"
 	"google.golang.org/grpc"
 	"log"
 	"net"
 
 	pb "github.com/sheikhshack/distributed-chaos-50.041/node/gossip/proto"
 	"github.com/sheikhshack/distributed-chaos-50.041/node/hash"
+	"github.com/sheikhshack/distributed-chaos-50.041/node/store"
 )
 
 // methods avaiable to the gossiper via the node package
@@ -21,7 +21,6 @@ type node interface {
 	SetSuccessor(id string)
 	GetID() string
 	NotifyHandler(possiblePredecessor string)
-	LookupIP(k string) (ip string)
 }
 
 type Gossiper struct {
@@ -162,7 +161,7 @@ func (g *Gossiper) Upload(ctx context.Context, uploadRequest *pb.UploadRequest) 
 func (g *Gossiper) CheckIP(ctx context.Context, lookupRequest *pb.CheckRequest) (*pb.CheckResponse, error) {
 	log.Printf("Lookup Method \n")
 	key := lookupRequest.GetKey()
-	ip := g.Node.LookupIP(key)
+	ip := g.Node.FindSuccessor(hash.Hash(key))
 	return &pb.CheckResponse{IP: ip}, nil
 }
 
