@@ -1,5 +1,24 @@
 # distributed-chaos-50.041
 
+## Panopticon
+The Panopticon is a debugger tool for viewing all chord nodes' predecessor and successor. Panopticon exists as a docker container that will sustain a consistent and easy to read table. Below is such an example 
+ ```
+                             ID     predecessor       successor
+panopticon    |           alpha:     nodeCharlie       nodeBravo
+panopticon    |       nodeBravo:           alpha     nodeCharlie
+panopticon    |     nodeCharlie:       nodeBravo           alpha
+```
+
+To use this, you can run the following command in one terminal (append more services at the end if there are more). Or add a `-d` if you wish to detach the stdout.
+```
+docker-compose -f docker-compose.debug.yaml up alpha bravo charlie
+```
+Then in a clean terminal (which you don't need the previous print-outs anymore), run
+```
+docker-compose -f docker-compose.debug.yaml up panopticon
+```
+The above command will start the Panopticon container.  
+
 ## Protoc
 
 ### Installation

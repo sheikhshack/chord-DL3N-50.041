@@ -22,6 +22,7 @@ type InternalListenerClient interface {
 	Upload(ctx context.Context, in *UploadRequest, opts ...grpc.CallOption) (*UploadResponse, error)
 	Download(ctx context.Context, in *DownloadRequest, opts ...grpc.CallOption) (*DownloadResponse, error)
 	CheckIP(ctx context.Context, in *CheckRequest, opts ...grpc.CallOption) (*CheckResponse, error)
+	Debug(ctx context.Context, in *DebugMessage, opts ...grpc.CallOption) (*DebugResponse, error)
 }
 
 type internalListenerClient struct {
@@ -68,6 +69,15 @@ func (c *internalListenerClient) CheckIP(ctx context.Context, in *CheckRequest, 
 	return out, nil
 }
 
+func (c *internalListenerClient) Debug(ctx context.Context, in *DebugMessage, opts ...grpc.CallOption) (*DebugResponse, error) {
+	out := new(DebugResponse)
+	err := c.cc.Invoke(ctx, "/internal.InternalListener/Debug", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // InternalListenerServer is the server API for InternalListener service.
 // All implementations must embed UnimplementedInternalListenerServer
 // for forward compatibility
@@ -76,6 +86,7 @@ type InternalListenerServer interface {
 	Upload(context.Context, *UploadRequest) (*UploadResponse, error)
 	Download(context.Context, *DownloadRequest) (*DownloadResponse, error)
 	CheckIP(context.Context, *CheckRequest) (*CheckResponse, error)
+	Debug(context.Context, *DebugMessage) (*DebugResponse, error)
 	mustEmbedUnimplementedInternalListenerServer()
 }
 
@@ -94,6 +105,9 @@ func (UnimplementedInternalListenerServer) Download(context.Context, *DownloadRe
 }
 func (UnimplementedInternalListenerServer) CheckIP(context.Context, *CheckRequest) (*CheckResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CheckIP not implemented")
+}
+func (UnimplementedInternalListenerServer) Debug(context.Context, *DebugMessage) (*DebugResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Debug not implemented")
 }
 func (UnimplementedInternalListenerServer) mustEmbedUnimplementedInternalListenerServer() {}
 
@@ -180,6 +194,24 @@ func _InternalListener_CheckIP_Handler(srv interface{}, ctx context.Context, dec
 	return interceptor(ctx, in, info, handler)
 }
 
+func _InternalListener_Debug_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DebugMessage)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(InternalListenerServer).Debug(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/internal.InternalListener/Debug",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(InternalListenerServer).Debug(ctx, req.(*DebugMessage))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // InternalListener_ServiceDesc is the grpc.ServiceDesc for InternalListener service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -202,6 +234,10 @@ var InternalListener_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "CheckIP",
 			Handler:    _InternalListener_CheckIP_Handler,
+		},
+		{
+			MethodName: "Debug",
+			Handler:    _InternalListener_Debug_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

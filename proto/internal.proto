@@ -61,9 +61,20 @@ message DownloadResponse {
   string value = 1;
 }
 
+message DebugMessage {
+  string fromID = 1;
+  string predecessor = 2;
+  string successor = 3;
+}
+
+message DebugResponse {
+  bool success = 1;
+}
+
 service InternalListener {
   rpc Emit(Request) returns (Response) {}
   rpc Upload(UploadRequest) returns (UploadResponse) {}
   rpc Download(DownloadRequest) returns (DownloadResponse) {}
   rpc CheckIP(CheckRequest) returns (CheckResponse) {}
+  rpc Debug(DebugMessage) returns (DebugResponse) {}
 }

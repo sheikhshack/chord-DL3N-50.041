@@ -2,6 +2,7 @@ package chord
 
 import (
 	"log"
+	"os"
 	"time"
 
 	"github.com/sheikhshack/distributed-chaos-50.041/node/gossip"
@@ -20,12 +21,39 @@ type Node struct {
 
 // New creates and returns a new Node
 func New(id string) *Node {
-	n := &Node{ID: id}
-	n.Gossiper = &gossip.Gossiper{
-		Node: n,
+	n := &Node{ID: id, next: 0}
+
+	if os.Getenv("DEBUG") == "debug" {
+		n.Gossiper = &gossip.Gossiper{
+			Node:      n,
+			DebugMode: true,
+		}
+	} else {
+		n.Gossiper = &gossip.Gossiper{
+			Node:      n,
+			DebugMode: false,
+		}
 	}
 
 	return n
+}
+
+func (n *Node) InitRing() {
+	n.SetPredecessor("")
+	n.SetSuccessor(n.ID)
+	go n.cron()
+}
+
+func (n *Node) Join(id string) {
+	successor, err := n.Gossiper.Join(n.ID, id)
+	if err != nil {
+		// TODO: handle this error
+		// we can pass the error back and have main.go to exit gracefully with helpful message
+		log.Fatalf("error in join: %+v\n", err)
+	}
+	n.SetPredecessor("")
+	n.SetSuccessor(successor)
+	go n.cron()
 }
 
 func (n *Node) FindSuccessor(hashed int) string {
@@ -59,24 +87,6 @@ func (n *Node) closestPrecedingNode(hashed int) string {
 		}
 	}
 	return n.ID
-}
-
-func (n *Node) InitRing() {
-	n.SetPredecessor("")
-	n.SetSuccessor(n.ID)
-	go n.cron()
-}
-
-func (n *Node) Join(id string) {
-	successor, err := n.Gossiper.Join(n.ID, id)
-	if err != nil {
-		// TODO: handle this error
-		// we can pass the error back and have main.go to exit gracefully with helpful message
-		log.Fatalf("error in join: %+v\n", err)
-	}
-	n.SetPredecessor("")
-	n.SetSuccessor(successor)
-	go n.cron()
 }
 
 func (n *Node) cron() {

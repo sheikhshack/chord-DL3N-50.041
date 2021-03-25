@@ -14,10 +14,41 @@ import (
 // and packaging into Request struct to be sent
 
 const (
-	LISTEN_PORT = 9000
+	LISTEN_PORT     = 9000
+	PANOPTICON_ADDR = "panopticon"
 )
 
+func (g *Gossiper) report() {
+	if !g.DebugMode {
+		return
+	}
+
+	var conn *grpc.ClientConn
+	connectionParams := fmt.Sprintf("%s:%v", PANOPTICON_ADDR, LISTEN_PORT)
+
+	conn, err := grpc.Dial(connectionParams, grpc.WithInsecure())
+	if err != nil {
+		//log.Fatalf("Cannot connect to: %s", err)
+		return
+
+	}
+	defer conn.Close()
+
+	client := pb.NewInternalListenerClient(conn)
+	_, err = client.Debug(context.Background(), &pb.DebugMessage{
+		FromID:      g.Node.GetID(),
+		Predecessor: g.Node.GetPredecessor(),
+		Successor:   g.Node.GetSuccessor(),
+	})
+	if err != nil {
+		//log.Printf("Error sending message: %v", err)
+		return
+	}
+}
+
 func (g *Gossiper) emit(nodeAddr string, request *pb.Request) (*pb.Response, error) {
+	g.report()
+
 	var conn *grpc.ClientConn
 	connectionParams := fmt.Sprintf("%s:%v", nodeAddr, LISTEN_PORT)
 	//log.Printf("Sending Request: %+v, %+v", request, request.Command)

@@ -24,7 +24,8 @@ type node interface {
 }
 
 type Gossiper struct {
-	Node node
+	Node      node
+	DebugMode bool
 
 	pb.UnimplementedInternalListenerServer
 }
@@ -48,6 +49,8 @@ func (g *Gossiper) NewServerAndListen(listenPort int) *grpc.Server {
 // This method is server-side
 // TODO: consider that we need to spin up goroutine whenever we serve a new request
 func (g *Gossiper) Emit(ctx context.Context, in *pb.Request) (*pb.Response, error) {
+	g.report()
+
 	//log.Printf("Receving Request: %+v %+v\n", in, in.Command)
 	var res *pb.Response
 
