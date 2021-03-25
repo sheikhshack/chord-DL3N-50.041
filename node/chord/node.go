@@ -4,8 +4,6 @@ import (
 	"log"
 	"time"
 
-	"github.com/sheikhshack/distributed-chaos-50.041/node/exposed"
-
 	"github.com/sheikhshack/distributed-chaos-50.041/node/gossip"
 	"github.com/sheikhshack/distributed-chaos-50.041/node/hash"
 )
@@ -17,17 +15,13 @@ type Node struct {
 	successor   string
 	next        int
 
-	Gossiper        *gossip.Gossiper
-	ExternalService *exposed.ExternalService
+	Gossiper *gossip.Gossiper
 }
 
 // New creates and returns a new Node
 func New(id string) *Node {
 	n := &Node{ID: id}
 	n.Gossiper = &gossip.Gossiper{
-		Node: n,
-	}
-	n.ExternalService = &exposed.ExternalService{
 		Node: n,
 	}
 
