@@ -12,6 +12,7 @@ type nodeData struct {
 	nodeID      string
 	predecessor string
 	successor   string
+	fingers     []string
 }
 
 func (t Tower) display() {
@@ -38,11 +39,12 @@ func (t Tower) display() {
 			hsuccessor := hash.Hash(node.successor)
 			stabilized := node.predecessor != "" && node.successor != "" && hash.IsInRange(hID, hpredecessor, hsuccessor)
 
-			fmt.Printf("%15s (%v): %15s (%v) %15s (%v) %9v\n",
+			fmt.Printf("%15s (%v): %15s (%v) %15s (%v) %9v\nFingers: %+v\n",
 				node.nodeID, hID,
 				node.predecessor, hpredecessor,
 				node.successor, hsuccessor,
 				stabilized,
+				node.fingers,
 			)
 		}
 

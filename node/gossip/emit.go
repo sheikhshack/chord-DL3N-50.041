@@ -39,6 +39,7 @@ func (g *Gossiper) report() {
 		FromID:      g.Node.GetID(),
 		Predecessor: g.Node.GetPredecessor(),
 		Successor:   g.Node.GetSuccessor(),
+		Fingers:     g.Node.GetFingers(),
 	})
 	if err != nil {
 		//log.Printf("Error sending message: %v", err)

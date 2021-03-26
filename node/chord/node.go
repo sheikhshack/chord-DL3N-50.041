@@ -21,7 +21,8 @@ type Node struct {
 
 // New creates and returns a new Node
 func New(id string) *Node {
-	n := &Node{ID: id, next: 0}
+	// 16 is finger table size
+	n := &Node{ID: id, next: 0, fingers: make([]string, 16)}
 
 	if os.Getenv("DEBUG") == "debug" {
 		n.Gossiper = &gossip.Gossiper{
@@ -58,9 +59,9 @@ func (n *Node) Join(id string) {
 
 func (n *Node) FindSuccessor(hashed int) string {
 	// edge case of having only one node in ring
-	if n.successor == n.ID {
-		return n.ID
-	}
+	//if n.successor == n.ID {
+	//	return n.ID
+	//}
 	if hash.IsInRange(hashed, hash.Hash(n.ID), hash.Hash(n.successor)+1) {
 		return n.successor
 	} else {
@@ -94,11 +95,8 @@ func (n *Node) cron() {
 	for {
 		log.Println(n.ID, "successor is", n.successor, ", predecessor is", n.predecessor)
 		n.stabilize()
+		n.fixFingers()
 		time.Sleep(time.Millisecond * 1000)
-
-		// if n.ID == "alpha" {
-		// 	log.Println("LOOK HEREEEEEEEEEEEEEEEE -> Lookup('hello')'s sucessor is ", n.Lookup("hello"))
-		// }
 	}
 }
 
@@ -124,4 +122,8 @@ func (n *Node) GetSuccessor() string {
 
 func (n *Node) GetID() string {
 	return n.ID
+}
+
+func (n *Node) GetFingers() []string {
+	return n.fingers
 }

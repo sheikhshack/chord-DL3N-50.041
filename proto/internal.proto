@@ -65,6 +65,7 @@ message DebugMessage {
   string fromID = 1;
   string predecessor = 2;
   string successor = 3;
+  repeated string fingers = 4;
 }
 
 message DebugResponse {

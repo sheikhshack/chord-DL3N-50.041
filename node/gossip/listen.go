@@ -20,6 +20,7 @@ type node interface {
 	GetSuccessor() string
 	SetSuccessor(id string)
 	GetID() string
+	GetFingers() []string
 	NotifyHandler(possiblePredecessor string)
 }
 

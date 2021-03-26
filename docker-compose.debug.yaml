@@ -16,24 +16,24 @@ services:
       - PEER_HOSTNAME=
       - DEBUG=debug
   bravo:
-    container_name: nodeBravo
+    container_name: beta
     image: chord_node
     ports:
       - 9000
     environment:
-      - NODE_ID=nodeBravo
+      - NODE_ID=beta
       - PEER_HOSTNAME=alpha
       - DEBUG=debug
     restart: "no"
     depends_on:
       - alpha
   charlie:
-    container_name: nodeCharlie
+    container_name: charlie
     image: chord_node
     ports:
       - 9000
     environment:
-      - NODE_ID=nodeCharlie
+      - NODE_ID=charlie
       - PEER_HOSTNAME=alpha
       - DEBUG=debug
     depends_on:

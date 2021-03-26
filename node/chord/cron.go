@@ -46,10 +46,10 @@ func (n *Node) NotifyHandler(possiblePredecessor string) {
 
 func (n *Node) fixFingers() {
 	n.next += 1
-	if n.next >= len(n.fingers) {
+	if n.next >= cap(n.fingers) {
 		n.next = 0
 	}
-	x := int(math.Pow(2, float64(n.next-1)))
+	x := int(math.Pow(2, float64(n.next)))
 	n.fingers[n.next] = n.FindSuccessor(hash.Hash(n.ID) + x)
 }
 

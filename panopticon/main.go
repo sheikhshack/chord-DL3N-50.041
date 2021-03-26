@@ -39,6 +39,7 @@ func (t *Tower) Debug(ctx context.Context, in *pb.DebugMessage) (*pb.DebugRespon
 		nodeID:      in.GetFromID(),
 		predecessor: in.GetPredecessor(),
 		successor:   in.GetSuccessor(),
+		fingers:     in.GetFingers(),
 	}
 	t.data.Store(in.GetFromID(), data)
 
