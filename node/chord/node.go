@@ -65,12 +65,8 @@ func (n *Node) FindSuccessor(hashed int) string {
 	if hash.IsInRange(hashed, hash.Hash(n.ID), hash.Hash(n.successor)+1) {
 		return n.successor
 	} else {
-		//n_prime := n.closestPrecedingNode(hashed)
-		//if n_prime == n.ID {
-		//	return n.ID
-		//}
-		//successor, err := n.Gossiper.FindSuccessor(n.ID, n_prime, hashed)
-		successor, err := n.Gossiper.FindSuccessor(n.ID, n.successor, hashed)
+		nPrime := n.closestPrecedingNode(hashed)
+		successor, err := n.Gossiper.FindSuccessor(n.ID, nPrime, hashed)
 		if err != nil {
 			// TODO: handle this error
 			log.Fatalf("error in FindSuccessor: %+v\n", err)
@@ -81,8 +77,11 @@ func (n *Node) FindSuccessor(hashed int) string {
 
 //searches local table for highest predecessor of id
 func (n *Node) closestPrecedingNode(hashed int) string {
-	m := len(n.fingers)
+	m := cap(n.fingers) - 1
 	for i := m; i > 0; i-- {
+		if n.fingers[i] == "" {
+			continue
+		}
 		if hash.IsInRange(hash.Hash(n.fingers[i]), hash.Hash(n.ID), hashed) {
 			return n.fingers[i]
 		}
