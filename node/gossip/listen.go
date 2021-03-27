@@ -4,9 +4,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"google.golang.org/grpc"
 	"log"
 	"net"
+
+	"google.golang.org/grpc"
 
 	pb "github.com/sheikhshack/distributed-chaos-50.041/node/gossip/proto"
 	"github.com/sheikhshack/distributed-chaos-50.041/node/hash"
@@ -17,6 +18,7 @@ import (
 type node interface {
 	FindSuccessor(hashed int) string
 	GetPredecessor() string
+	GetSuccessorList() []string
 	GetSuccessor() string
 	SetSuccessor(id string)
 	GetID() string
@@ -103,6 +105,17 @@ func (g *Gossiper) Emit(ctx context.Context, in *pb.Request) (*pb.Response, erro
 			},
 		}
 
+	case pb.Command_GET_SUCCESSOR_LIST:
+		successorList := g.getSuccessorListHandler()
+		res = &pb.Response{
+			Command:     pb.Command_GET_SUCCESSOR_LIST,
+			RequesterID: in.GetRequesterID(),
+			TargetID:    in.GetTargetID(),
+			Body: &pb.Response_Body{
+				SuccessorList: successorList,
+			},
+		}
+
 	case pb.Command_NOTIFY:
 		possiblePredecessor := in.GetRequesterID()
 		g.notifyHandler(possiblePredecessor)
@@ -144,6 +157,10 @@ func (g *Gossiper) healthcheckHandler() bool {
 
 func (g *Gossiper) getPredecessorHandler() string {
 	return g.Node.GetPredecessor()
+}
+
+func (g *Gossiper) getSuccessorListHandler() []string {
+	return g.Node.GetSuccessorList()
 }
 
 // notifyHandler handles notify requests and returns if id is in between n.predecessor and n.

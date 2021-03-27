@@ -117,6 +117,11 @@ func (n *Node) GetPredecessor() string {
 	return n.predecessor
 }
 
+// Get Successor List
+func (n *Node) GetSuccessorList() []string {
+	return n.successorList
+}
+
 func (n *Node) GetSuccessor() string {
 	return n.successorList[0]
 }

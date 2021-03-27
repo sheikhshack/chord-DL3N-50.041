@@ -139,6 +139,22 @@ func (g *Gossiper) GetPredecessor(fromID, toID string) (string, error) {
 	return res.GetBody().ID, nil
 }
 
+// Get the successor list of the node
+func (g *Gossiper) GetSuccessorList(fromID, toID string) ([]string, error) {
+	req := &pb.Request{
+		Command:     pb.Command_GET_SUCCESSOR_LIST,
+		RequesterID: fromID,
+		TargetID:    toID,
+		Body:        &pb.Request_Body{},
+	}
+
+	res, err := g.emit(toID, req)
+	if err != nil {
+		return make([]string, 1), err
+	}
+	return res.GetBody().SuccessorList, nil
+}
+
 // called by notify
 //n things it might be the predecessor of id
 func (g *Gossiper) Notify(fromID, toID string) error {

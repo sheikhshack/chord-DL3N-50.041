@@ -8,7 +8,8 @@ enum Command {
   HEALTHCHECK = 2;
   GET_PREDECESSOR = 3;
   NOTIFY = 4;
-  LOOKUP= 5 ;
+  LOOKUP= 5;
+  GET_SUCCESSOR_LIST = 6;
 }
 
 
@@ -32,6 +33,7 @@ message Request {
 message Response {
   message Body {
     string ID = 1;
+    repeated string SuccessorList = 2;
     bool IsHealthy = 4;
   }
 
