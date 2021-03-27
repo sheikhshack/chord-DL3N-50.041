@@ -17,44 +17,35 @@ func (n *Node) stabilize() {
 	// log.Println("node successorList[0]: ", n.successorList[0])
 	// log.Println("Value of x: ", x)
 
-	// TODO: Timeout for stabilize
+	// TODO: Fix connection between node and new successor node when previous successor node is down
 	if err != nil {
-		log.Printf("error in stabilize: %+v\n", err)
-		return
+		log.Printf("error in stabilize[GetPredecessor]: %+v\n", err)
+
+		if len(n.successorList) <= 1 {
+			n.successorList = make([]string, SUCCESSOR_LIST_SIZE)
+		} else {
+			n.successorList = n.successorList[1:]
+		}
+
+		// return
 	}
 
 	if hash.IsInRange(hash.Hash(x), hash.Hash(n.ID), hash.Hash(n.successorList[0])) {
 		n.SetSuccessor(x)
-		// Get succ list of new successor
-		succSuccList, err := n.Gossiper.GetSuccessorList(n.ID, x)
-
-		// TODO: Timeout for stabilize
-		if err != nil {
-			log.Printf("error in stabilize: %+v\n", err)
-
-			return
-		}
-
-		tempSuccList := n.successorList[:1]
-		tempSuccList = append(tempSuccList, succSuccList[:cap(n.successorList)-1]...)
-
-		n.successorList = tempSuccList
-
-	} else {
-		// Get succ list of successor
-		succSuccList, err := n.Gossiper.GetSuccessorList(n.ID, n.successorList[0])
-
-		// TODO: Timeout for stabilize
-		if err != nil {
-			log.Printf("error in stabilize: %+v\n", err)
-			return
-		}
-
-		tempSuccList := n.successorList[:1]
-		tempSuccList = append(tempSuccList, succSuccList[:cap(n.successorList)-1]...)
-
-		n.successorList = tempSuccList
 	}
+
+	// Get succ list of new successor
+	succSuccList, err := n.Gossiper.GetSuccessorList(n.ID, n.successorList[0])
+
+	if err != nil {
+		log.Printf("error in stabilize[GetSuccessorList]: %+v\n", err)
+		return
+	}
+
+	tempSuccList := n.successorList[:1]
+	tempSuccList = append(tempSuccList, succSuccList[:len(succSuccList)-1]...)
+
+	n.successorList = tempSuccList
 
 	log.Println("Value of successorList: ", n.successorList)
 
