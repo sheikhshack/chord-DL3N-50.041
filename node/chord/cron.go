@@ -31,11 +31,12 @@ func (n *Node) stabilize() {
 		// TODO: Timeout for stabilize
 		if err != nil {
 			log.Printf("error in stabilize: %+v\n", err)
+
 			return
 		}
 
 		tempSuccList := n.successorList[:1]
-		tempSuccList = append(tempSuccList, succSuccList[:len(succSuccList)-1]...)
+		tempSuccList = append(tempSuccList, succSuccList[:cap(n.successorList)-1]...)
 
 		n.successorList = tempSuccList
 
@@ -50,7 +51,7 @@ func (n *Node) stabilize() {
 		}
 
 		tempSuccList := n.successorList[:1]
-		tempSuccList = append(tempSuccList, succSuccList[:len(succSuccList)-1]...)
+		tempSuccList = append(tempSuccList, succSuccList[:cap(n.successorList)-1]...)
 
 		n.successorList = tempSuccList
 	}

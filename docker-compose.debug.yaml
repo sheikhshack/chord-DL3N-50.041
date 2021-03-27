@@ -37,7 +37,16 @@ services:
       - PEER_HOSTNAME=alpha
       - DEBUG=debug
     depends_on:
-      - alpha
-    deploy:
-      mode: replicated
-      replicas: 1
+      - bravo
+  delta:
+    container_name: delta
+    image: chord_node
+    ports:
+      - 9000
+    environment:
+      - NODE_ID=delta
+      - PEER_HOSTNAME=alpha
+      - DEBUG=debug
+    depends_on:
+      - charlie
+
