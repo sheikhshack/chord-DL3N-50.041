@@ -9,12 +9,14 @@ import (
 	"github.com/sheikhshack/distributed-chaos-50.041/node/hash"
 )
 
+const SUCCESSOR_LIST_SIZE = 2
+
 type Node struct {
-	ID          string // maybe IP address
-	fingers     []string
-	predecessor string
-	successor   string
-	next        int
+	ID            string // maybe IP address
+	fingers       []string
+	predecessor   string
+	next          int
+	successorList []string
 
 	Gossiper *gossip.Gossiper
 }
@@ -22,7 +24,7 @@ type Node struct {
 // New creates and returns a new Node
 func New(id string) *Node {
 	// 16 is finger table size
-	n := &Node{ID: id, next: 0, fingers: make([]string, 16)}
+	n := &Node{ID: id, next: 0, fingers: make([]string, 16), successorList: make([]string, SUCCESSOR_LIST_SIZE)}
 
 	if os.Getenv("DEBUG") == "debug" {
 		n.Gossiper = &gossip.Gossiper{
@@ -62,8 +64,8 @@ func (n *Node) FindSuccessor(hashed int) string {
 	//if n.successor == n.ID {
 	//	return n.ID
 	//}
-	if hash.IsInRange(hashed, hash.Hash(n.ID), hash.Hash(n.successor)+1) {
-		return n.successor
+	if hash.IsInRange(hashed, hash.Hash(n.ID), hash.Hash(n.successorList[0])+1) {
+		return n.successorList[0]
 	} else {
 		nPrime := n.closestPrecedingNode(hashed)
 		successor, err := n.Gossiper.FindSuccessor(n.ID, nPrime, hashed)
@@ -92,7 +94,7 @@ func (n *Node) closestPrecedingNode(hashed int) string {
 func (n *Node) cron() {
 	time.Sleep(time.Millisecond * 10000)
 	for {
-		log.Println(n.ID, "successor is", n.successor, ", predecessor is", n.predecessor)
+		log.Println(n.ID, "successor is", n.successorList[0], ", predecessor is", n.predecessor)
 		n.stabilize()
 		n.fixFingers()
 		time.Sleep(time.Millisecond * 1000)
@@ -101,7 +103,7 @@ func (n *Node) cron() {
 
 //change successor
 func (n *Node) SetSuccessor(id string) {
-	n.successor = id
+	n.successorList[0] = id
 }
 
 //change predecessor
@@ -116,7 +118,7 @@ func (n *Node) GetPredecessor() string {
 }
 
 func (n *Node) GetSuccessor() string {
-	return n.successor
+	return n.successorList[0]
 }
 
 func (n *Node) GetID() string {

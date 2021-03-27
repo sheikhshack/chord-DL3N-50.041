@@ -9,18 +9,18 @@ import (
 
 func (n *Node) stabilize() {
 	//log.Println("Stabilizing", n.ID)
-	if n.successor == n.ID {
+	if n.successorList[0] == n.ID {
 		return
 	}
-	x, err := n.Gossiper.GetPredecessor(n.ID, n.successor)
+	x, err := n.Gossiper.GetPredecessor(n.ID, n.successorList[0])
 	if err != nil {
 		log.Printf("error in stabilize: %+v\n", err)
 		return
 	}
-	if hash.IsInRange(hash.Hash(x), hash.Hash(n.ID), hash.Hash(n.successor)) {
+	if hash.IsInRange(hash.Hash(x), hash.Hash(n.ID), hash.Hash(n.successorList[0])) {
 		n.SetSuccessor(x)
 	}
-	n.notify(n.successor)
+	n.notify(n.successorList[0])
 }
 
 //implemented differently from pseudocode, n thinks it might be the predecessor of id
