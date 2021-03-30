@@ -3,6 +3,8 @@ package main
 import (
 	"fmt"
 	"os"
+	"os/signal"
+	"syscall"
 
 	"github.com/sheikhshack/distributed-chaos-50.041/dl3n"
 )
@@ -16,7 +18,7 @@ func main() {
 
 	cmd := os.Args[1]
 	path := os.Args[2]
-	// addr := os.Args[3]
+	addr := os.Args[3]
 
 	if cmd != "seed" && cmd != "get" {
 		fmt.Println(helpMessage)
@@ -33,9 +35,6 @@ func main() {
 	}
 
 	if cmd == "seed" {
-		// d, _ := dl3n.NewDL3NFromFile(path, 64)
-		// d.WriteMetaFile(path + ".dl3n")
-
 		d, err := dl3n.NewDL3NFromFileOneChunk(path)
 		if err != nil {
 			fmt.Print(err)
@@ -43,15 +42,16 @@ func main() {
 
 		d.WriteMetaFile(path + ".dl3n")
 
-		// s := dl3n.DL3NNodeServer{
-		// 	DL3N: *d,
-		// 	Addr: addr,
-		// }
+		ds := dl3n.NewDL3NNode(d, nil)
+		ds.StartSeed(addr)
 
-		// interrupt := make(chan os.Signal, 1)
-		// signal.Notify(interrupt, os.Interrupt, syscall.SIGTERM)
+		// listen for signals
+		sigs := make(chan os.Signal, 1)
+		signal.Notify(sigs, os.Interrupt, syscall.SIGTERM)
 
-		// s.Seed(interrupt)
+		// wait for sigint or sigterm
+		<-sigs
+		ds.StopSeed()
 	}
 
 }
