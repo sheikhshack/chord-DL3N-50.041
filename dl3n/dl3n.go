@@ -98,6 +98,23 @@ func NewDL3NFromFile(path string, chunkSize int64) (*DL3N, error) {
 	return &dl3n, nil
 }
 
+// Create a new DL3N struct from filepath
+// With one chunk
+func NewDL3NFromFileOneChunk(path string) (*DL3N, error) {
+	// open the file once to get the infohash and fileSize
+	f, err := os.Open(path)
+	if err != nil {
+		return nil, err
+	}
+	fileInfo, _ := f.Stat()
+	fileSize := fileInfo.Size()
+	f.Close()
+
+	dl3n, err := NewDL3NFromFile(path, fileSize+1)
+
+	return dl3n, err
+}
+
 // WriteMetaFile writes a .dl3n file to filepath for that particular DL3N
 func (d *DL3N) WriteMetaFile(path string) error {
 	d.Mutex.Lock()
