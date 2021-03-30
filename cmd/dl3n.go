@@ -24,14 +24,17 @@ func main() {
 		fmt.Println(helpMessage)
 	}
 
-	if cmd == "create" {
-		d, _ := dl3n.NewDL3NFromFile(path, 64)
-		d.WriteMetaFile(path + ".dl3n")
-	}
-
 	if cmd == "get" {
 		d, _ := dl3n.NewDL3NFromMeta(path)
 		fmt.Printf("%+v\n", d)
+
+		md := dl3n.NewMockNodeDiscovery(addr)
+
+		ds := dl3n.NewDL3NNode(d, md)
+		err := ds.Get()
+		if err != nil {
+			fmt.Print(err)
+		}
 	}
 
 	if cmd == "seed" {

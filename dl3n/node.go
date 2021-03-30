@@ -3,25 +3,27 @@ package dl3n
 import (
 	"context"
 	"fmt"
+	"io"
 	"net/http"
+	"os"
 )
 
 // Represents an application node
 type DL3NNode struct {
 	DL3N          *DL3N
-	PeerDiscovery *PeerDiscovery
+	NodeDiscovery NodeDiscovery
 	server        *http.Server
 }
 
-type PeerDiscovery interface {
-	FindPeer(string)
+type NodeDiscovery interface {
+	FindSeederAddr(string) string
 }
 
 // NewDL3NNode
-func NewDL3NNode(d *DL3N, p *PeerDiscovery) *DL3NNode {
+func NewDL3NNode(d *DL3N, s NodeDiscovery) *DL3NNode {
 	dn := &DL3NNode{
 		DL3N:          d,
-		PeerDiscovery: p,
+		NodeDiscovery: s,
 	}
 
 	return dn
@@ -47,4 +49,27 @@ func (d *DL3NNode) StartSeed(addr string) {
 func (d *DL3NNode) StopSeed() {
 	fmt.Printf("Stopping Seed on %s ... \n", d.server.Addr)
 	d.server.Shutdown(context.Background())
+}
+
+func (d *DL3NNode) Get() error {
+	nd := d.NodeDiscovery
+	addr := nd.FindSeederAddr(d.DL3N.Hash)
+
+	// Get the data
+	resp, err := http.Get(addr)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	// Create the file
+	out, err := os.Create(d.DL3N.Name)
+	if err != nil {
+		return err
+	}
+	defer out.Close()
+
+	// Write the body to file
+	_, err = io.Copy(out, resp.Body)
+	return err
 }

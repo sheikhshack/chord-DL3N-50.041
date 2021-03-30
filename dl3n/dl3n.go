@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"math"
 	"os"
+	"path/filepath"
 	"strconv"
 	"sync"
 )
@@ -17,6 +18,7 @@ import (
 // struct should be marshallable to JSON (aka .dl3n file)
 type DL3N struct {
 	Mutex     *sync.Mutex `json:"-"`
+	Name      string
 	Hash      string
 	Size      int64
 	ChunkSize int64
@@ -40,6 +42,7 @@ func NewDL3NFromFile(path string, chunkSize int64) (*DL3N, error) {
 	if err != nil {
 		return nil, err
 	}
+	filename := filepath.Base(path)
 	fileInfo, _ := f.Stat()
 	fileSize := fileInfo.Size()
 
@@ -63,6 +66,7 @@ func NewDL3NFromFile(path string, chunkSize int64) (*DL3N, error) {
 
 	dl3n := DL3N{
 		Mutex:     &sync.Mutex{},
+		Name:      filename,
 		Hash:      infohash,
 		Size:      fileSize,
 		ChunkSize: chunkSize,
@@ -120,7 +124,8 @@ func (d *DL3N) WriteMetaFile(path string) error {
 	d.Mutex.Lock()
 	defer d.Mutex.Unlock()
 
-	_, err := os.Create(path)
+	f, err := os.Create(path)
+	defer f.Close()
 	if err != nil {
 		return err
 	}
