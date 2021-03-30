@@ -35,7 +35,6 @@ func main() {
 	}
 
 	if cmd == "seed" {
-<<<<<<< HEAD
 		d, err := dl3n.NewDL3NFromFileOneChunk(path)
 		if err != nil {
 			fmt.Print(err)
@@ -53,20 +52,6 @@ func main() {
 		// wait for sigint or sigterm
 		<-sigs
 		ds.StopSeed()
-=======
-		d, _ := dl3n.NewDL3NFromFile(path, 64)
-		d.WriteMetaFile(path + ".dl3n")
-
-		s := dl3n.DL3NNodeServer{
-			DL3N: *d,
-			Addr: addr,
-		}
-
-		interrupt := make(chan os.Signal, 1)
-		signal.Notify(interrupt, os.Interrupt, syscall.SIGTERM)
-
-		s.Seed(interrupt)
->>>>>>> 1f0bc6efd9b4af0562562009422c7a1fca38ed8a
 	}
 
 }
