@@ -4,37 +4,79 @@ import (
 	"context"
 	"fmt"
 	gossip "github.com/sheikhshack/distributed-chaos-50.041/node/gossip/proto"
-	"github.com/sheikhshack/distributed-chaos-50.041/node/hash"
 	"google.golang.org/grpc"
 	"log"
 	"os"
-	"strings"
 	"time"
 )
 
-func lookup(nodeAddr, key string) {
-	//log.Printf("Attempting to lookup string %v", key)
-	var conn *grpc.ClientConn
-	connectionParams := fmt.Sprintf("%s:%v", nodeAddr, 9000)
+//func lookup(nodeAddr, key string) {
+//	//log.Printf("Attempting to lookup string %v", key)
+//	var conn *grpc.ClientConn
+//	connectionParams := fmt.Sprintf("%s:%v", nodeAddr, 9000)
+//
+//	conn, err := grpc.Dial(connectionParams, grpc.WithInsecure())
+//	if err != nil {
+//		log.Fatalf("Cannot connect to: %s", err)
+//
+//	}
+//	defer conn.Close()
+//
+//	checkRequest := &gossip.CheckRequest{Key: key}
+//	client := gossip.NewInternalListenerClient(conn)
+//	resp, err := client.CheckIP(context.Background(), checkRequest)
+//	if err != nil {
+//		log.Printf("Error sending message: %v", err)
+//	}
+//	log.Printf("key %v (hash of %v) found in node %v\n", key, hash.Hash(key), resp.IP)
+//	upload(resp.IP, key, fmt.Sprintf("%.23s | %s\ndistributed systems is the best :)\n", time.Now().UTC(), key))
+//}
 
-	conn, err := grpc.Dial(connectionParams, grpc.WithInsecure())
-	if err != nil {
-		log.Fatalf("Cannot connect to: %s", err)
+//func upload(nodeAddr, key, value string) {
+//	//log.Printf("Attempting to lookup string %v", key)
+//	var conn *grpc.ClientConn
+//	connectionParams := fmt.Sprintf("%s:%v", nodeAddr, 9000)
+//
+//	conn, err := grpc.Dial(connectionParams, grpc.WithInsecure())
+//	if err != nil {
+//		log.Fatalf("Cannot connect to: %s", err)
+//
+//	}
+//	defer conn.Close()
+//
+//	req := &gossip.UploadRequest{Key: key, Value: value}
+//	client := gossip.NewInternalListenerClient(conn)
+//	_, err = client.Upload(context.Background(), req)
+//	if err != nil {
+//		log.Printf("Error sending message: %v", err)
+//	}
+//	//log.Printf("key %v uploaded to node %v\n", key, nodeAddr)
+//}
 
-	}
-	defer conn.Close()
+func writeExternalFile(nodeAddr, fileName, containerIP string) {
+		//log.Printf("Attempting to lookup string %v", key)
+		var conn *grpc.ClientConn
+		connectionParams := fmt.Sprintf("%s:%v", nodeAddr, 9000)
 
-	checkRequest := &gossip.CheckRequest{Key: key}
-	client := gossip.NewInternalListenerClient(conn)
-	resp, err := client.CheckIP(context.Background(), checkRequest)
-	if err != nil {
-		log.Printf("Error sending message: %v", err)
-	}
-	log.Printf("key %v (hash of %v) found in node %v\n", key, hash.Hash(key), resp.IP)
-	upload(resp.IP, key, fmt.Sprintf("%.23s | %s\ndistributed systems is the best :)\n", time.Now().UTC(), key))
+		conn, err := grpc.Dial(connectionParams, grpc.WithInsecure())
+		if err != nil {
+			log.Fatalf("Cannot connect to: %s", err)
+
+		}
+		defer conn.Close()
+		client := gossip.NewInternalListenerClient(conn)
+		res, err := client.StoreKeyHash(context.Background(), &gossip.DLUploadRequest{
+			Filename:    fileName,
+			ContainerIP: containerIP,
+		})
+		if err != nil {
+			log.Fatalf("-- MIKE external fail %s", err)
+		}
+
+		log.Printf("\nSuccess upload info to the following chord node: %+v\n", res)
 }
 
-func upload(nodeAddr, key, value string) {
+func resolveFile(nodeAddr, fileName string) {
 	//log.Printf("Attempting to lookup string %v", key)
 	var conn *grpc.ClientConn
 	connectionParams := fmt.Sprintf("%s:%v", nodeAddr, 9000)
@@ -45,30 +87,36 @@ func upload(nodeAddr, key, value string) {
 
 	}
 	defer conn.Close()
-
-	req := &gossip.UploadRequest{Key: key, Value: value}
 	client := gossip.NewInternalListenerClient(conn)
-	_, err = client.Upload(context.Background(), req)
+	res, err := client.GetFileLocation(context.Background(), &gossip.DLDownloadRequest{
+		Filename:    fileName,
+	})
 	if err != nil {
-		log.Printf("Error sending message: %v", err)
+		log.Fatalf("-- MIKE external fail %s", err)
 	}
-	//log.Printf("key %v uploaded to node %v\n", key, nodeAddr)
+
+	log.Printf("\nSuccess, received the following containerINFO: %+v\n", res)
 }
 
 func main() {
 	fmt.Printf("%.23s\n", time.Now().UTC())
-	contactNode := os.Getenv("APP_NODE")
-	searchKeys := os.Getenv("SEARCH_KEY")
+	attachedNode := os.Getenv("APP_NODE")
+	fileName := os.Getenv("FILE_NAME")
+	containerIP := os.Getenv("CONTAINER_IP")
+
+
 	//keys := [4]string{"AAA", "BBB", "XXX", "UYEWTFBBQ"}
 
 	//for i := 0; i < 999; i++ {
 	//	fmt.Println("Trying a new key...")
 	//	lookup(contactNode, keys[i%4])
 	//	time.Sleep(2 * time.Second)
-	//}
-	keys := strings.Fields(searchKeys)
-	for _, key := range keys {
-		lookup(contactNode, key)
-	}
+	fmt.Println("Sleeping the night away")
+	time.Sleep(5 * time.Second)
+	writeExternalFile(attachedNode, fileName, containerIP)
+	fmt.Println("Sleep again, retrieving back the same file in 5s")
+	time.Sleep(5 * time.Second)
+	resolveFile(attachedNode, fileName)
+
 
 }

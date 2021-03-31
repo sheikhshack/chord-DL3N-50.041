@@ -51,17 +51,28 @@ message DLUploadRequest {
   string containerIP = 2;
 }
 
+message DLDownloadRequest {
+  string filename = 1;
+}
+
 
 message DLResponse {
   string chordIP = 1;
   DlowenStatus status = 2;
 }
 
-
-// can merge
-message DownloadRequest {
-  string key = 1;
+message DLDownloadResponse {
+  ContainerInfo container = 1;
+  string chordIP = 2;
 }
+
+message ContainerInfo {
+  string containerIP = 1;
+
+}
+
+
+
 
 message FetchChordRequest {
   string key = 1;
@@ -71,10 +82,6 @@ message ModResponse {
   string IP = 1;
 }
 
-
-message DownloadResponse {
-  string value = 1;
-}
 
 message DebugMessage {
   string fromID = 1;
@@ -91,15 +98,15 @@ service InternalListener {
   // core service
   rpc Emit(Request) returns (Response) {}
   // chord file management services (internal)
+  rpc ReadFile(FetchChordRequest) returns (ContainerInfo) {}
   rpc WriteFile(ModRequest) returns (ModResponse) {}
   rpc DeleteFile(FetchChordRequest) returns (ModResponse) {}
   rpc FetchChordIp(FetchChordRequest) returns (ModResponse) {}
   // defunct
-  rpc Download(DownloadRequest) returns (DownloadResponse) {}
 
-  // dlowen communicaton protocol (external)
+  // D3L bridge protocol (external)
   rpc StoreKeyHash(DLUploadRequest) returns (DLResponse) {}
-//  rpc CheckIP(CheckRequest) returns (CheckResponse) {}
-//  rpc WriteIP(UploadRequest) returns (UploadRequest) {}
+  rpc GetFileLocation(DLDownloadRequest) returns (DLDownloadResponse) {}
+
   rpc Debug(DebugMessage) returns (DebugResponse) {}
 }

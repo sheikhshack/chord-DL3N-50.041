@@ -6,8 +6,9 @@ services:
     container_name: mike
     image: mike_node
     environment:
-      - APP_NODE=alpha
-      - SEARCH_KEY=alpha nodeBravo nodeCharlie wordhere gimmewords helloworld
+      - APP_NODE=bravo
+      - FILE_NAME=forgotten_sailor.rar
+      - CONTAINER_IP=godbless_DL3N_DNS
     depends_on:
       - alpha
       - bravo
