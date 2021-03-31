@@ -126,3 +126,8 @@ func (n *Node) GetID() string {
 func (n *Node) GetFingers() []string {
 	return n.fingers
 }
+
+// exposed version is essentially the same crap
+func (n *Node) WriteFileToNode (nodeAddr, fileName, ip string) {
+
+}

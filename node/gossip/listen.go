@@ -13,7 +13,7 @@ import (
 	"github.com/sheikhshack/distributed-chaos-50.041/node/store"
 )
 
-// methods avaiable to the gossiper via the node package
+// methods available to the gossiper via the node package
 type node interface {
 	FindSuccessor(hashed int) string
 	GetPredecessor() string
@@ -22,6 +22,7 @@ type node interface {
 	GetID() string
 	GetFingers() []string
 	NotifyHandler(possiblePredecessor string)
+	// for external API
 }
 
 type Gossiper struct {
@@ -151,33 +152,91 @@ func (g *Gossiper) notifyHandler(possiblePredecessor string) {
 	g.Node.NotifyHandler(possiblePredecessor)
 }
 
-func (g *Gossiper) Upload(ctx context.Context, uploadRequest *pb.UploadRequest) (*pb.UploadResponse, error) {
-	log.Printf("Upload Method triggered \n")
-	key := uploadRequest.Key
-	val := uploadRequest.Value
+//// TODO: Move to legacy.
+//// Upload takes in a key and the value and stores it into a file with the corresponding name
+//func (g *Gossiper) Upload(ctx context.Context, uploadRequest *pb.UploadRequest) (*pb.UploadResponse, error) {
+//	log.Printf("Upload Method triggered \n")
+//	key := uploadRequest.Key
+//	val := uploadRequest.Value
+//
+//	fileByte := []byte(val)
+//	output := store.New(key, fileByte)
+//
+//	return &pb.UploadResponse{IP: g.Node.GetID()}, output
+//}
+//
+//// TODO: Move to legacy
+//// CheckIP takes in the key and returns the IP addr
+//func (g *Gossiper) CheckIP(ctx context.Context, lookupRequest *pb.CheckRequest) (*pb.CheckResponse, error) {
+//	log.Printf("Lookup Method \n")
+//	key := lookupRequest.GetKey()
+//	ip := g.Node.FindSuccessor(hash.Hash(key))
+//	return &pb.CheckResponse{IP: ip}, nil
+//}
+//
+//// TODO: Move to legacy - DEFUNCT
+//func (g *Gossiper) Download(ctx context.Context, downloadRequest *pb.DownloadRequest) (*pb.DownloadResponse, error) {
+//	log.Printf("Download Method triggered \n")
+//	key := downloadRequest.Key
+//
+//	fileByte, status := store.Get(key)
+//	if status == nil {
+//		v := string(fileByte)
+//		return &pb.DownloadResponse{Value: v}, nil
+//	} else {
+//		return nil, status
+//	}
+//}
+
+////////// Internal CHORD file management
+func (g *Gossiper) FetchChordIp (ctx context.Context, fetchRequest *pb.FetchChordRequest) (*pb.ModResponse, error) {
+	log.Printf("Lookup Method \n")
+	key := fetchRequest.GetKey()
+	ip := g.Node.FindSuccessor(hash.Hash(key))
+	return &pb.ModResponse{IP: ip}, nil
+}
+
+func (g *Gossiper) WriteFile(ctx context.Context, writeRequest *pb.ModRequest) (*pb.ModResponse, error) {
+	key := writeRequest.Key
+	val := writeRequest.Value
+	log.Printf("--- FS: Triggering File Write to Chord Node for key [%v] with content %v \n", key, val)
 
 	fileByte := []byte(val)
 	output := store.New(key, fileByte)
 
-	return &pb.UploadResponse{IP: g.Node.GetID()}, output
+	return &pb.ModResponse{IP: g.Node.GetID()}, output
 }
 
-func (g *Gossiper) CheckIP(ctx context.Context, lookupRequest *pb.CheckRequest) (*pb.CheckResponse, error) {
-	log.Printf("Lookup Method \n")
-	key := lookupRequest.GetKey()
-	ip := g.Node.FindSuccessor(hash.Hash(key))
-	return &pb.CheckResponse{IP: ip}, nil
+func (g *Gossiper) DeleteFile (ctx context.Context, fetchRequest *pb.FetchChordRequest) (*pb.ModResponse, error) {
+	log.Printf("Upload Method triggered \n")
+	key := fetchRequest.GetKey()
+	status := store.Delete(key)
+	log.Printf("--- FS: Triggering File Delete in Node for key [%v] \n", key)
+
+	return &pb.ModResponse{IP: g.Node.GetID()}, status
 }
 
-func (g *Gossiper) Download(ctx context.Context, downloadRequest *pb.DownloadRequest) (*pb.DownloadResponse, error) {
-	log.Printf("Download Method triggered \n")
-	key := downloadRequest.Key
+////////// EXPOSED TO D3LOWEN
+func (g *Gossiper) StoreKeyHash (ctx context.Context, dlUploadRequest *pb.DLUploadRequest) (*pb.DLResponse, error) {
+	fileName := dlUploadRequest.Filename
+	containerIP := dlUploadRequest.ContainerIP
+	log.Printf("--- DLCHORD: Triggering storage of file [%v] from [%v]\n", fileName, containerIP)
 
-	fileByte, status := store.Get(key)
-	if status == nil {
-		v := string(fileByte)
-		return &pb.DownloadResponse{Value: v}, nil
-	} else {
-		return nil, status
+	correctChordIP := g.Node.FindSuccessor(hash.Hash(fileName))
+	_, err := g.writeFileToNode(correctChordIP, fileName, containerIP)
+	if err != nil{
+		log.Fatalf("error in running Store Key Hash (ext) : %+v\n", err)
 	}
+	status := pb.DlowenStatus_SAME_NODE
+	if correctChordIP != g.Node.GetID(){
+		status = pb.DlowenStatus_REDIRECTED_NODE
+	}
+
+	return &pb.DLResponse{
+		ChordIP: correctChordIP,
+		Status:  status,
+	}, nil
+
 }
+
+

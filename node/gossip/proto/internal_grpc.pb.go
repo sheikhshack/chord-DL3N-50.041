@@ -18,10 +18,18 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type InternalListenerClient interface {
+	// core service
 	Emit(ctx context.Context, in *Request, opts ...grpc.CallOption) (*Response, error)
-	Upload(ctx context.Context, in *UploadRequest, opts ...grpc.CallOption) (*UploadResponse, error)
+	// chord file management services (internal)
+	WriteFile(ctx context.Context, in *ModRequest, opts ...grpc.CallOption) (*ModResponse, error)
+	DeleteFile(ctx context.Context, in *FetchChordRequest, opts ...grpc.CallOption) (*ModResponse, error)
+	FetchChordIp(ctx context.Context, in *FetchChordRequest, opts ...grpc.CallOption) (*ModResponse, error)
+	// defunct
 	Download(ctx context.Context, in *DownloadRequest, opts ...grpc.CallOption) (*DownloadResponse, error)
-	CheckIP(ctx context.Context, in *CheckRequest, opts ...grpc.CallOption) (*CheckResponse, error)
+	// dlowen communicaton protocol (external)
+	StoreKeyHash(ctx context.Context, in *DLUploadRequest, opts ...grpc.CallOption) (*DLResponse, error)
+	//  rpc CheckIP(CheckRequest) returns (CheckResponse) {}
+	//  rpc WriteIP(UploadRequest) returns (UploadRequest) {}
 	Debug(ctx context.Context, in *DebugMessage, opts ...grpc.CallOption) (*DebugResponse, error)
 }
 
@@ -42,9 +50,27 @@ func (c *internalListenerClient) Emit(ctx context.Context, in *Request, opts ...
 	return out, nil
 }
 
-func (c *internalListenerClient) Upload(ctx context.Context, in *UploadRequest, opts ...grpc.CallOption) (*UploadResponse, error) {
-	out := new(UploadResponse)
-	err := c.cc.Invoke(ctx, "/internal.InternalListener/Upload", in, out, opts...)
+func (c *internalListenerClient) WriteFile(ctx context.Context, in *ModRequest, opts ...grpc.CallOption) (*ModResponse, error) {
+	out := new(ModResponse)
+	err := c.cc.Invoke(ctx, "/internal.InternalListener/WriteFile", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *internalListenerClient) DeleteFile(ctx context.Context, in *FetchChordRequest, opts ...grpc.CallOption) (*ModResponse, error) {
+	out := new(ModResponse)
+	err := c.cc.Invoke(ctx, "/internal.InternalListener/DeleteFile", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *internalListenerClient) FetchChordIp(ctx context.Context, in *FetchChordRequest, opts ...grpc.CallOption) (*ModResponse, error) {
+	out := new(ModResponse)
+	err := c.cc.Invoke(ctx, "/internal.InternalListener/FetchChordIp", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -60,9 +86,9 @@ func (c *internalListenerClient) Download(ctx context.Context, in *DownloadReque
 	return out, nil
 }
 
-func (c *internalListenerClient) CheckIP(ctx context.Context, in *CheckRequest, opts ...grpc.CallOption) (*CheckResponse, error) {
-	out := new(CheckResponse)
-	err := c.cc.Invoke(ctx, "/internal.InternalListener/CheckIP", in, out, opts...)
+func (c *internalListenerClient) StoreKeyHash(ctx context.Context, in *DLUploadRequest, opts ...grpc.CallOption) (*DLResponse, error) {
+	out := new(DLResponse)
+	err := c.cc.Invoke(ctx, "/internal.InternalListener/StoreKeyHash", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -82,10 +108,18 @@ func (c *internalListenerClient) Debug(ctx context.Context, in *DebugMessage, op
 // All implementations must embed UnimplementedInternalListenerServer
 // for forward compatibility
 type InternalListenerServer interface {
+	// core service
 	Emit(context.Context, *Request) (*Response, error)
-	Upload(context.Context, *UploadRequest) (*UploadResponse, error)
+	// chord file management services (internal)
+	WriteFile(context.Context, *ModRequest) (*ModResponse, error)
+	DeleteFile(context.Context, *FetchChordRequest) (*ModResponse, error)
+	FetchChordIp(context.Context, *FetchChordRequest) (*ModResponse, error)
+	// defunct
 	Download(context.Context, *DownloadRequest) (*DownloadResponse, error)
-	CheckIP(context.Context, *CheckRequest) (*CheckResponse, error)
+	// dlowen communicaton protocol (external)
+	StoreKeyHash(context.Context, *DLUploadRequest) (*DLResponse, error)
+	//  rpc CheckIP(CheckRequest) returns (CheckResponse) {}
+	//  rpc WriteIP(UploadRequest) returns (UploadRequest) {}
 	Debug(context.Context, *DebugMessage) (*DebugResponse, error)
 	mustEmbedUnimplementedInternalListenerServer()
 }
@@ -97,14 +131,20 @@ type UnimplementedInternalListenerServer struct {
 func (UnimplementedInternalListenerServer) Emit(context.Context, *Request) (*Response, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Emit not implemented")
 }
-func (UnimplementedInternalListenerServer) Upload(context.Context, *UploadRequest) (*UploadResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Upload not implemented")
+func (UnimplementedInternalListenerServer) WriteFile(context.Context, *ModRequest) (*ModResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method WriteFile not implemented")
+}
+func (UnimplementedInternalListenerServer) DeleteFile(context.Context, *FetchChordRequest) (*ModResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteFile not implemented")
+}
+func (UnimplementedInternalListenerServer) FetchChordIp(context.Context, *FetchChordRequest) (*ModResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method FetchChordIp not implemented")
 }
 func (UnimplementedInternalListenerServer) Download(context.Context, *DownloadRequest) (*DownloadResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Download not implemented")
 }
-func (UnimplementedInternalListenerServer) CheckIP(context.Context, *CheckRequest) (*CheckResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method CheckIP not implemented")
+func (UnimplementedInternalListenerServer) StoreKeyHash(context.Context, *DLUploadRequest) (*DLResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method StoreKeyHash not implemented")
 }
 func (UnimplementedInternalListenerServer) Debug(context.Context, *DebugMessage) (*DebugResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Debug not implemented")
@@ -140,20 +180,56 @@ func _InternalListener_Emit_Handler(srv interface{}, ctx context.Context, dec fu
 	return interceptor(ctx, in, info, handler)
 }
 
-func _InternalListener_Upload_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(UploadRequest)
+func _InternalListener_WriteFile_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ModRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(InternalListenerServer).Upload(ctx, in)
+		return srv.(InternalListenerServer).WriteFile(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/internal.InternalListener/Upload",
+		FullMethod: "/internal.InternalListener/WriteFile",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(InternalListenerServer).Upload(ctx, req.(*UploadRequest))
+		return srv.(InternalListenerServer).WriteFile(ctx, req.(*ModRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _InternalListener_DeleteFile_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(FetchChordRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(InternalListenerServer).DeleteFile(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/internal.InternalListener/DeleteFile",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(InternalListenerServer).DeleteFile(ctx, req.(*FetchChordRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _InternalListener_FetchChordIp_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(FetchChordRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(InternalListenerServer).FetchChordIp(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/internal.InternalListener/FetchChordIp",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(InternalListenerServer).FetchChordIp(ctx, req.(*FetchChordRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -176,20 +252,20 @@ func _InternalListener_Download_Handler(srv interface{}, ctx context.Context, de
 	return interceptor(ctx, in, info, handler)
 }
 
-func _InternalListener_CheckIP_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(CheckRequest)
+func _InternalListener_StoreKeyHash_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DLUploadRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(InternalListenerServer).CheckIP(ctx, in)
+		return srv.(InternalListenerServer).StoreKeyHash(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/internal.InternalListener/CheckIP",
+		FullMethod: "/internal.InternalListener/StoreKeyHash",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(InternalListenerServer).CheckIP(ctx, req.(*CheckRequest))
+		return srv.(InternalListenerServer).StoreKeyHash(ctx, req.(*DLUploadRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -224,16 +300,24 @@ var InternalListener_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _InternalListener_Emit_Handler,
 		},
 		{
-			MethodName: "Upload",
-			Handler:    _InternalListener_Upload_Handler,
+			MethodName: "WriteFile",
+			Handler:    _InternalListener_WriteFile_Handler,
+		},
+		{
+			MethodName: "DeleteFile",
+			Handler:    _InternalListener_DeleteFile_Handler,
+		},
+		{
+			MethodName: "FetchChordIp",
+			Handler:    _InternalListener_FetchChordIp_Handler,
 		},
 		{
 			MethodName: "Download",
 			Handler:    _InternalListener_Download_Handler,
 		},
 		{
-			MethodName: "CheckIP",
-			Handler:    _InternalListener_CheckIP_Handler,
+			MethodName: "StoreKeyHash",
+			Handler:    _InternalListener_StoreKeyHash_Handler,
 		},
 		{
 			MethodName: "Debug",

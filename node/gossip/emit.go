@@ -67,10 +67,9 @@ func (g *Gossiper) emit(nodeAddr string, request *pb.Request) (*pb.Response, err
 		log.Printf("Error sending message: %v", err)
 		return nil, err
 	}
-	//log.Printf("Receiving Response: %+v", response)
-
 	return response, nil
 }
+
 
 // called by FindSuccessor
 func (g *Gossiper) FindSuccessor(fromID, toID string, key int) (string, error) {
@@ -155,4 +154,31 @@ func (g *Gossiper) Notify(fromID, toID string) error {
 		return err
 	}
 	return nil
+}
+
+// external dialing service called w/o emit
+func (g *Gossiper) writeFileToNode(nodeAddr, fileName, ip string) (*pb.ModResponse, error) {
+	g.report()
+
+	var conn *grpc.ClientConn
+	connectionParams := fmt.Sprintf("%s:%v", nodeAddr, LISTEN_PORT)
+	//log.Printf("Sending Request: %+v, %+v", request, request.Command)
+
+	conn, err := grpc.Dial(connectionParams, grpc.WithInsecure())
+	if err != nil {
+		log.Fatalf("Cannot connect to: %s", err)
+
+	}
+	defer conn.Close()
+
+	client := pb.NewInternalListenerClient(conn)
+	response, err := client.WriteFile(context.Background(), &pb.ModRequest{
+		Key:   fileName,
+		Value: ip,
+	})
+	if err != nil {
+		log.Printf("Error sending message: %v", err)
+		return nil, err
+	}
+	return response, nil
 }
