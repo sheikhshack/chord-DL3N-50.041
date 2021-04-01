@@ -11,6 +11,12 @@ enum Command {
   LOOKUP= 5 ;
 }
 
+
+enum DlowenStatus {
+  SAME_NODE = 0;
+  REDIRECTED_NODE = 1;
+}
+
 message Request {
   message Body {
     int64 HashSlot = 1;
@@ -35,31 +41,47 @@ message Response {
   Body body = 4;
 }
 // In this proof of concept, we have the key and value sent from client -> chord node
-message UploadRequest {
+message ModRequest {
   string key = 1;
   string value = 2;
 }
 
-// can merge
-message DownloadRequest {
+message DLUploadRequest {
+  string filename = 1;
+  string containerIP = 2;
+}
+
+message DLDownloadRequest {
+  string filename = 1;
+}
+
+
+message DLResponse {
+  string chordIP = 1;
+  DlowenStatus status = 2;
+}
+
+message DLDownloadResponse {
+  ContainerInfo container = 1;
+  string chordIP = 2;
+}
+
+message ContainerInfo {
+  string containerIP = 1;
+
+}
+
+
+
+
+message FetchChordRequest {
   string key = 1;
 }
 
-message CheckRequest {
-  string key = 1;
-}
-
-message UploadResponse {
+message ModResponse {
   string IP = 1;
 }
 
-message CheckResponse {
-  string IP = 1;
-}
-
-message DownloadResponse {
-  string value = 1;
-}
 
 message DebugMessage {
   string fromID = 1;
@@ -73,9 +95,18 @@ message DebugResponse {
 }
 
 service InternalListener {
+  // core service
   rpc Emit(Request) returns (Response) {}
-  rpc Upload(UploadRequest) returns (UploadResponse) {}
-  rpc Download(DownloadRequest) returns (DownloadResponse) {}
-  rpc CheckIP(CheckRequest) returns (CheckResponse) {}
+  // chord file management services (internal)
+  rpc ReadFile(FetchChordRequest) returns (ContainerInfo) {}
+  rpc WriteFile(ModRequest) returns (ModResponse) {}
+  rpc DeleteFile(FetchChordRequest) returns (ModResponse) {}
+  rpc FetchChordIp(FetchChordRequest) returns (ModResponse) {}
+  // defunct
+
+  // D3L bridge protocol (external)
+  rpc StoreKeyHash(DLUploadRequest) returns (DLResponse) {}
+  rpc GetFileLocation(DLDownloadRequest) returns (DLDownloadResponse) {}
+
   rpc Debug(DebugMessage) returns (DebugResponse) {}
 }
