@@ -21,13 +21,12 @@ func (n *Node) stabilize() {
 	if err != nil {
 		log.Printf("error in stabilize[GetPredecessor]: %+v\n", err)
 
+		// TODO: External function
 		if len(n.successorList) <= 1 {
 			n.successorList = make([]string, SUCCESSOR_LIST_SIZE)
 		} else {
 			n.successorList = n.successorList[1:]
 		}
-
-		// return
 	}
 
 	if hash.IsInRange(hash.Hash(x), hash.Hash(n.ID), hash.Hash(n.successorList[0])) {
@@ -42,14 +41,20 @@ func (n *Node) stabilize() {
 		return
 	}
 
-	tempSuccList := n.successorList[:1]
-	tempSuccList = append(tempSuccList, succSuccList[:len(succSuccList)-1]...)
-
-	n.successorList = tempSuccList
+	n.updateSuccessorList(n.successorList, succSuccList)
 
 	log.Println("Value of successorList: ", n.successorList)
 
 	n.notify(n.successorList[0])
+}
+
+// First 2 nodes joined => SuccessorList is not accurate (r < n-1 and values of r are different)
+func (n *Node) updateSuccessorList(succList []string, succSuccList []string) {
+
+	tempSuccList := succList[:1]
+	tempSuccList = append(tempSuccList, succSuccList[:len(succSuccList)-1]...)
+
+	n.successorList = tempSuccList
 }
 
 //implemented differently from pseudocode, n thinks it might be the predecessor of id
