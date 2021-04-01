@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+option go_package = "github.com/sheikhshack/distributed-chaos-50.041/dl3n/pb";
+
+package dl3n_pb;
+
+service DL3N {
+    rpc GetAvailableChunks(DL3NHash) returns (Chunks) {}
+    rpc GetChunk(ChunkMeta) returns (ChunkData) {}   
+}
+
+message DL3NHash {
+    string hash = 1;
+}
+
+message ChunkMeta {
+    DL3NHash DL3NHash = 1;
+    int64 ChunkId = 2;
+}
+
+message Chunks {
+    repeated ChunkMeta Chunks = 1;
+}
+
+message ChunkData {
+    bytes data = 1;
+}
