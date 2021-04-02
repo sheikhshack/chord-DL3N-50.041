@@ -7,6 +7,8 @@ import (
 	"github.com/sheikhshack/distributed-chaos-50.041/node/hash"
 )
 
+//TODO: [fault] When shutting down alpha node, will crash its predecessor occasionally
+//TODO: Handle the case when the node is in the successorList as well
 func (n *Node) stabilize() {
 	log.Println("Stabilizing", n.ID)
 	if n.successorList[0] == n.ID {
@@ -75,7 +77,6 @@ func (n *Node) fixSuccessorList() {
 
 }
 
-// TODO: First 2 nodes joined => SuccessorList is not accurate (r < n-1 and values of r are different)
 func (n *Node) updateSuccessorList(succList []string, succSuccList []string) {
 
 	tempSuccList := succList[:1]
@@ -94,7 +95,7 @@ func (n *Node) notify(id string) {
 
 // used as a handler func for gossip.Gossiper.NotifyHandler
 func (n *Node) NotifyHandler(possiblePredecessor string) {
-	log.Printf("[NOTIFY HANDLER] Possible Predecessor of %s is %s.\n", n.ID, possiblePredecessor)
+	// log.Printf("[NOTIFY HANDLER] Possible Predecessor of %s is %s.\n", n.ID, possiblePredecessor)
 	//possiblePredecessor is Request's pred
 	if (n.GetPredecessor() == "") ||
 		(hash.IsInRange(
@@ -102,7 +103,7 @@ func (n *Node) NotifyHandler(possiblePredecessor string) {
 			hash.Hash(n.GetPredecessor()),
 			hash.Hash(n.ID),
 		)) {
-		log.Printf("[NOTIFY HANDLER - Set Predecessor] Predecessor of %s is %s.\n", n.ID, possiblePredecessor)
+		// log.Printf("[NOTIFY HANDLER - Set Predecessor] Predecessor of %s is %s.\n", n.ID, possiblePredecessor)
 		n.SetPredecessor(possiblePredecessor)
 	}
 }

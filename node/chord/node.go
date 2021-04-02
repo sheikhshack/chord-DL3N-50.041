@@ -70,8 +70,18 @@ func (n *Node) FindSuccessor(hashed int) string {
 		nPrime := n.closestPrecedingNode(hashed)
 		successor, err := n.Gossiper.FindSuccessor(n.ID, nPrime, hashed)
 		if err != nil {
-			// TODO: handle this error
-			log.Fatalf("error in FindSuccessor: %+v\n", err)
+
+			log.Printf("Error in Find Sucessor. Calling Find Successor of next in line.\n")
+
+			n.fixSuccessorList()
+			n.fixFingers()
+
+			if len(n.successorList) != 0 {
+				return n.FindSuccessor(hashed)
+			} else {
+				// No more alive successor nodes (Same as commented out edge case)
+				return n.ID
+			}
 		}
 		return successor
 	}
