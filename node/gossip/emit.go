@@ -134,6 +134,7 @@ func (g *Gossiper) GetPredecessor(fromID, toID string) (string, error) {
 
 	res, err := g.emit(toID, req)
 	if err != nil {
+		log.Println("Get Predecessor is still an error from Predecessor of ", toID)
 		return "", err
 	}
 	return res.GetBody().ID, nil
@@ -150,6 +151,7 @@ func (g *Gossiper) GetSuccessorList(fromID, toID string) ([]string, error) {
 
 	res, err := g.emit(toID, req)
 	if err != nil {
+		log.Println("Get SuccessorList is still an error from successorList of ", toID)
 		return make([]string, 1), err
 	}
 	return res.GetBody().SuccessorList, nil
