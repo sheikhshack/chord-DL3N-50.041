@@ -12,12 +12,18 @@ func (n *Node) stabilize() {
 	if n.successorList[0] == n.ID {
 		return
 	}
-	x, err := n.Gossiper.GetPredecessor(n.ID, n.successorList[0])
-	log.Println("node ID: ", n.ID)
-	log.Println("node successorList[0]: ", n.successorList[0])
-	log.Println("Value of x: ", x)
 
-	// TODO: Fix connection between node and new successor node when previous successor node is down
+	// Set Predecessor to "" when predecessor is down
+	if !n.checkPredecessor() {
+		log.Printf("%s's Predecessor is down.\n", n.ID)
+		n.SetPredecessor("")
+	}
+
+	x, err := n.Gossiper.GetPredecessor(n.ID, n.successorList[0])
+	// log.Println("node ID: ", n.ID)
+	// log.Println("node successorList[0]: ", n.successorList[0])
+	// log.Println("Value of x: ", x)
+
 	if err != nil {
 		log.Printf("error in stabilize[GetPredecessor]: %+v\n", err)
 		n.fixSuccessorList()
