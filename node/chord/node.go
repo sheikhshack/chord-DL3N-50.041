@@ -64,7 +64,7 @@ func (n *Node) Join(id string) {
 	}
 	n.SetPredecessor("")
 	n.SetSuccessor(successor)
-	n.migrationInit(n.successor)
+	go n.migrationInit(n.successor)
 	//edge case of in the 1s window, the node's ideal pred hasn't recognised this node
 	go n.cron()
 
@@ -90,7 +90,9 @@ func (n *Node) FindSuccessor(hashed int) string {
 
 //ask successor to migrate files that belong to current node
 func (n *Node) migrationInit(successor string) {
-	n.Gossiper.MigrationRequestFromNode(successor)
+	if _, err := n.Gossiper.MigrationRequestFromNode(successor); err != nil {
+		log.Fatalf("[MigrationRequestFromNode: %+v\n", err)
+	}
 }
 
 //predecessor has asked to migrate files from current nodes
@@ -109,7 +111,7 @@ func (n *Node) MigrationHandler(pred string) {
 			val, _ := store.Get(i.Name())
 			_, err := n.Gossiper.WriteFileToNode(pred, i.Name(), string(val))
 			if err != nil {
-				log.Printf("Error in writing file")
+				log.Printf("Error in writing file: %+v\n", err)
 			} else {
 				store.Delete(i.Name())
 			}
