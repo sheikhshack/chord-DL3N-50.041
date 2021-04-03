@@ -36,10 +36,10 @@ func (t *Tower) NewServerAndListen(listenPort int) *grpc.Server {
 
 func (t *Tower) Debug(ctx context.Context, in *pb.DebugMessage) (*pb.DebugResponse, error) {
 	data := nodeData{
-		nodeID:      in.GetFromID(),
-		predecessor: in.GetPredecessor(),
-		successor:   in.GetSuccessor(),
-		fingers:     in.GetFingers(),
+		nodeID:        in.GetFromID(),
+		predecessor:   in.GetPredecessor(),
+		successorList: in.GetSuccessorList(),
+		fingers:       in.GetFingers(),
 	}
 	t.data.Store(in.GetFromID(), data)
 

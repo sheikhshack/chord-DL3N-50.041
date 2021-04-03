@@ -36,10 +36,10 @@ func (g *Gossiper) report() {
 
 	client := pb.NewInternalListenerClient(conn)
 	_, err = client.Debug(context.Background(), &pb.DebugMessage{
-		FromID:      g.Node.GetID(),
-		Predecessor: g.Node.GetPredecessor(),
-		Successor:   g.Node.GetSuccessor(),
-		Fingers:     g.Node.GetFingers(),
+		FromID:        g.Node.GetID(),
+		Predecessor:   g.Node.GetPredecessor(),
+		SuccessorList: g.Node.GetSuccessorList(),
+		Fingers:       g.Node.GetFingers(),
 	})
 	if err != nil {
 		//log.Printf("Error sending message: %v", err)
