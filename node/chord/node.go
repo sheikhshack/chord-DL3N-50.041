@@ -9,7 +9,7 @@ import (
 	"github.com/sheikhshack/distributed-chaos-50.041/node/hash"
 )
 
-const SUCCESSOR_LIST_SIZE = 3
+const SUCCESSOR_LIST_SIZE = 2
 
 type Node struct {
 	ID            string // maybe IP address
@@ -71,7 +71,7 @@ func (n *Node) FindSuccessor(hashed int) string {
 		successor, err := n.Gossiper.FindSuccessor(n.ID, nPrime, hashed)
 		if err != nil {
 
-			log.Printf("Error in Find Sucessor. Calling Find Successor of next in line.\n")
+			log.Printf("Error in Find Successor. Calling Find Successor of next in line.\n")
 
 			n.fixSuccessorList()
 			n.fixFingers()
