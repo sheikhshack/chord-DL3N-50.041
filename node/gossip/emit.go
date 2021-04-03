@@ -70,7 +70,6 @@ func (g *Gossiper) emit(nodeAddr string, request *pb.Request) (*pb.Response, err
 	return response, nil
 }
 
-
 // called by FindSuccessor
 func (g *Gossiper) FindSuccessor(fromID, toID string, key int) (string, error) {
 	req := &pb.Request{
@@ -172,6 +171,25 @@ func (g *Gossiper) Notify(fromID, toID string) error {
 	return nil
 }
 
+// Replicate file to node
+func (g *Gossiper) ReplicateToNode(fromID, toID, key, value string) (bool, error) {
+	req := &pb.Request{
+		Command:     pb.Command_REPLICATE_TO_NODE,
+		RequesterID: fromID,
+		TargetID:    toID,
+		Body: &pb.Request_Body{
+			Key:   key,
+			Value: value,
+		},
+	}
+
+	_, err := g.emit(toID, req)
+	if err != nil {
+		return false, err
+	}
+	return true, nil
+}
+
 // external dialing service called w/o emit //
 func (g *Gossiper) writeFileToNode(nodeAddr, fileName, ip string) (*pb.ModResponse, error) {
 	g.report()
@@ -215,7 +233,7 @@ func (g *Gossiper) readFileFromNode(nodeAddr, fileName string) (*pb.ContainerInf
 
 	client := pb.NewInternalListenerClient(conn)
 	response, err := client.ReadFile(context.Background(), &pb.FetchChordRequest{
-		Key:   fileName,
+		Key: fileName,
 	})
 	if err != nil {
 		log.Printf("Error sending message: %v", err)

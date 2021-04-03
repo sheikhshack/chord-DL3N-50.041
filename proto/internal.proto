@@ -10,6 +10,7 @@ enum Command {
   NOTIFY = 4;
   LOOKUP= 5;
   GET_SUCCESSOR_LIST = 6;
+  REPLICATE_TO_NODE = 7;
 }
 
 
@@ -22,6 +23,8 @@ message Request {
   message Body {
     int64 HashSlot = 1;
     string InfoHash = 2;
+    string Key = 3;
+    string Value = 4;
   }
 
   Command command = 1;
