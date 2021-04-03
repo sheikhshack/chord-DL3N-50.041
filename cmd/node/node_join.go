@@ -18,7 +18,7 @@ func main() {
 	utils.SetLogFile(logFileName)
 
 	id := os.Getenv("NODE_ID")
-	knownPeerID := os.Getenv("PEER_HOSTNAME")
+	knownPeerID := os.Getenv("PEER_HOSTNAME	")
 	log.Printf("starting NODE_ID: %v\n", id)
 
 	node := chord.New(id)

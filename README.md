@@ -49,7 +49,8 @@ for archiving
 
 ### Quick start (Build and Compose)
 ```bash
-docker build -t chord_node . && docker-compose up
+./builder.sh
+s
 ```
 
 ### Build using DockerFile
