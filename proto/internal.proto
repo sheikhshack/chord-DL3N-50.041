@@ -71,9 +71,6 @@ message ContainerInfo {
 
 }
 
-
-
-
 message FetchChordRequest {
   string key = 1;
 }
@@ -81,7 +78,6 @@ message FetchChordRequest {
 message ModResponse {
   string IP = 1;
 }
-
 
 message DebugMessage {
   string fromID = 1;
@@ -94,6 +90,14 @@ message DebugResponse {
   bool success = 1;
 }
 
+message MigrationRequest{
+  string requesterID = 1;
+}
+
+message MigrationResponse{
+  bool success = 1;
+}
+
 service InternalListener {
   // core service
   rpc Emit(Request) returns (Response) {}
@@ -102,6 +106,7 @@ service InternalListener {
   rpc WriteFile(ModRequest) returns (ModResponse) {}
   rpc DeleteFile(FetchChordRequest) returns (ModResponse) {}
   rpc FetchChordIp(FetchChordRequest) returns (ModResponse) {}
+  rpc MigrationInit(MigrationRequest) returns (MigrationResponse) {}
   // defunct
 
   // D3L bridge protocol (external)

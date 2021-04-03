@@ -70,7 +70,6 @@ func (g *Gossiper) emit(nodeAddr string, request *pb.Request) (*pb.Response, err
 	return response, nil
 }
 
-
 // called by FindSuccessor
 func (g *Gossiper) FindSuccessor(fromID, toID string, key int) (string, error) {
 	req := &pb.Request{
@@ -157,7 +156,7 @@ func (g *Gossiper) Notify(fromID, toID string) error {
 }
 
 // external dialing service called w/o emit //
-func (g *Gossiper) writeFileToNode(nodeAddr, fileName, ip string) (*pb.ModResponse, error) {
+func (g *Gossiper) WriteFileToNode(nodeAddr, fileName, ip string) (*pb.ModResponse, error) {
 	g.report()
 
 	var conn *grpc.ClientConn
@@ -199,7 +198,31 @@ func (g *Gossiper) readFileFromNode(nodeAddr, fileName string) (*pb.ContainerInf
 
 	client := pb.NewInternalListenerClient(conn)
 	response, err := client.ReadFile(context.Background(), &pb.FetchChordRequest{
-		Key:   fileName,
+		Key: fileName,
+	})
+	if err != nil {
+		log.Printf("Error sending message: %v", err)
+		return nil, err
+	}
+	return response, nil
+}
+
+func (g *Gossiper) MigrationRequestFromNode(nodeAddr string) (*pb.MigrationResponse, error) {
+	g.report()
+
+	var conn *grpc.ClientConn
+	connectionParams := fmt.Sprintf("%s:%v", nodeAddr, LISTEN_PORT)
+
+	conn, err := grpc.Dial(connectionParams, grpc.WithInsecure())
+	if err != nil {
+		log.Fatalf("Cannot connect to: %s", err)
+
+	}
+	defer conn.Close()
+
+	client := pb.NewInternalListenerClient(conn)
+	response, err := client.MigrationInit(context.Background(), &pb.MigrationRequest{
+		RequesterID: g.Node.GetID(),
 	})
 	if err != nil {
 		log.Printf("Error sending message: %v", err)

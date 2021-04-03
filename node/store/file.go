@@ -1,6 +1,7 @@
 package store
 
 import (
+	"io/fs"
 	"io/ioutil"
 	"os"
 )
@@ -27,6 +28,20 @@ func Get(key string) ([]byte, error) {
 	}
 
 	content, err := ioutil.ReadFile(filename)
+	if err != nil {
+		return nil, err
+	}
+	return content, nil
+}
+
+// Get obtains the bytes stored in filename
+func GetAll() ([]fs.FileInfo, error) {
+	dir, err := getOrCreateChordDir()
+	if err != nil {
+		return nil, err
+	}
+
+	content, err := ioutil.ReadDir(dir)
 	if err != nil {
 		return nil, err
 	}

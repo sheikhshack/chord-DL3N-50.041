@@ -4,9 +4,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"google.golang.org/grpc"
 	"log"
 	"net"
+
+	"google.golang.org/grpc"
 
 	pb "github.com/sheikhshack/distributed-chaos-50.041/node/gossip/proto"
 	"github.com/sheikhshack/distributed-chaos-50.041/node/hash"
@@ -22,6 +23,7 @@ type node interface {
 	GetID() string
 	GetFingers() []string
 	NotifyHandler(possiblePredecessor string)
+	MigrationHandler(pred string)
 	// for external API
 }
 
@@ -152,7 +154,6 @@ func (g *Gossiper) notifyHandler(possiblePredecessor string) {
 	g.Node.NotifyHandler(possiblePredecessor)
 }
 
-
 //// TODO: Move to legacy - DEFUNCT (leaving as reference for fk-up)
 //func (g *Gossiper) Download(ctx context.Context, downloadRequest *pb.DownloadRequest) (*pb.DownloadResponse, error) {
 //	log.Printf("Download Method triggered \n")
@@ -169,7 +170,7 @@ func (g *Gossiper) notifyHandler(possiblePredecessor string) {
 
 ////////// Internal CHORD file management
 // FetchChordIp is basically unused for now, leaving as legacy
-func (g *Gossiper) FetchChordIp (ctx context.Context, fetchRequest *pb.FetchChordRequest) (*pb.ModResponse, error) {
+func (g *Gossiper) FetchChordIp(ctx context.Context, fetchRequest *pb.FetchChordRequest) (*pb.ModResponse, error) {
 	log.Printf("Lookup Method \n")
 	key := fetchRequest.GetKey()
 	ip := g.Node.FindSuccessor(hash.Hash(key))
@@ -187,7 +188,7 @@ func (g *Gossiper) WriteFile(ctx context.Context, writeRequest *pb.ModRequest) (
 	return &pb.ModResponse{IP: g.Node.GetID()}, output
 }
 
-func (g *Gossiper) DeleteFile (ctx context.Context, fetchRequest *pb.FetchChordRequest) (*pb.ModResponse, error) {
+func (g *Gossiper) DeleteFile(ctx context.Context, fetchRequest *pb.FetchChordRequest) (*pb.ModResponse, error) {
 	log.Printf("Upload Method triggered \n")
 	key := fetchRequest.GetKey()
 	status := store.Delete(key)
@@ -195,35 +196,47 @@ func (g *Gossiper) DeleteFile (ctx context.Context, fetchRequest *pb.FetchChordR
 
 	return &pb.ModResponse{IP: g.Node.GetID()}, status
 }
+
 // ReadFile allows returning of container IP from file within chord
-func (g *Gossiper) ReadFile (ctx context.Context, fetchRequest *pb.FetchChordRequest) (*pb.ContainerInfo, error) {
+func (g *Gossiper) ReadFile(ctx context.Context, fetchRequest *pb.FetchChordRequest) (*pb.ContainerInfo, error) {
 	log.Printf("Upload Method triggered \n")
 	key := fetchRequest.GetKey()
 	fileByte, status := store.Get(key)
 	// TODO: Might need to change this
-	 containerIP := string(fileByte[:])
+	containerIP := string(fileByte[:])
 	log.Printf("--- FS: Triggering File Delete in Node for key [%v] \n", key)
 
 	return &pb.ContainerInfo{ContainerIP: containerIP}, status
 }
+
+func (g *Gossiper) MigrationInit(ctx context.Context, migrationRequest *pb.MigrationRequest) (*pb.MigrationResponse, error) {
+	requestId := migrationRequest.RequesterID
+
+	log.Printf("--- FS: Triggering Migration to Chord Node %v from %v \n", requestId, g.Node.GetID())
+
+	g.Node.MigrationHandler(requestId)
+
+	return &pb.MigrationResponse{Success: true}, nil
+}
+
 /////////////////////////////////////////
 ////////// EXPOSED TO D3LOWEN ///////////
 /////////////////////////////////////////
 
 // StoreKeyHash will allow  D3L to call a single function to write upload directory to the right chord node
-func (g *Gossiper) StoreKeyHash (ctx context.Context, dlUploadRequest *pb.DLUploadRequest) (*pb.DLResponse, error) {
+func (g *Gossiper) StoreKeyHash(ctx context.Context, dlUploadRequest *pb.DLUploadRequest) (*pb.DLResponse, error) {
 	fileName := dlUploadRequest.Filename
 	containerIP := dlUploadRequest.ContainerIP
 	log.Printf("--- DLCHORD: Triggering storage of file [%v] from [%v]\n", fileName, containerIP)
 
 	correctChordIP := g.Node.FindSuccessor(hash.Hash(fileName))
-	_, err := g.writeFileToNode(correctChordIP, fileName, containerIP)
-	if err != nil{
+	_, err := g.WriteFileToNode(correctChordIP, fileName, containerIP)
+	if err != nil {
 		// TODO: return error
 		log.Fatalf("error in running Store Key Hash (ext) : %+v\n", err)
 	}
 	status := pb.DlowenStatus_SAME_NODE
-	if correctChordIP != g.Node.GetID(){
+	if correctChordIP != g.Node.GetID() {
 		status = pb.DlowenStatus_REDIRECTED_NODE
 	}
 
@@ -235,16 +248,14 @@ func (g *Gossiper) StoreKeyHash (ctx context.Context, dlUploadRequest *pb.DLUplo
 }
 
 // GetFileLocation takes in a file and resolves it into an IP
-func (g *Gossiper) GetFileLocation (ctx context.Context, dlDownloadRequest *pb.DLDownloadRequest) (*pb.DLDownloadResponse, error) {
+func (g *Gossiper) GetFileLocation(ctx context.Context, dlDownloadRequest *pb.DLDownloadRequest) (*pb.DLDownloadResponse, error) {
 	fileName := dlDownloadRequest.Filename
 	correctChordIP := g.Node.FindSuccessor(hash.Hash(fileName))
 	containerInfo, err := g.readFileFromNode(correctChordIP, fileName)
-	if err != nil{
+	if err != nil {
 		// TODO: return error
 		log.Fatalf("error in running Store Key Hash (ext) : %+v\n", err)
 	}
 	return &pb.DLDownloadResponse{Container: containerInfo, ChordIP: correctChordIP}, nil
 
 }
-
-

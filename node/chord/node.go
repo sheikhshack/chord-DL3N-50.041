@@ -7,6 +7,7 @@ import (
 
 	"github.com/sheikhshack/distributed-chaos-50.041/node/gossip"
 	"github.com/sheikhshack/distributed-chaos-50.041/node/hash"
+	"github.com/sheikhshack/distributed-chaos-50.041/node/store"
 )
 
 type Node struct {
@@ -54,7 +55,24 @@ func (n *Node) Join(id string) {
 	}
 	n.SetPredecessor("")
 	n.SetSuccessor(successor)
+	// n.migrationInit(successor)
+	//edge case of in the 1s window, the node's ideal pred hasn't recognised this node
 	go n.cron()
+}
+
+func (n *Node) migrationInit(successor string) {
+	//add grpc
+	n.Gossiper.MigrationRequestFromNode(successor)
+}
+
+func (n *Node) MigrationHandler(pred string) {
+	files, err := store.GetAll()
+	if err != nil {
+		print(err)
+	}
+	print(files)
+	// n.Gossiper.WriteFileToNode(pred, nil, n.ID)
+
 }
 
 func (n *Node) FindSuccessor(hashed int) string {
@@ -125,9 +143,4 @@ func (n *Node) GetID() string {
 
 func (n *Node) GetFingers() []string {
 	return n.fingers
-}
-
-// exposed version is essentially the same crap
-func (n *Node) WriteFileToNode (nodeAddr, fileName, ip string) {
-
 }
