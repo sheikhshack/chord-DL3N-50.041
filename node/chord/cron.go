@@ -7,18 +7,11 @@ import (
 	"github.com/sheikhshack/distributed-chaos-50.041/node/hash"
 )
 
-//TODO: [fault] When shutting down alpha node, will crash its predecessor occasionally
 //TODO: Handle the case when the node is in the successorList as well
 func (n *Node) stabilize() {
 	log.Println("Stabilizing", n.ID)
 	if n.successorList[0] == n.ID {
 		return
-	}
-
-	// Set Predecessor to "" when predecessor is down
-	if !n.checkPredecessor() {
-		log.Printf("%s's Predecessor is down.\n", n.ID)
-		n.SetPredecessor("")
 	}
 
 	x, err := n.Gossiper.GetPredecessor(n.ID, n.successorList[0])
@@ -32,7 +25,7 @@ func (n *Node) stabilize() {
 		return
 	}
 
-	// Check if x (supposedly predecessor of successor) is alive (decouple)
+	// Check if x (supposedly predecessor of successor) is alive
 	if n.healthCheck(x) {
 		if hash.IsInRange(hash.Hash(x), hash.Hash(n.ID), hash.Hash(n.successorList[0])) {
 			n.SetSuccessor(x)
@@ -117,6 +110,10 @@ func (n *Node) fixFingers() {
 	n.fingers[n.next] = n.FindSuccessor(hash.Hash(n.ID) + x)
 }
 
-func (n *Node) checkPredecessor() bool {
-	return n.healthCheck(n.predecessor)
+func (n *Node) checkPredecessor() {
+
+	if !n.healthCheck(n.predecessor) {
+		log.Printf("%s's Predecessor is down.\n", n.ID)
+		n.SetPredecessor("")
+	}
 }

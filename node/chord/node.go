@@ -105,6 +105,7 @@ func (n *Node) cron() {
 	time.Sleep(time.Millisecond * 10000)
 	for {
 		log.Println(n.ID, "successor is", n.successorList[0], ", predecessor is", n.predecessor)
+		n.checkPredecessor()
 		n.stabilize()
 		n.fixFingers()
 		time.Sleep(time.Millisecond * 1000)
