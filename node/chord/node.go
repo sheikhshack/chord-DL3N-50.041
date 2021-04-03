@@ -9,7 +9,7 @@ import (
 	"github.com/sheikhshack/distributed-chaos-50.041/node/hash"
 )
 
-const SUCCESSOR_LIST_SIZE = 2
+const SUCCESSOR_LIST_SIZE = 3
 
 type Node struct {
 	ID            string // maybe IP address
@@ -146,6 +146,6 @@ func (n *Node) GetFingers() []string {
 }
 
 // exposed version is essentially the same crap
-func (n *Node) WriteFileToNode (nodeAddr, fileName, ip string) {
+func (n *Node) WriteFileToNode(nodeAddr, fileName, ip string) {
 
 }
