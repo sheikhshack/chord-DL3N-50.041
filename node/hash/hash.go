@@ -3,6 +3,7 @@ package hash
 import (
 	"crypto/sha1"
 	"encoding/binary"
+	"fmt"
 )
 
 // max_slot_capacity represents the maximum num of slots for consistent hashing
@@ -39,4 +40,8 @@ func IsInRange(keySlot, localSlot, remoteSlot int) bool {
 	}
 
 	return (localSlot < keySlot && keySlot < remoteSlot)
+}
+
+func main() {
+	fmt.Print(Hash("forgotten.rar"))
 }

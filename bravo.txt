@@ -1,0 +1,46 @@
+2021/04/03 09:45:48 starting NODE_ID: nodeBravo
+2021/04/03 09:45:48 Node Hash id: 96447
+2021/04/03 09:46:03 nodeBravo successor is alpha , predecessor is alpha
+2021/04/03 09:46:04 nodeBravo successor is alpha , predecessor is alpha
+2021/04/03 09:46:05 nodeBravo successor is alpha , predecessor is alpha
+2021/04/03 09:46:06 nodeBravo successor is alpha , predecessor is alpha
+2021/04/03 09:46:07 nodeBravo successor is alpha , predecessor is alpha
+2021/04/03 09:46:08 nodeBravo successor is alpha , predecessor is alpha
+2021/04/03 09:46:09 nodeBravo successor is alpha , predecessor is alpha
+2021/04/03 09:46:10 nodeBravo successor is alpha , predecessor is alpha
+2021/04/03 09:46:11 nodeBravo successor is alpha , predecessor is alpha
+2021/04/03 09:46:12 nodeBravo successor is alpha , predecessor is alpha
+2021/04/03 09:46:13 nodeBravo successor is alpha , predecessor is alpha
+2021/04/03 09:46:14 nodeBravo successor is alpha , predecessor is alpha
+2021/04/03 09:46:15 nodeBravo successor is alpha , predecessor is alpha
+2021/04/03 09:46:16 nodeBravo successor is alpha , predecessor is alpha
+2021/04/03 09:46:17 nodeBravo successor is alpha , predecessor is alpha
+2021/04/03 09:46:18 nodeBravo successor is alpha , predecessor is alpha
+2021/04/03 09:46:19 nodeBravo successor is alpha , predecessor is alpha
+2021/04/03 09:46:20 nodeBravo successor is alpha , predecessor is alpha
+2021/04/03 09:46:21 nodeBravo successor is alpha , predecessor is alpha
+2021/04/03 09:46:22 nodeBravo successor is alpha , predecessor is alpha
+2021/04/03 09:46:23 nodeBravo successor is alpha , predecessor is alpha
+2021/04/03 09:46:24 nodeBravo successor is alpha , predecessor is alpha
+2021/04/03 09:46:25 nodeBravo successor is alpha , predecessor is alpha
+2021/04/03 09:46:26 nodeBravo successor is alpha , predecessor is alpha
+2021/04/03 09:46:27 nodeBravo successor is alpha , predecessor is alpha
+2021/04/03 09:46:27 --- DLCHORD: Triggering storage of file [forgotten.rar] from [godbless_DL3N_DNS]
+2021/04/03 09:46:27 Writing file forgotten.rar to Node alpha
+2021/04/03 09:46:28 nodeBravo successor is alpha , predecessor is alpha
+2021/04/03 09:46:29 nodeBravo successor is alpha , predecessor is alpha
+2021/04/03 09:46:30 nodeBravo successor is alpha , predecessor is alpha
+2021/04/03 09:46:31 nodeBravo successor is alpha , predecessor is alpha
+2021/04/03 09:46:32 nodeBravo successor is alpha , predecessor is alpha
+2021/04/03 09:46:33 nodeBravo successor is alpha , predecessor is alpha
+2021/04/03 09:46:34 nodeBravo successor is alpha , predecessor is alpha
+2021/04/03 09:46:35 nodeBravo successor is alpha , predecessor is alpha
+2021/04/03 09:46:36 nodeBravo successor is alpha , predecessor is alpha
+2021/04/03 09:46:37 nodeBravo successor is alpha , predecessor is alpha
+2021/04/03 09:46:38 nodeBravo successor is nodeCharlie , predecessor is alpha
+2021/04/03 09:46:39 nodeBravo successor is nodeCharlie , predecessor is alpha
+2021/04/03 09:46:40 nodeBravo successor is nodeCharlie , predecessor is alpha
+2021/04/03 09:46:41 nodeBravo successor is nodeCharlie , predecessor is alpha
+2021/04/03 09:46:42 nodeBravo successor is nodeCharlie , predecessor is alpha
+2021/04/03 09:46:43 nodeBravo successor is nodeCharlie , predecessor is alpha
+2021/04/03 09:46:44 nodeBravo successor is nodeCharlie , predecessor is alpha

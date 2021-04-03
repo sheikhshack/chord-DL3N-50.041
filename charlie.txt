@@ -1,0 +1,12 @@
+2021/04/03 09:45:48 starting NODE_ID: nodeCharlie
+2021/04/03 09:45:48 Node Hash id: 53816
+2021/04/03 09:46:21 starting NODE_ID: nodeCharlie
+2021/04/03 09:46:21 Node Hash id: 53816
+2021/04/03 09:46:36 nodeCharlie successor is alpha , predecessor is 
+2021/04/03 09:46:37 nodeCharlie successor is alpha , predecessor is nodeBravo
+2021/04/03 09:46:38 nodeCharlie successor is alpha , predecessor is nodeBravo
+2021/04/03 09:46:39 nodeCharlie successor is alpha , predecessor is nodeBravo
+2021/04/03 09:46:40 nodeCharlie successor is alpha , predecessor is nodeBravo
+2021/04/03 09:46:41 nodeCharlie successor is alpha , predecessor is nodeBravo
+2021/04/03 09:46:42 nodeCharlie successor is alpha , predecessor is nodeBravo
+2021/04/03 09:46:43 nodeCharlie successor is alpha , predecessor is nodeBravo

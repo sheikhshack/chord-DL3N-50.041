@@ -37,6 +37,14 @@ func New(id string) *Node {
 			DebugMode: false,
 		}
 	}
+	files, err := store.GetAll()
+	if err != nil {
+		print(err)
+	}
+
+	for _, i := range files {
+		log.Printf("Filename:%v, HashedFile: %v", i.Name(), hash.Hash(i.Name()))
+	}
 
 	return n
 }
@@ -56,30 +64,9 @@ func (n *Node) Join(id string) {
 	}
 	n.SetPredecessor("")
 	n.SetSuccessor(successor)
-	// n.migrationInit(successor)
+	n.migrationInit(n.successor)
 	//edge case of in the 1s window, the node's ideal pred hasn't recognised this node
 	go n.cron()
-}
-
-func (n *Node) migrationInit(successor string) {
-	//add grpc
-	n.Gossiper.MigrationRequestFromNode(successor)
-}
-
-func (n *Node) MigrationHandler(pred string) {
-	files, err := store.GetAll()
-	if err != nil {
-		print(err)
-	}
-
-	for _, i := range files {
-		log.Printf("Filename:%v, HashedFile: %v", i.Name(), hash.Hash(i.Name()))
-		if !hash.IsInRange(hash.Hash(i.Name()), hash.Hash(pred), hash.Hash(n.ID)) {
-			n.Gossiper.WriteFileToNode(pred, i.Name(), n.ID)
-			store.Delete(i.Name())
-		}
-
-	}
 
 }
 
@@ -101,6 +88,37 @@ func (n *Node) FindSuccessor(hashed int) string {
 	}
 }
 
+//ask successor to migrate files that belong to current node
+func (n *Node) migrationInit(successor string) {
+	n.Gossiper.MigrationRequestFromNode(successor)
+}
+
+//predecessor has asked to migrate files from current nodes
+func (n *Node) MigrationHandler(pred string) {
+
+	// Get all the files in the store
+	files, err := store.GetAll()
+	if err != nil {
+		print(err)
+	}
+
+	//Loop through them and write over the ones that do not lie in between pred and current node, and then delete if the write is successful
+	for _, i := range files {
+		log.Printf("Filename:%v, HashedFile: %v", i.Name(), hash.Hash(i.Name()))
+		if !hash.IsInRange(hash.Hash(i.Name()), hash.Hash(pred), hash.Hash(n.ID)) {
+			val, _ := store.Get(i.Name())
+			_, err := n.Gossiper.WriteFileToNode(pred, i.Name(), string(val))
+			if err != nil {
+				log.Printf("Error in writing file")
+			} else {
+				store.Delete(i.Name())
+			}
+		}
+
+	}
+
+}
+
 //searches local table for highest predecessor of id
 func (n *Node) closestPrecedingNode(hashed int) string {
 	m := cap(n.fingers) - 1
@@ -118,7 +136,7 @@ func (n *Node) closestPrecedingNode(hashed int) string {
 func (n *Node) cron() {
 	time.Sleep(time.Millisecond * 10000)
 	for {
-		log.Println(n.ID, "successor is", n.successor, ", predecessor is", n.predecessor)
+		// log.Println(n.ID, "successor is", n.successor, ", predecessor is", n.predecessor)
 		n.stabilize()
 		n.fixFingers()
 		time.Sleep(time.Millisecond * 1000)

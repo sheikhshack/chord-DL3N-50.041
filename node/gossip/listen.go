@@ -70,7 +70,7 @@ func (g *Gossiper) Emit(ctx context.Context, in *pb.Request) (*pb.Response, erro
 				ID: id,
 			},
 		}
-		log.Printf("Sending Response: %+v \n", res)
+		// log.Printf("Sending Response: %+v \n", res)
 	case pb.Command_JOIN:
 		fromID := in.GetRequesterID()
 		id := g.joinHandler(fromID)
@@ -180,7 +180,7 @@ func (g *Gossiper) FetchChordIp(ctx context.Context, fetchRequest *pb.FetchChord
 func (g *Gossiper) WriteFile(ctx context.Context, writeRequest *pb.ModRequest) (*pb.ModResponse, error) {
 	key := writeRequest.Key
 	val := writeRequest.Value
-	log.Printf("--- FS: Triggering File Write to Chord Node for key [%v] with content %v \n", key, val)
+	log.Printf("--- FS: Triggering File Write to Chord Node for key [%v] with content %v \nHashedkey: %v", key, val, hash.Hash(key))
 
 	fileByte := []byte(val)
 	output := store.New(key, fileByte)
@@ -211,7 +211,6 @@ func (g *Gossiper) ReadFile(ctx context.Context, fetchRequest *pb.FetchChordRequ
 
 func (g *Gossiper) MigrationInit(ctx context.Context, migrationRequest *pb.MigrationRequest) (*pb.MigrationResponse, error) {
 	requestId := migrationRequest.RequesterID
-
 	log.Printf("--- FS: Triggering Migration to Chord Node %v from %v \n", requestId, g.Node.GetID())
 
 	g.Node.MigrationHandler(requestId)

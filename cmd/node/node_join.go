@@ -27,10 +27,6 @@ func main() {
 		node.InitRing()
 		log.Printf("%v: init-ed ring\n", node.ID)
 	} else {
-		if node.ID == "charlie" {
-			time.Sleep(time.Millisecond * 30000)
-		}
-		time.Sleep(time.Millisecond * 5000)
 		node.Join(knownPeerID)
 
 	}
