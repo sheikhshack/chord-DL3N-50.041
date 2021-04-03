@@ -24,6 +24,7 @@ type Node struct {
 func New(id string) *Node {
 	// 16 is finger table size
 	n := &Node{ID: id, next: 0, fingers: make([]string, 16)}
+	log.Printf("Node Hash id: %v\n", hash.Hash(n.ID))
 
 	if os.Getenv("DEBUG") == "debug" {
 		n.Gossiper = &gossip.Gossiper{
@@ -70,8 +71,15 @@ func (n *Node) MigrationHandler(pred string) {
 	if err != nil {
 		print(err)
 	}
-	print(files)
-	// n.Gossiper.WriteFileToNode(pred, nil, n.ID)
+
+	for _, i := range files {
+		log.Printf("Filename:%v, HashedFile: %v", i.Name(), hash.Hash(i.Name()))
+		if !hash.IsInRange(hash.Hash(i.Name()), hash.Hash(pred), hash.Hash(n.ID)) {
+			n.Gossiper.WriteFileToNode(pred, i.Name(), n.ID)
+			store.Delete(i.Name())
+		}
+
+	}
 
 }
 

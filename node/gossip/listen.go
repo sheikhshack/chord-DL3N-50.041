@@ -204,7 +204,7 @@ func (g *Gossiper) ReadFile(ctx context.Context, fetchRequest *pb.FetchChordRequ
 	fileByte, status := store.Get(key)
 	// TODO: Might need to change this
 	containerIP := string(fileByte[:])
-	log.Printf("--- FS: Triggering File Delete in Node for key [%v] \n", key)
+	log.Printf("--- FS: Triggering File Read in Node for key [%v] \n", key)
 
 	return &pb.ContainerInfo{ContainerIP: containerIP}, status
 }

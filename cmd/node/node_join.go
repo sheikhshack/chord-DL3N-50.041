@@ -18,7 +18,7 @@ func main() {
 	utils.SetLogFile(logFileName)
 
 	id := os.Getenv("NODE_ID")
-	knownPeerID := os.Getenv("PEER_HOSTNAME	")
+	knownPeerID := os.Getenv("PEER_HOSTNAME")
 	log.Printf("starting NODE_ID: %v\n", id)
 
 	node := chord.New(id)
@@ -27,6 +27,9 @@ func main() {
 		node.InitRing()
 		log.Printf("%v: init-ed ring\n", node.ID)
 	} else {
+		if node.ID == "charlie" {
+			time.Sleep(time.Millisecond * 30000)
+		}
 		time.Sleep(time.Millisecond * 5000)
 		node.Join(knownPeerID)
 

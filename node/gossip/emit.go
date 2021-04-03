@@ -170,6 +170,7 @@ func (g *Gossiper) WriteFileToNode(nodeAddr, fileName, ip string) (*pb.ModRespon
 	}
 	defer conn.Close()
 
+	log.Printf("Writing file %v to Node %v", fileName, nodeAddr)
 	client := pb.NewInternalListenerClient(conn)
 	response, err := client.WriteFile(context.Background(), &pb.ModRequest{
 		Key:   fileName,
