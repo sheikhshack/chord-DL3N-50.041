@@ -6,7 +6,7 @@ services:
     container_name: dl3n-seeder
     build: 
       context: .
-      dockerfile: Dockerfile.dl3n
+      dockerfile: Dockerfile.dl3ndemo
     environment:
       - CONTAINER_IP=dl3n-seeder
     depends_on:
@@ -18,7 +18,7 @@ services:
     container_name: dl3n-getter
     build: 
       context: .
-      dockerfile: Dockerfile.dl3n
+      dockerfile: Dockerfile.dl3ndemo
     environment:
       - CONTAINER_IP=dl3n-getter
     depends_on:
