@@ -70,6 +70,7 @@ func (n *Node) fixSuccessorList() {
 	}
 }
 
+// TODO: SuccessorList will have duplicates (Might want to take note for replication) Might have to do away with copy with we want different size
 func (n *Node) updateSuccessorList(succSuccList []string) {
 	copy(n.successorList[1:], succSuccList[:SUCCESSOR_LIST_SIZE-1])
 }

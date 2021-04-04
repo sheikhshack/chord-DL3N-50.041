@@ -11,6 +11,7 @@ import (
 )
 
 const SUCCESSOR_LIST_SIZE = 3
+const FINGER_TABLE_SIZE = 16
 
 type Node struct {
 	ID            string // maybe IP address
@@ -25,7 +26,7 @@ type Node struct {
 // New creates and returns a new Node
 func New(id string) *Node {
 	// 16 is finger table size
-	n := &Node{ID: id, next: 0, fingers: make([]string, 16), successorList: make([]string, SUCCESSOR_LIST_SIZE)}
+	n := &Node{ID: id, next: 0, fingers: make([]string, FINGER_TABLE_SIZE), successorList: make([]string, SUCCESSOR_LIST_SIZE)}
 
 	if os.Getenv("DEBUG") == "debug" {
 		n.Gossiper = &gossip.Gossiper{
@@ -73,30 +74,20 @@ func (n *Node) FindSuccessor(hashed int) string {
 		successor, err := n.Gossiper.FindSuccessor(n.ID, nPrime, hashed)
 		if err != nil {
 
-			log.Printf("Error in Find Successor. Calling Find Successor of next in line.\n")
+			log.Printf("Error in FindSucessor(). Fixing fingerTables.\n")
 
-			for i := range n.successorList {
-				successor, err := n.findNextSuccessor(n.successorList[i], nPrime, hashed)
-				if err == nil {
-					return successor
-				}
+			n.fixFingers()
+
+			// Assume that FingerTables will eventually be corrected if there is >1 node alive
+			if n.successorList[0] != n.ID {
+				return n.FindSuccessor(hashed)
+			} else {
+				// No more alive successor nodes except itself (Same as commented out edge case)
+				return n.ID
 			}
-			// No more alive successor nodes (Same as commented out edge case)
-			return n.ID
 		}
-
 		return successor
 	}
-}
-
-func (n *Node) findNextSuccessor(id string, nPrime string, hashed int) (string, error) {
-
-	successor, err := n.Gossiper.FindSuccessor(id, nPrime, hashed)
-	if err != nil {
-		log.Printf("Error in Find Successor. Calling Find Successor of next in line.\n")
-		return "", err
-	}
-	return successor, nil
 }
 
 //searches local table for highest predecessor of id
@@ -208,9 +199,13 @@ func (n *Node) WriteFile(fileName, ip string) error {
 }
 
 func (n *Node) ReplicateToSuccessorList(fileName, ip string) {
+
+	// Assumes that successorList nodes repeat after it contains own node
 	for i := range n.successorList {
 		if n.successorList[i] != n.ID {
 			n.replicateToNode(n.successorList[i], fileName, ip)
+		} else {
+			break
 		}
 	}
 }
