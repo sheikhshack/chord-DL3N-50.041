@@ -76,7 +76,9 @@ func (n *Node) FindSuccessor(hashed int) string {
 
 			log.Printf("Error in FindSucessor(). Fixing fingerTables.\n")
 
-			n.fixFingers()
+			for i := 0; i < FINGER_TABLE_SIZE; i++ {
+				n.fixFingers()
+			}
 
 			// Assume that FingerTables will eventually be corrected if there is >1 node alive
 			if n.successorList[0] != n.ID {
