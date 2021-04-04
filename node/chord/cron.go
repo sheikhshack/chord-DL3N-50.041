@@ -10,13 +10,13 @@ import (
 //TODO: Handle the case when the node is in the successorList as well
 func (n *Node) stabilize() {
 	log.Println("Stabilizing", n.ID)
-	if n.successorList[0] == n.ID {
+	if n.GetSuccessor() == n.ID {
 		return
 	}
 
-	x, err := n.Gossiper.GetPredecessor(n.ID, n.successorList[0])
+	x, err := n.Gossiper.GetPredecessor(n.ID, n.GetSuccessor())
 	// log.Println("node ID: ", n.ID)
-	// log.Println("node successorList[0]: ", n.successorList[0])
+	// log.Println("node successorList[0]: ", n.GetSuccessor())
 	// log.Println("Value of x: ", x)
 
 	if err != nil {
@@ -25,19 +25,19 @@ func (n *Node) stabilize() {
 		return
 	}
 
-	// Check if x (supposedly predecessor of successor) is alive
-	if n.healthCheck(x) {
-		if hash.IsInRange(hash.Hash(x), hash.Hash(n.ID), hash.Hash(n.successorList[0])) {
+	if hash.IsInRange(hash.Hash(x), hash.Hash(n.ID), hash.Hash(n.GetSuccessor())) {
+		// Check if x (supposedly predecessor of successor) is alive
+		if n.healthCheck(x) {
 			n.SetSuccessor(x)
+		} else {
+			log.Printf("Predecessor of %s is down. Notify the successor.\n", n.GetSuccessor())
+			n.notify(n.GetSuccessor())
+			return
 		}
-	} else {
-		log.Printf("Predecessor of %s is down. Notify the successor.\n", n.successorList[0])
-		n.notify(n.successorList[0])
-		return
 	}
 
 	// Get succ list of new successor
-	succSuccList, err := n.Gossiper.GetSuccessorList(n.ID, n.successorList[0])
+	succSuccList, err := n.Gossiper.GetSuccessorList(n.ID, n.GetSuccessor())
 
 	if err != nil {
 		log.Printf("error in stabilize[GetSuccessorList]: %+v\n", err)
@@ -45,11 +45,11 @@ func (n *Node) stabilize() {
 		return
 	}
 
-	n.updateSuccessorList(n.successorList, succSuccList)
+	n.updateSuccessorList(succSuccList)
 
 	log.Println("Value of successorList: ", n.successorList)
 
-	n.notify(n.successorList[0])
+	n.notify(n.GetSuccessor())
 }
 
 func (n *Node) healthCheck(id string) bool {
@@ -60,22 +60,18 @@ func (n *Node) healthCheck(id string) bool {
 	return res
 }
 
+// TODO: Mutex locks for this
 func (n *Node) fixSuccessorList() {
-
 	if len(n.successorList) <= 1 {
 		n.successorList = make([]string, SUCCESSOR_LIST_SIZE)
 	} else {
 		n.successorList = n.successorList[1:]
+		n.successorList = append(n.successorList, "")
 	}
-
 }
 
-func (n *Node) updateSuccessorList(succList []string, succSuccList []string) {
-
-	tempSuccList := succList[:1]
-	tempSuccList = append(tempSuccList, succSuccList[:len(succSuccList)-1]...)
-
-	n.successorList = tempSuccList
+func (n *Node) updateSuccessorList(succSuccList []string) {
+	copy(n.successorList[1:], succSuccList[:SUCCESSOR_LIST_SIZE-1])
 }
 
 //implemented differently from pseudocode, n thinks it might be the predecessor of id

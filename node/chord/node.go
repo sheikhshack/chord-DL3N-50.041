@@ -65,27 +65,38 @@ func (n *Node) FindSuccessor(hashed int) string {
 	//if n.successor == n.ID {
 	//	return n.ID
 	//}
-	if hash.IsInRange(hashed, hash.Hash(n.ID), hash.Hash(n.successorList[0])+1) {
-		return n.successorList[0]
+	if hash.IsInRange(hashed, hash.Hash(n.ID), hash.Hash(n.GetSuccessor())+1) {
+		return n.GetSuccessor()
 	} else {
 		nPrime := n.closestPrecedingNode(hashed)
+
 		successor, err := n.Gossiper.FindSuccessor(n.ID, nPrime, hashed)
 		if err != nil {
 
 			log.Printf("Error in Find Successor. Calling Find Successor of next in line.\n")
 
-			n.fixSuccessorList()
-			n.fixFingers()
-
-			if len(n.successorList) != 0 {
-				return n.FindSuccessor(hashed)
-			} else {
-				// No more alive successor nodes (Same as commented out edge case)
-				return n.ID
+			for i := range n.successorList {
+				successor, err := n.findNextSuccessor(n.successorList[i], nPrime, hashed)
+				if err == nil {
+					return successor
+				}
 			}
+			// No more alive successor nodes (Same as commented out edge case)
+			return n.ID
 		}
+
 		return successor
 	}
+}
+
+func (n *Node) findNextSuccessor(id string, nPrime string, hashed int) (string, error) {
+
+	successor, err := n.Gossiper.FindSuccessor(id, nPrime, hashed)
+	if err != nil {
+		log.Printf("Error in Find Successor. Calling Find Successor of next in line.\n")
+		return "", err
+	}
+	return successor, nil
 }
 
 //searches local table for highest predecessor of id
@@ -105,7 +116,7 @@ func (n *Node) closestPrecedingNode(hashed int) string {
 func (n *Node) cron() {
 	time.Sleep(time.Millisecond * 10000)
 	for {
-		log.Println(n.ID, "successor is", n.successorList[0], ", predecessor is", n.predecessor)
+		log.Println(n.ID, "successor is", n.GetSuccessor(), ", predecessor is", n.predecessor)
 		n.checkPredecessor()
 		n.stabilize()
 		n.fixFingers()
@@ -117,7 +128,7 @@ func (n *Node) cron() {
 // func (n *Node) cron() {
 // 	time.Sleep(time.Millisecond * 10000)
 // 	for i := 0; ; i++ {
-// 		log.Println(n.ID, "successor is", n.successorList[0], ", predecessor is", n.predecessor)
+// 		log.Println(n.ID, "successor is", n.GetSuccessor(), ", predecessor is", n.predecessor)
 // 		n.checkPredecessor()
 // 		n.stabilize()
 // 		n.fixFingers()
