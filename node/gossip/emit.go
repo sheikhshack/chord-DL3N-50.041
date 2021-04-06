@@ -36,10 +36,10 @@ func (g *Gossiper) report() {
 
 	client := pb.NewInternalListenerClient(conn)
 	_, err = client.Debug(context.Background(), &pb.DebugMessage{
-		FromID:      g.Node.GetID(),
-		Predecessor: g.Node.GetPredecessor(),
-		Successor:   g.Node.GetSuccessor(),
-		Fingers:     g.Node.GetFingers(),
+		FromID:        g.Node.GetID(),
+		Predecessor:   g.Node.GetPredecessor(),
+		SuccessorList: g.Node.GetSuccessorList(),
+		Fingers:       g.Node.GetFingers(),
 	})
 	if err != nil {
 		//log.Printf("Error sending message: %v", err)
@@ -69,7 +69,6 @@ func (g *Gossiper) emit(nodeAddr string, request *pb.Request) (*pb.Response, err
 	}
 	return response, nil
 }
-
 
 // called by FindSuccessor
 func (g *Gossiper) FindSuccessor(fromID, toID string, key int) (string, error) {
@@ -139,6 +138,22 @@ func (g *Gossiper) GetPredecessor(fromID, toID string) (string, error) {
 	return res.GetBody().ID, nil
 }
 
+// Get the successor list of the node
+func (g *Gossiper) GetSuccessorList(fromID, toID string) ([]string, error) {
+	req := &pb.Request{
+		Command:     pb.Command_GET_SUCCESSOR_LIST,
+		RequesterID: fromID,
+		TargetID:    toID,
+		Body:        &pb.Request_Body{},
+	}
+
+	res, err := g.emit(toID, req)
+	if err != nil {
+		return make([]string, 1), err
+	}
+	return res.GetBody().SuccessorList, nil
+}
+
 // called by notify
 //n things it might be the predecessor of id
 func (g *Gossiper) Notify(fromID, toID string) error {
@@ -154,6 +169,25 @@ func (g *Gossiper) Notify(fromID, toID string) error {
 		return err
 	}
 	return nil
+}
+
+// Replicate file to node
+func (g *Gossiper) ReplicateToNode(fromID, toID, key, value string) (bool, error) {
+	req := &pb.Request{
+		Command:     pb.Command_REPLICATE_TO_NODE,
+		RequesterID: fromID,
+		TargetID:    toID,
+		Body: &pb.Request_Body{
+			Key:   key,
+			Value: value,
+		},
+	}
+
+	_, err := g.emit(toID, req)
+	if err != nil {
+		return false, err
+	}
+	return true, nil
 }
 
 // external dialing service called w/o emit //
@@ -199,7 +233,7 @@ func (g *Gossiper) readFileFromNode(nodeAddr, fileName string) (*pb.ContainerInf
 
 	client := pb.NewInternalListenerClient(conn)
 	response, err := client.ReadFile(context.Background(), &pb.FetchChordRequest{
-		Key:   fileName,
+		Key: fileName,
 	})
 	if err != nil {
 		log.Printf("Error sending message: %v", err)
