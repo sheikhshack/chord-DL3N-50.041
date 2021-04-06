@@ -17,7 +17,11 @@ func main() {
 
 	utils.SetLogFile(logFileName)
 
-	id := os.Getenv("NODE_ID")
+	id, err := os.Hostname()
+	if err != nil{
+		// crash me baby
+		log.Fatal("Docker engine -- hostname issues", err)
+	}
 	knownPeerID := os.Getenv("PEER_HOSTNAME")
 	log.Printf("starting NODE_ID: %v\n", id)
 

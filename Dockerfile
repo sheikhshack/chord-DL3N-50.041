@@ -10,7 +10,6 @@ FROM alpine
 WORKDIR /built-app
 COPY --from=builder /app/node_exec /built-app/
 # ENVARS
-ENV NODE_ID=123
 ENV PEER_HOSTNAME=godbless
 EXPOSE 9000 8888
 

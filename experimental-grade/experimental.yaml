@@ -13,18 +13,19 @@ services:
 #      - alpha
 #      - chord_node
   alpha:
-    container_name: alpha
-    image: chord_node
+    container_name: chord_alpha
+    build:
+      context: ..
+      dockerfile: ../Dockerfile
     ports:
       - 9000
     environment:
-      - NODE_ID=alpha
       - PEER_HOSTNAME=
 
-  chordnode:
-    container_name: apache
-    hostname: sparkypoo
-    image: chord_node
+  chord_member:
+    build:
+      context: ..
+      dockerfile: ../Dockerfile
     ports:
       - 9000
     environment:
@@ -32,3 +33,4 @@ services:
     restart: "no"
     depends_on:
       - alpha
+
