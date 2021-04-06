@@ -58,3 +58,26 @@ func TestDelete(t *testing.T) {
 	err = Delete("alpha", "testdelete")
 	assert.Nilf(err, "error in removing file")
 }
+
+func TestMigrate(t *testing.T) {
+	assert := assert.New(t)
+	testString := "hello world"
+
+	err := New("alpha", "testwrite", []byte(testString))
+	assert.Nilf(err, "error in creating file")
+
+	filename, err := getFilename("alpha", "testwrite")
+	assert.Nilf(err, "error in obtaining filename")
+
+	err = Migrate("alpha", "charlie", "testwrite")
+	assert.Nilf(err, "error in migrating")
+
+	defer os.Remove(filename)
+
+	filename, _ = getFilename("charlie", "testwrite")
+	content, err := ioutil.ReadFile(filename)
+	assert.Nilf(err, "error in reading file")
+
+	contentStr := string(content)
+	assert.EqualValuesf(testString, contentStr, "different contents")
+}

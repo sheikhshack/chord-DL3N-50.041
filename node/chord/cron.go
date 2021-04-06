@@ -5,6 +5,7 @@ import (
 	"math"
 
 	"github.com/sheikhshack/distributed-chaos-50.041/node/hash"
+	"github.com/sheikhshack/distributed-chaos-50.041/node/store"
 )
 
 //TODO: Handle the case when the node is in the successorList as well
@@ -111,6 +112,27 @@ func (n *Node) checkPredecessor() {
 
 	if !n.healthCheck(n.predecessor) {
 		log.Printf("%s's Predecessor is down.\n", n.ID)
+
+		n.migratePredecessorFiles(n.GetPredecessor())
 		n.SetPredecessor("")
+
+	}
+}
+
+// Transfer all the files from predecessor to its own folder
+func (n *Node) migratePredecessorFiles(predecessorID string) {
+
+	files, err := store.GetAll(predecessorID)
+
+	if err != nil {
+		log.Printf("Error in obtaining all files info in store: %+v\n", err)
+		return
+	}
+
+	for _, file := range files {
+		err := store.Migrate(predecessorID, n.ID, file.Name())
+		if err != nil {
+			log.Printf("Error in migrating file %s: %+v\n", file.Name(), err)
+		}
 	}
 }
