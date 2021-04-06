@@ -178,8 +178,9 @@ func (g *Gossiper) ReplicateToNode(fromID, toID, key, value string) (bool, error
 		RequesterID: fromID,
 		TargetID:    toID,
 		Body: &pb.Request_Body{
-			Key:   key,
-			Value: value,
+			Key:    key,
+			Value:  value,
+			NodeId: fromID,
 		},
 	}
 

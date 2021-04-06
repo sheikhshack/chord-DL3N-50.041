@@ -5,9 +5,9 @@ import (
 	"os"
 )
 
-// New creates a new file locally with the filename key and contains value
-func New(key string, value []byte) error {
-	filename, err := getFilename(key)
+// New creates a new file locally with the nodeId directory, filename key and contains value
+func New(nodeId, key string, value []byte) error {
+	filename, err := getFilename(nodeId, key)
 	if err != nil {
 		return err
 	}
@@ -20,8 +20,8 @@ func New(key string, value []byte) error {
 }
 
 // Get obtains the bytes stored in filename
-func Get(key string) ([]byte, error) {
-	filename, err := getFilename(key)
+func Get(nodeId, key string) ([]byte, error) {
+	filename, err := getFilename(nodeId, key)
 	if err != nil {
 		return nil, err
 	}
@@ -34,8 +34,8 @@ func Get(key string) ([]byte, error) {
 }
 
 // Delete removes the file
-func Delete(key string) error {
-	filename, err := getFilename(key)
+func Delete(nodeId, key string) error {
+	filename, err := getFilename(nodeId, key)
 	if err != nil {
 		return err
 	}

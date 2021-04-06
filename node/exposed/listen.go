@@ -3,11 +3,12 @@ package exposed
 import (
 	"context"
 	"fmt"
+	"log"
+	"net"
+
 	exposed "github.com/sheikhshack/distributed-chaos-50.041/node/exposed/proto"
 	"github.com/sheikhshack/distributed-chaos-50.041/node/store"
 	"google.golang.org/grpc"
-	"log"
-	"net"
 )
 
 /* Package exposed is not being used for now
@@ -47,11 +48,13 @@ type ExternalService struct {
 
 func (e *ExternalService) Upload(ctx context.Context, uploadRequest *exposed.UploadRequest) (*exposed.UploadResponse, error) {
 	log.Printf("Upload Method triggered \n")
+
+	nodeId := uploadRequest.NodeId
 	key := uploadRequest.Key
 	val := uploadRequest.Value
 
 	fileByte := []byte(val)
-	output := store.New(key, fileByte)
+	output := store.New(nodeId, key, fileByte)
 
 	return &exposed.UploadResponse{IP: e.Node.GetID()}, output
 }
@@ -65,9 +68,11 @@ func (e *ExternalService) CheckIP(ctx context.Context, lookupRequest *exposed.Ch
 
 func (e *ExternalService) Download(ctx context.Context, downloadRequest *exposed.DownloadRequest) (*exposed.DownloadResponse, error) {
 	log.Printf("Download Method triggered \n")
+
+	nodeId := downloadRequest.NodeId
 	key := downloadRequest.Key
 
-	fileByte, status := store.Get(key)
+	fileByte, status := store.Get(nodeId, key)
 	if status == nil {
 		v := string(fileByte)
 		return &exposed.DownloadResponse{Value: v}, nil

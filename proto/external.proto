@@ -6,13 +6,15 @@ option go_package="github.com/sheikhshack/distributed-chaos-50.041/node/exposed"
 
 // In this proof of concept, we have the key and value sent from client -> chord node
 message UploadRequest {
-  string key = 1;
-  string value = 2;
+  string nodeId = 1;
+  string key = 2;
+  string value = 3;
 }
 
 // can merge
 message DownloadRequest {
-  string key = 1;
+  string nodeId = 1;
+  string key = 2;
 }
 
 message CheckRequest {

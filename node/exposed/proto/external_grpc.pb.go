@@ -33,7 +33,7 @@ func NewExternalListenerClient(cc grpc.ClientConnInterface) ExternalListenerClie
 
 func (c *externalListenerClient) Upload(ctx context.Context, in *UploadRequest, opts ...grpc.CallOption) (*UploadResponse, error) {
 	out := new(UploadResponse)
-	err := c.cc.Invoke(ctx, "/grpc.ExternalListener/Upload", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/external.ExternalListener/Upload", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -42,7 +42,7 @@ func (c *externalListenerClient) Upload(ctx context.Context, in *UploadRequest, 
 
 func (c *externalListenerClient) Download(ctx context.Context, in *DownloadRequest, opts ...grpc.CallOption) (*DownloadResponse, error) {
 	out := new(DownloadResponse)
-	err := c.cc.Invoke(ctx, "/grpc.ExternalListener/Download", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/external.ExternalListener/Download", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -51,7 +51,7 @@ func (c *externalListenerClient) Download(ctx context.Context, in *DownloadReque
 
 func (c *externalListenerClient) CheckIP(ctx context.Context, in *CheckRequest, opts ...grpc.CallOption) (*CheckResponse, error) {
 	out := new(CheckResponse)
-	err := c.cc.Invoke(ctx, "/grpc.ExternalListener/CheckIP", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/external.ExternalListener/CheckIP", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -104,7 +104,7 @@ func _ExternalListener_Upload_Handler(srv interface{}, ctx context.Context, dec 
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/grpc.ExternalListener/Upload",
+		FullMethod: "/external.ExternalListener/Upload",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(ExternalListenerServer).Upload(ctx, req.(*UploadRequest))
@@ -122,7 +122,7 @@ func _ExternalListener_Download_Handler(srv interface{}, ctx context.Context, de
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/grpc.ExternalListener/Download",
+		FullMethod: "/external.ExternalListener/Download",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(ExternalListenerServer).Download(ctx, req.(*DownloadRequest))
@@ -140,7 +140,7 @@ func _ExternalListener_CheckIP_Handler(srv interface{}, ctx context.Context, dec
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/grpc.ExternalListener/CheckIP",
+		FullMethod: "/external.ExternalListener/CheckIP",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(ExternalListenerServer).CheckIP(ctx, req.(*CheckRequest))
@@ -152,7 +152,7 @@ func _ExternalListener_CheckIP_Handler(srv interface{}, ctx context.Context, dec
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var ExternalListener_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "grpc.ExternalListener",
+	ServiceName: "external.ExternalListener",
 	HandlerType: (*ExternalListenerServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{

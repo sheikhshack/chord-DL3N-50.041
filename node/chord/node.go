@@ -106,50 +106,50 @@ func (n *Node) closestPrecedingNode(hashed int) string {
 	return n.ID
 }
 
-func (n *Node) cron() {
-	time.Sleep(time.Millisecond * 10000)
-	for {
-		log.Println(n.ID, "successor is", n.GetSuccessor(), ", predecessor is", n.predecessor)
-		n.checkPredecessor()
-		n.stabilize()
-		n.fixFingers()
-		time.Sleep(time.Millisecond * 1000)
-	}
-}
-
-// // Fake test
 // func (n *Node) cron() {
 // 	time.Sleep(time.Millisecond * 10000)
-// 	for i := 0; ; i++ {
+// 	for {
 // 		log.Println(n.ID, "successor is", n.GetSuccessor(), ", predecessor is", n.predecessor)
 // 		n.checkPredecessor()
 // 		n.stabilize()
 // 		n.fixFingers()
 // 		time.Sleep(time.Millisecond * 1000)
-
-// 		if i == 15 && n.ID == "charlie" {
-
-// 			// Create for own store
-// 			keyString := "store's key 1"
-// 			valueString := "store's value 1"
-// 			valueByte := []byte(valueString)
-// 			store.New(keyString, valueByte)
-
-// 			n.ReplicateToSuccessorList(keyString, valueString)
-
-// 		}
-
-// 		if i > 20 {
-// 			keyString := "store's key 1"
-// 			content, err := store.Get(keyString)
-// 			if err != nil {
-// 				log.Println("[Read Fail] Error in finding key.")
-// 			} else {
-// 				log.Printf("[Read Successful] Value of content is: %s.\n", content)
-// 			}
-// 		}
 // 	}
 // }
+
+// Fake test
+func (n *Node) cron() {
+	time.Sleep(time.Millisecond * 10000)
+	for i := 0; ; i++ {
+		log.Println(n.ID, "successor is", n.GetSuccessor(), ", predecessor is", n.predecessor)
+		n.checkPredecessor()
+		n.stabilize()
+		n.fixFingers()
+		time.Sleep(time.Millisecond * 1000)
+
+		if i == 15 && n.ID == "charlie" {
+
+			// Create for own store
+			keyString := "store's key 1"
+			valueString := "store's value 1"
+			valueByte := []byte(valueString)
+			store.New(n.ID, keyString, valueByte)
+
+			n.ReplicateToSuccessorList(keyString, valueString)
+
+		}
+
+		if i > 20 {
+			keyString := "store's key 1"
+			content, err := store.Get("charlie", keyString)
+			if err != nil {
+				log.Println("[Read Fail] Error in finding key.")
+			} else {
+				log.Printf("[Read Successful] Value of content is: %s.\n", content)
+			}
+		}
+	}
+}
 
 //change successor
 func (n *Node) SetSuccessor(id string) {
@@ -189,13 +189,13 @@ func (n *Node) WriteFileToNode(nodeAddr, fileName, ip string) {
 
 }
 
-func (n *Node) WriteFile(fileName, ip string) error {
+func (n *Node) WriteFile(nodeId, fileName, ip string) error {
 	key := fileName
 	val := ip
 	log.Printf("--- FS: Triggering File Write to Chord Node for key [%v] with content %v \n", key, val)
 
 	fileByte := []byte(val)
-	output := store.New(key, fileByte)
+	output := store.New(nodeId, key, fileByte)
 
 	return output
 }
