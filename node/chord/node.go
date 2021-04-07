@@ -66,7 +66,7 @@ func (n *Node) Join(id string) {
 	}
 	n.SetPredecessor("")
 	n.SetSuccessor(successor)
-	go n.migrationInit(n.successor)
+	go n.migrationInit(n.GetSuccessor())
 	//edge case of in the 1s window, the node's ideal pred hasn't recognised this node
 	go n.cron()
 
