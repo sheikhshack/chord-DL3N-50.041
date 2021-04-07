@@ -5,7 +5,7 @@ COPY . .
 
 # build
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -tags netgo -ldflags '-w' -o dl3n ./cmd/dl3n/dl3n.go
-RUN mv dl3n ../dl3n
+RUN mv dl3n/dl3n ../dl3n
 
 WORKDIR /app
 COPY ./dl3n/demo .

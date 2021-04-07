@@ -1,84 +1,22 @@
+/*
+Copyright © 2021 NAME HERE <EMAIL ADDRESS>
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
 package main
 
-import (
-	"fmt"
-	"os"
-	"os/signal"
-	"syscall"
-
-	"github.com/sheikhshack/distributed-chaos-50.041/dl3n"
-)
-
-const helpMessage = `
-DL3N SEED - usage:
-dl3n seed [filepath] [addr]
-filepath: file to be seeded. should be in same directory as executable.
-addr: address of chord node to update for peer discovery. should include port.
-
-DL3N GET - usage:
-dl3n get [filepath] [addr]
-filepath: .dl3n meta file. should be in same directory as executable.
-addr: address of chord node to query for peer discovery. should include port.
-`
+import "github.com/sheikhshack/distributed-chaos-50.041/cmd/dl3n/cmd"
 
 func main() {
-	if len(os.Args) != 4 {
-		fmt.Println(helpMessage)
-		os.Exit(1)
-	}
-
-	cmd := os.Args[1]
-	path := os.Args[2]
-	addr := os.Args[3]
-
-	if cmd != "seed" && cmd != "get" {
-		fmt.Println(helpMessage)
-		os.Exit(1)
-	}
-
-	if cmd == "get" {
-		d, _ := dl3n.NewDL3NFromMeta(path)
-		fmt.Printf("%+v\n", d)
-
-		nd := dl3n.NewChordNodeDiscovery(addr)
-
-		ds := dl3n.NewDL3NNode(d, nd)
-		err := ds.Get()
-		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
-		}
-	}
-
-	if cmd == "seed" {
-		d, err := dl3n.NewDL3NFromFileOneChunk(path)
-		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
-		}
-
-		d.WriteMetaFile(path + ".dl3n")
-
-		nd := dl3n.NewChordNodeDiscovery(addr)
-		ds := dl3n.NewDL3NNode(d, nd)
-
-		containerIP := os.Getenv("CONTAINER_IP")
-		seederAddr := containerIP + ":11111"
-		err = ds.NodeDiscovery.SetSeederAddr(d.Hash, seederAddr)
-		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
-		}
-
-		ds.StartSeed(seederAddr)
-
-		// listen for signals
-		sigs := make(chan os.Signal, 1)
-		signal.Notify(sigs, os.Interrupt, syscall.SIGTERM)
-
-		// wait for sigint or sigterm
-		<-sigs
-		ds.StopSeed()
-	}
-
+	cmd.Execute()
 }
