@@ -16,35 +16,41 @@ limitations under the License.
 package cmd
 
 import (
-	"fmt"
+	"os"
 
+	"github.com/sheikhshack/distributed-chaos-50.041/dl3n"
 	"github.com/spf13/cobra"
 )
 
 // writemetaCmd represents the writemeta command
 var writemetaCmd = &cobra.Command{
-	Use:   "writemeta",
+	Use:   "writemeta [file_path]",
 	Short: "create a metadata file without sharing the file",
 	Long: `writemeta generates a .dl3n metadata file which contains metadata about
 the file being shared, such as its name, infohash, and chunks.
 
 unlike seed, writemeta will not chunk the file, only generate the metadata file.
 `,
-	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("writemeta called")
-	},
+	Args: cobra.ExactArgs(1),
+	Run:  writemeta,
+}
+
+func writemeta(cmd *cobra.Command, args []string) {
+	path := args[0]
+
+	d, err := dl3n.NewDL3NFromFileOneChunk(path)
+	if err != nil {
+		cmd.PrintErrln(err)
+		os.Exit(1)
+	}
+
+	err = d.WriteMetaFile(path + ".dl3n")
+	if err != nil {
+		cmd.PrintErrln(err)
+		os.Exit(1)
+	}
 }
 
 func init() {
 	rootCmd.AddCommand(writemetaCmd)
-
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// writemetaCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// writemetaCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }

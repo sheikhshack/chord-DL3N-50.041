@@ -3,13 +3,23 @@ FROM golang:1.16-alpine
 WORKDIR /app/src
 COPY . .
 
-# build
+# build chord_node_exec and dl3n
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -tags netgo -ldflags '-w' -o dl3n ./cmd/dl3n/dl3n.go
-RUN mv dl3n/dl3n ../dl3n
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -tags netgo -ldflags '-w' -o chord_node_exec ./cmd/node/node_join.go
 
+# install figlet for demo, install dos2unix to convert scripts just in case
+RUN apk add figlet dos2unix
+
+# delete source files
+RUN mv dl3n/dl3n ../dl3n
+RUN mv chord_node_exec ../chord_node_exec
 WORKDIR /app
-COPY ./dl3n/demo .
 RUN rm -r src
+
+# add demo files
+COPY ./dl3n/demo .
+# convert demo files just in case
+RUN dos2unix *
 
 EXPOSE 9000
 
