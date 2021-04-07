@@ -1,18 +1,17 @@
-FROM golang AS builder
-# stagedbuild
+FROM golang:1.16-alpine
+
+WORKDIR /app/src
+COPY . .
+
+# build
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -tags netgo -ldflags '-w' -o dl3n ./cmd/dl3n/dl3n.go
+RUN mv dl3n ../dl3n
 
 WORKDIR /app
-COPY . .
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -tags netgo -ldflags '-w' -o dl3n ./cmd/dl3n/dl3n.go
+COPY ./dl3n/demo .
+RUN rm -r src
 
-# using alpine for this, remember to use APK
-FROM alpine
-WORKDIR /built-app
-COPY --from=builder /app/dl3n/dl3n /built-app/
-# ENVARS
-ENV NODE_ID=123
-ENV PEER_HOSTNAME=godbless
-EXPOSE 9000 8888
+EXPOSE 9000
 
 # do nothing
 CMD sleep 86400
