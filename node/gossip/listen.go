@@ -18,12 +18,14 @@ import (
 type node interface {
 	FindSuccessor(hashed int) string
 	GetPredecessor() string
+	GetSuccessorList() []string
 	GetSuccessor() string
 	SetSuccessor(id string)
 	GetID() string
 	GetFingers() []string
 	NotifyHandler(possiblePredecessor string)
 	MigrationHandler(pred string)
+	WriteFile(nodeId, fileName, ip string) error
 	// for external API
 }
 
@@ -105,11 +107,37 @@ func (g *Gossiper) Emit(ctx context.Context, in *pb.Request) (*pb.Response, erro
 			},
 		}
 
+	case pb.Command_GET_SUCCESSOR_LIST:
+		successorList := g.getSuccessorListHandler()
+		res = &pb.Response{
+			Command:     pb.Command_GET_SUCCESSOR_LIST,
+			RequesterID: in.GetRequesterID(),
+			TargetID:    in.GetTargetID(),
+			Body: &pb.Response_Body{
+				SuccessorList: successorList,
+			},
+		}
+
 	case pb.Command_NOTIFY:
 		possiblePredecessor := in.GetRequesterID()
 		g.notifyHandler(possiblePredecessor)
 		res = &pb.Response{
 			Command:     pb.Command_NOTIFY,
+			RequesterID: in.GetRequesterID(),
+			TargetID:    in.GetTargetID(),
+			Body:        &pb.Response_Body{},
+		}
+
+	case pb.Command_REPLICATE_TO_NODE:
+
+		key := in.GetBody().Key
+		value := in.GetBody().Value
+		nodeId := in.GetBody().NodeId
+
+		g.replicateToNodeHandler(nodeId, key, value)
+
+		res = &pb.Response{
+			Command:     pb.Command_REPLICATE_TO_NODE,
 			RequesterID: in.GetRequesterID(),
 			TargetID:    in.GetTargetID(),
 			Body:        &pb.Response_Body{},
@@ -148,10 +176,18 @@ func (g *Gossiper) getPredecessorHandler() string {
 	return g.Node.GetPredecessor()
 }
 
+func (g *Gossiper) getSuccessorListHandler() []string {
+	return g.Node.GetSuccessorList()
+}
+
 // notifyHandler handles notify requests and returns if id is in between n.predecessor and n.
 // notifyHandler might also update n.predecessor and trigger data transfer if appropriate.
 func (g *Gossiper) notifyHandler(possiblePredecessor string) {
 	g.Node.NotifyHandler(possiblePredecessor)
+}
+
+func (g *Gossiper) replicateToNodeHandler(nodeId, key, value string) {
+	g.Node.WriteFile(nodeId, key, value)
 }
 
 //// TODO: Move to legacy - DEFUNCT (leaving as reference for fk-up)
@@ -178,20 +214,18 @@ func (g *Gossiper) FetchChordIp(ctx context.Context, fetchRequest *pb.FetchChord
 }
 
 func (g *Gossiper) WriteFile(ctx context.Context, writeRequest *pb.ModRequest) (*pb.ModResponse, error) {
-	key := writeRequest.Key
-	val := writeRequest.Value
-	log.Printf("--- FS: Triggering File Write to Chord Node for key [%v] with content %v \nHashedkey: %v", key, val, hash.Hash(key))
 
-	fileByte := []byte(val)
-	output := store.New(key, fileByte)
-
+	output := g.Node.WriteFile(writeRequest.NodeId, writeRequest.Key, writeRequest.Value)
 	return &pb.ModResponse{IP: g.Node.GetID()}, output
 }
 
 func (g *Gossiper) DeleteFile(ctx context.Context, fetchRequest *pb.FetchChordRequest) (*pb.ModResponse, error) {
 	log.Printf("Upload Method triggered \n")
+
 	key := fetchRequest.GetKey()
-	status := store.Delete(key)
+	nodeId := fetchRequest.NodeId
+
+	status := store.Delete(nodeId, key)
 	log.Printf("--- FS: Triggering File Delete in Node for key [%v] \n", key)
 
 	return &pb.ModResponse{IP: g.Node.GetID()}, status
@@ -200,11 +234,14 @@ func (g *Gossiper) DeleteFile(ctx context.Context, fetchRequest *pb.FetchChordRe
 // ReadFile allows returning of container IP from file within chord
 func (g *Gossiper) ReadFile(ctx context.Context, fetchRequest *pb.FetchChordRequest) (*pb.ContainerInfo, error) {
 	log.Printf("Upload Method triggered \n")
+
 	key := fetchRequest.GetKey()
-	fileByte, status := store.Get(key)
+	nodeId := fetchRequest.NodeId
+
+	fileByte, status := store.Get(nodeId, key)
 	// TODO: Might need to change this
 	containerIP := string(fileByte[:])
-	log.Printf("--- FS: Triggering File Read in Node for key [%v] \n", key)
+	log.Printf("--- FS: Triggering File Delete in Node for key [%v] \n", key)
 
 	return &pb.ContainerInfo{ContainerIP: containerIP}, status
 }

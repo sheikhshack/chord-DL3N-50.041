@@ -1,22 +1,23 @@
 package store
 
 import (
-	"github.com/kardianos/osext"
 	"os"
 	"path"
+
+	"github.com/kardianos/osext"
 )
 
 // getOrCreateChordDir gets the path for chord store and creates it if it doesn't exist
-func getOrCreateChordDir() (dirPath string, err error) {
+func getOrCreateChordDir(nodeId string) (dirPath string, err error) {
 	exPath, err := osext.ExecutableFolder()
 	if err != nil {
 		return "", err
 	}
 
-	dirPath = path.Join(exPath, "chord")
+	dirPath = path.Join(exPath, "chord", nodeId)
 
 	if _, err := os.Stat(dirPath); os.IsNotExist(err) {
-		err = os.Mkdir(dirPath, os.ModeDir+0777)
+		err = os.MkdirAll(dirPath, os.ModeDir+0777)
 		if err != nil {
 			return "", err
 		}
@@ -24,8 +25,8 @@ func getOrCreateChordDir() (dirPath string, err error) {
 	return dirPath, nil
 }
 
-func getFilename(name string) (filename string, err error) {
-	if dirPath, err := getOrCreateChordDir(); err != nil {
+func getFilename(nodeId, name string) (filename string, err error) {
+	if dirPath, err := getOrCreateChordDir(nodeId); err != nil {
 		return "", err
 	} else {
 		filename = path.Join(dirPath, name)
