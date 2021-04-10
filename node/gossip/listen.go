@@ -25,6 +25,7 @@ type node interface {
 	GetFingers() []string
 	NotifyHandler(possiblePredecessor string)
 	MigrationJoinHandler(requestId string)
+	MigrationFaultHandler(requestId string)
 	WriteFile(fileType, fileName, ip string) error
 	WriteFileAndReplicate(fileType, fileName, ip string) error
 	DeleteFile(fileType, fileName string) error
@@ -245,9 +246,18 @@ func (g *Gossiper) ReadFile(ctx context.Context, fetchRequest *pb.FetchChordRequ
 
 func (g *Gossiper) MigrationJoin(ctx context.Context, migrationRequest *pb.MigrationRequest) (*pb.MigrationResponse, error) {
 	requestId := migrationRequest.RequesterID
-	log.Printf("--- FS: Triggering Migration to Chord Node %v from %v \n", requestId, g.Node.GetID())
+	log.Printf("--- FS: Triggering Migration (Join) to Chord Node %v from %v \n", requestId, g.Node.GetID())
 
 	g.Node.MigrationJoinHandler(requestId)
+
+	return &pb.MigrationResponse{Success: true}, nil
+}
+
+func (g *Gossiper) MigrationFault(ctx context.Context, migrationRequest *pb.MigrationRequest) (*pb.MigrationResponse, error) {
+	requestId := migrationRequest.RequesterID
+	log.Printf("--- FS: Triggering Migration (Fault) to Chord Node %v from %v \n", requestId, g.Node.GetID())
+
+	g.Node.MigrationFaultHandler(requestId)
 
 	return &pb.MigrationResponse{Success: true}, nil
 }

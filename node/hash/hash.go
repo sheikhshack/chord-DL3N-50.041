@@ -43,7 +43,7 @@ func IsInRange(keySlot, localSlot, remoteSlot int) bool {
 }
 
 func main() {
-	fmt.Println(Hash("forgotten_sailor.rar"))
+	fmt.Println(Hash("remember.rar"))
 	fmt.Println("alpha:", Hash("alpha"))
 	fmt.Println("bravo:", Hash("nodeBravo"))
 	fmt.Println("charlie:", Hash("nodeCharlie"))
