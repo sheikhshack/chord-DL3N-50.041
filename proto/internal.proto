@@ -106,15 +106,18 @@ message MigrationResponse{
   bool success = 1;
 }
 
+
 service InternalListener {
   // core service
   rpc Emit(Request) returns (Response) {}
   // chord file management services (internal)
   rpc ReadFile(FetchChordRequest) returns (ContainerInfo) {}
   rpc WriteFile(ModRequest) returns (ModResponse) {}
+  rpc WriteFileAndReplicate(ModRequest) returns (ModResponse) {}
   rpc DeleteFile(FetchChordRequest) returns (ModResponse) {}
   rpc FetchChordIp(FetchChordRequest) returns (ModResponse) {}
-  rpc MigrationInit(MigrationRequest) returns (MigrationResponse) {}
+  rpc MigrationJoin(MigrationRequest) returns (MigrationResponse) {}
+  rpc MigrationFault(MigrationRequest) returns (MigrationResponse) {}
   // defunct
 
   // D3L bridge protocol (external)

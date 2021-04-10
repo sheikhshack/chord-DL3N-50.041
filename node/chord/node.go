@@ -3,6 +3,7 @@ package chord
 import (
 	"log"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/sheikhshack/distributed-chaos-50.041/node/gossip"
@@ -10,7 +11,7 @@ import (
 	"github.com/sheikhshack/distributed-chaos-50.041/node/store"
 )
 
-const SUCCESSOR_LIST_SIZE = 3
+const SUCCESSOR_LIST_SIZE = 2
 const FINGER_TABLE_SIZE = 16
 
 type Node struct {
@@ -27,7 +28,7 @@ type Node struct {
 func New(id string) *Node {
 	// 16 is finger table size
 	n := &Node{ID: id, next: 0, fingers: make([]string, FINGER_TABLE_SIZE), successorList: make([]string, SUCCESSOR_LIST_SIZE)}
-
+	log.Printf("Node:%v, HashedValue:%v", n.ID, hash.Hash(n.ID))
 	if os.Getenv("DEBUG") == "debug" {
 		n.Gossiper = &gossip.Gossiper{
 			Node:      n,
@@ -66,7 +67,7 @@ func (n *Node) Join(id string) {
 	}
 	n.SetPredecessor("")
 	n.SetSuccessor(successor)
-	go n.migrationInit(n.GetSuccessor())
+	go n.migrationJoin(n.GetSuccessor())
 	//edge case of in the 1s window, the node's ideal pred hasn't recognised this node
 	go n.cron()
 
@@ -104,34 +105,53 @@ func (n *Node) FindSuccessor(hashed int) string {
 }
 
 //ask successor to migrate files that belong to current node
-func (n *Node) migrationInit(successor string) {
-	if _, err := n.Gossiper.MigrationRequestFromNode(successor); err != nil {
+func (n *Node) migrationJoin(successor string) {
+	if _, err := n.Gossiper.MigrationJoinFromNode(successor); err != nil {
 		log.Fatalf("[MigrationRequestFromNode: %+v\n", err)
 	}
 }
 
 //predecessor has asked to migrate files from current nodes
-func (n *Node) MigrationHandler(pred string) {
+func (n *Node) MigrationJoinHandler(requestID string) {
 
 	// Get all the replica files in the store
 	files, err := store.GetAll("local")
 	if err != nil {
 		print(err)
+		return
 	}
-
+	keys := ""
+	values := ""
 	//Loop through them and write over the ones that do not lie in between pred and current node, and then delete if the write is successful
 	for _, i := range files {
-		log.Printf("Filename:%v, HashedFile: %v", i.Name(), hash.Hash(i.Name()))
-		if !hash.IsInRange(hash.Hash(i.Name()), hash.Hash(pred), hash.Hash(n.ID)) {
+		log.Printf("Has Filename:%v, HashedFile: %v", i.Name(), hash.Hash(i.Name()))
+		if !hash.IsInRange(hash.Hash(i.Name()), hash.Hash(requestID), hash.Hash(n.ID)) {
+			keys += i.Name() + ","
 			val, _ := store.Get("local", i.Name())
-			_, err := n.Gossiper.WriteFileToNode(pred, i.Name(), string(val))
-			if err != nil {
-				log.Printf("Error in writing file: %+v\n", err)
-			} else {
-				store.Delete("local", i.Name())
+			values += string(val) + ","
+		}
+	}
+	if keys != "" {
+		//Init writing to predecessor
+		log.Printf("Migrating Filename:%v", keys)
+		_, err = n.Gossiper.WriteFileToNode(requestID, keys, "local", values)
+		if err != nil {
+			log.Printf("Error in writing file: %+v\n", err)
+			return
+		} else {
+			keys_list := strings.Split(keys, ",")
+
+			for _, i := range keys_list {
+				store.Migrate("local", "replica", i)
 			}
 		}
 
+		//Init deleting from last successor
+		_, err = n.Gossiper.DeleteFileFromNode(requestID, keys, "replica")
+		if err != nil {
+			print("Error in Deleting file: %+v\n", err)
+			return
+		}
 	}
 
 }
@@ -231,12 +251,35 @@ func (n *Node) GetFingers() []string {
 func (n *Node) WriteFile(fileType, fileName, ip string) error {
 	key := fileName
 	val := ip
-	log.Printf("--- FS: Triggering File Write to Chord Node for key [%v] with content %v \n", key, val)
+	log.Printf("--- FS: Triggering File Write to Chord Node for key [%v] with content %v to folder %v\n", key, val, fileType)
+	var keys_list []string
+	var val_list []string
 
-	fileByte := []byte(val)
-	output := store.New(fileType, key, fileByte)
+	if strings.Contains(key, ",") {
+		keys_list = strings.Split(key, ",")
+		val_list = strings.Split(val, ",")
+	} else {
+		keys_list = []string{key}
+		val_list = []string{val}
+	}
+	for i := 0; i < len(keys_list); i++ {
+		fileByte := []byte(val_list[i])
+		output := store.New(fileType, keys_list[i], fileByte)
+		if output != nil {
+			for x := 0; x <= i; x++ {
+				store.Delete(fileType, keys_list[x])
+			}
+			return output
+		}
+	}
 
-	return output
+	return nil
+}
+
+func (n *Node) WriteFileAndReplicate(fileType, fileName, ip string) error {
+	n.WriteFile(fileType, fileName, ip)
+	n.ReplicateToSuccessorList(fileName, ip)
+	return nil
 }
 
 func (n *Node) ReplicateToSuccessorList(fileName, ip string) {

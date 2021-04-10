@@ -5,7 +5,6 @@ services:
   panopticon:
     container_name: panopticon
     image: panopticon
-
   alpha:
     container_name: alpha
     image: chord_node
