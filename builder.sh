@@ -1,2 +1,2 @@
-docker build -t mike_node -f mike/Dockerfile . &&  docker build -t chord_node .
+docker build -t mike_node -f mike/Dockerfile . &&  docker build -t sheikhshack/chord_node .
 
