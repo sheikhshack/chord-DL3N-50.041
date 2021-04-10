@@ -1,0 +1,442 @@
+2021/04/10 15:30:14 starting NODE_ID: alpha
+2021/04/10 15:30:14 Node:alpha, HashedValue:68601
+2021/04/10 15:30:14 alpha: init-ed ring
+2021/04/10 15:30:16 --- FS: Triggering Migration to Chord Node nodeBravo from alpha 
+2021/04/10 15:30:24 alpha successor is nodeBravo , predecessor is 
+2021/04/10 15:30:24 Stabilizing alpha
+2021/04/10 15:30:24 Value of successorList:  [nodeBravo alpha]
+2021/04/10 15:30:25 --- FS: Triggering Migration to Chord Node nodeDelta from alpha 
+2021/04/10 15:30:25 alpha successor is nodeBravo , predecessor is 
+2021/04/10 15:30:25 Stabilizing alpha
+2021/04/10 15:30:25 Value of successorList:  [nodeBravo alpha]
+2021/04/10 15:30:26 alpha successor is nodeBravo , predecessor is nodeBravo
+2021/04/10 15:30:26 Stabilizing alpha
+2021/04/10 15:30:26 Value of successorList:  [nodeBravo alpha]
+2021/04/10 15:30:27 alpha successor is nodeBravo , predecessor is nodeBravo
+2021/04/10 15:30:27 Stabilizing alpha
+2021/04/10 15:30:28 Value of successorList:  [nodeBravo alpha]
+2021/04/10 15:30:29 alpha successor is nodeBravo , predecessor is nodeBravo
+2021/04/10 15:30:29 Stabilizing alpha
+2021/04/10 15:30:29 Value of successorList:  [nodeBravo alpha]
+2021/04/10 15:30:30 alpha successor is nodeBravo , predecessor is nodeBravo
+2021/04/10 15:30:30 Stabilizing alpha
+2021/04/10 15:30:30 Value of successorList:  [nodeBravo alpha]
+2021/04/10 15:30:31 alpha successor is nodeBravo , predecessor is nodeBravo
+2021/04/10 15:30:31 Stabilizing alpha
+2021/04/10 15:30:31 Value of successorList:  [nodeBravo alpha]
+2021/04/10 15:30:32 alpha successor is nodeBravo , predecessor is nodeBravo
+2021/04/10 15:30:32 Stabilizing alpha
+2021/04/10 15:30:32 Value of successorList:  [nodeBravo alpha]
+2021/04/10 15:30:33 alpha successor is nodeBravo , predecessor is nodeBravo
+2021/04/10 15:30:33 Stabilizing alpha
+2021/04/10 15:30:33 Value of successorList:  [nodeBravo alpha]
+2021/04/10 15:30:34 alpha successor is nodeBravo , predecessor is nodeBravo
+2021/04/10 15:30:34 Stabilizing alpha
+2021/04/10 15:30:34 Value of successorList:  [nodeBravo alpha]
+2021/04/10 15:30:35 alpha successor is nodeBravo , predecessor is nodeBravo
+2021/04/10 15:30:35 Stabilizing alpha
+2021/04/10 15:30:35 Value of successorList:  [nodeBravo alpha]
+2021/04/10 15:30:36 alpha successor is nodeBravo , predecessor is nodeDelta
+2021/04/10 15:30:36 Stabilizing alpha
+2021/04/10 15:30:36 Value of successorList:  [nodeBravo alpha]
+2021/04/10 15:30:37 alpha successor is nodeBravo , predecessor is nodeDelta
+2021/04/10 15:30:37 Stabilizing alpha
+2021/04/10 15:30:37 Value of successorList:  [nodeBravo nodeDelta]
+2021/04/10 15:30:38 alpha successor is nodeBravo , predecessor is nodeDelta
+2021/04/10 15:30:38 Stabilizing alpha
+2021/04/10 15:30:38 Value of successorList:  [nodeBravo nodeDelta]
+2021/04/10 15:30:39 alpha successor is nodeBravo , predecessor is nodeDelta
+2021/04/10 15:30:39 Stabilizing alpha
+2021/04/10 15:30:39 Value of successorList:  [nodeBravo nodeDelta]
+2021/04/10 15:30:40 alpha successor is nodeBravo , predecessor is nodeDelta
+2021/04/10 15:30:40 Stabilizing alpha
+2021/04/10 15:30:40 Value of successorList:  [nodeBravo nodeDelta]
+2021/04/10 15:30:41 alpha successor is nodeBravo , predecessor is nodeDelta
+2021/04/10 15:30:41 Stabilizing alpha
+2021/04/10 15:30:41 Value of successorList:  [nodeBravo nodeDelta]
+2021/04/10 15:30:42 alpha successor is nodeBravo , predecessor is nodeDelta
+2021/04/10 15:30:42 Stabilizing alpha
+2021/04/10 15:30:42 Value of successorList:  [nodeBravo nodeDelta]
+2021/04/10 15:30:43 alpha successor is nodeBravo , predecessor is nodeDelta
+2021/04/10 15:30:43 Stabilizing alpha
+2021/04/10 15:30:43 Value of successorList:  [nodeBravo nodeDelta]
+2021/04/10 15:30:44 alpha successor is nodeBravo , predecessor is nodeDelta
+2021/04/10 15:30:44 Stabilizing alpha
+2021/04/10 15:30:44 Value of successorList:  [nodeBravo nodeDelta]
+2021/04/10 15:30:45 alpha successor is nodeBravo , predecessor is nodeDelta
+2021/04/10 15:30:45 Stabilizing alpha
+2021/04/10 15:30:45 Value of successorList:  [nodeBravo nodeDelta]
+2021/04/10 15:30:46 alpha successor is nodeBravo , predecessor is nodeDelta
+2021/04/10 15:30:46 Stabilizing alpha
+2021/04/10 15:30:46 Value of successorList:  [nodeBravo nodeDelta]
+2021/04/10 15:30:47 alpha successor is nodeBravo , predecessor is nodeDelta
+2021/04/10 15:30:47 Stabilizing alpha
+2021/04/10 15:30:47 Value of successorList:  [nodeBravo nodeDelta]
+2021/04/10 15:30:48 alpha successor is nodeBravo , predecessor is nodeDelta
+2021/04/10 15:30:48 Stabilizing alpha
+2021/04/10 15:30:48 Value of successorList:  [nodeBravo nodeDelta]
+2021/04/10 15:30:49 alpha successor is nodeBravo , predecessor is nodeDelta
+2021/04/10 15:30:49 Stabilizing alpha
+2021/04/10 15:30:49 Value of successorList:  [nodeBravo nodeDelta]
+2021/04/10 15:30:50 alpha successor is nodeBravo , predecessor is nodeDelta
+2021/04/10 15:30:50 Stabilizing alpha
+2021/04/10 15:30:50 Value of successorList:  [nodeBravo nodeDelta]
+2021/04/10 15:30:51 alpha successor is nodeBravo , predecessor is nodeDelta
+2021/04/10 15:30:51 Stabilizing alpha
+2021/04/10 15:30:51 Value of successorList:  [nodeBravo nodeDelta]
+2021/04/10 15:30:52 --- FS: Triggering File Write to Chord Node for key [forgotten.rar] with content godbless_DL3N_DNS to folder local
+2021/04/10 15:30:52 Keys to be put in: [forgotten.rar], Val_list to be put in: [godbless_DL3N_DNS]
+2021/04/10 15:30:52 Storing forgotten.rar with value godbless_DL3N_DNS
+2021/04/10 15:30:52 alpha successor is nodeBravo , predecessor is nodeDelta
+2021/04/10 15:30:52 Stabilizing alpha
+2021/04/10 15:30:52 Value of successorList:  [nodeBravo nodeDelta]
+2021/04/10 15:30:53 alpha successor is nodeBravo , predecessor is nodeDelta
+2021/04/10 15:30:53 Stabilizing alpha
+2021/04/10 15:30:53 Value of successorList:  [nodeBravo nodeDelta]
+2021/04/10 15:30:54 alpha successor is nodeBravo , predecessor is nodeDelta
+2021/04/10 15:30:54 Stabilizing alpha
+2021/04/10 15:30:54 Value of successorList:  [nodeBravo nodeDelta]
+2021/04/10 15:30:55 alpha successor is nodeBravo , predecessor is nodeDelta
+2021/04/10 15:30:55 Stabilizing alpha
+2021/04/10 15:30:55 Value of successorList:  [nodeBravo nodeDelta]
+2021/04/10 15:30:56 alpha successor is nodeBravo , predecessor is nodeDelta
+2021/04/10 15:30:56 Stabilizing alpha
+2021/04/10 15:30:56 Value of successorList:  [nodeBravo nodeDelta]
+2021/04/10 15:30:57 Upload Method triggered 
+2021/04/10 15:30:57 --- FS: Triggering File Read in Node for key [forgotten.rar] 
+2021/04/10 15:30:57 alpha successor is nodeBravo , predecessor is nodeDelta
+2021/04/10 15:30:57 Stabilizing alpha
+2021/04/10 15:30:57 Value of successorList:  [nodeBravo nodeDelta]
+2021/04/10 15:30:58 alpha successor is nodeBravo , predecessor is nodeDelta
+2021/04/10 15:30:58 Stabilizing alpha
+2021/04/10 15:30:58 Value of successorList:  [nodeBravo nodeDelta]
+2021/04/10 15:30:59 alpha successor is nodeBravo , predecessor is nodeDelta
+2021/04/10 15:30:59 Stabilizing alpha
+2021/04/10 15:30:59 Value of successorList:  [nodeBravo nodeDelta]
+2021/04/10 15:31:00 alpha successor is nodeBravo , predecessor is nodeDelta
+2021/04/10 15:31:00 Stabilizing alpha
+2021/04/10 15:31:00 Value of successorList:  [nodeBravo nodeDelta]
+2021/04/10 15:31:01 alpha successor is nodeBravo , predecessor is nodeDelta
+2021/04/10 15:31:01 Stabilizing alpha
+2021/04/10 15:31:01 Value of successorList:  [nodeBravo nodeDelta]
+2021/04/10 15:31:02 alpha successor is nodeBravo , predecessor is nodeDelta
+2021/04/10 15:31:02 Stabilizing alpha
+2021/04/10 15:31:02 Value of successorList:  [nodeBravo nodeDelta]
+2021/04/10 15:31:03 alpha successor is nodeBravo , predecessor is nodeDelta
+2021/04/10 15:31:03 Stabilizing alpha
+2021/04/10 15:31:03 Value of successorList:  [nodeBravo nodeDelta]
+2021/04/10 15:31:04 alpha successor is nodeBravo , predecessor is nodeDelta
+2021/04/10 15:31:04 Stabilizing alpha
+2021/04/10 15:31:04 Value of successorList:  [nodeBravo nodeDelta]
+2021/04/10 15:31:05 alpha successor is nodeBravo , predecessor is nodeDelta
+2021/04/10 15:31:05 Stabilizing alpha
+2021/04/10 15:31:05 Value of successorList:  [nodeBravo nodeDelta]
+2021/04/10 15:31:06 alpha successor is nodeBravo , predecessor is nodeDelta
+2021/04/10 15:31:06 Stabilizing alpha
+2021/04/10 15:31:06 Value of successorList:  [nodeBravo nodeDelta]
+2021/04/10 15:31:07 alpha successor is nodeBravo , predecessor is nodeDelta
+2021/04/10 15:31:07 Stabilizing alpha
+2021/04/10 15:31:07 Value of successorList:  [nodeBravo nodeDelta]
+2021/04/10 15:31:08 alpha successor is nodeBravo , predecessor is nodeDelta
+2021/04/10 15:31:08 Stabilizing alpha
+2021/04/10 15:31:08 Value of successorList:  [nodeBravo nodeDelta]
+2021/04/10 15:31:09 alpha successor is nodeBravo , predecessor is nodeDelta
+2021/04/10 15:31:09 Stabilizing alpha
+2021/04/10 15:31:09 Value of successorList:  [nodeBravo nodeDelta]
+2021/04/10 15:31:10 alpha successor is nodeBravo , predecessor is nodeDelta
+2021/04/10 15:31:10 Stabilizing alpha
+2021/04/10 15:31:10 Value of successorList:  [nodeBravo nodeDelta]
+2021/04/10 15:31:11 alpha successor is nodeBravo , predecessor is nodeDelta
+2021/04/10 15:31:11 Stabilizing alpha
+2021/04/10 15:31:11 Value of successorList:  [nodeBravo nodeDelta]
+2021/04/10 15:31:12 alpha successor is nodeBravo , predecessor is nodeDelta
+2021/04/10 15:31:12 Stabilizing alpha
+2021/04/10 15:31:12 Value of successorList:  [nodeBravo nodeDelta]
+2021/04/10 15:31:13 alpha successor is nodeBravo , predecessor is nodeDelta
+2021/04/10 15:31:13 Stabilizing alpha
+2021/04/10 15:31:13 Value of successorList:  [nodeBravo nodeDelta]
+2021/04/10 15:31:14 alpha successor is nodeBravo , predecessor is nodeDelta
+2021/04/10 15:31:14 Stabilizing alpha
+2021/04/10 15:31:14 Value of successorList:  [nodeBravo nodeDelta]
+2021/04/10 15:31:15 alpha successor is nodeBravo , predecessor is nodeDelta
+2021/04/10 15:31:15 Stabilizing alpha
+2021/04/10 15:31:15 Value of successorList:  [nodeBravo nodeDelta]
+2021/04/10 15:31:16 alpha successor is nodeBravo , predecessor is nodeDelta
+2021/04/10 15:31:16 Stabilizing alpha
+2021/04/10 15:31:16 Value of successorList:  [nodeBravo nodeDelta]
+2021/04/10 15:31:17 alpha successor is nodeBravo , predecessor is nodeDelta
+2021/04/10 15:31:17 Stabilizing alpha
+2021/04/10 15:31:17 Value of successorList:  [nodeBravo nodeDelta]
+2021/04/10 15:31:18 alpha successor is nodeBravo , predecessor is nodeDelta
+2021/04/10 15:31:18 Stabilizing alpha
+2021/04/10 15:31:18 Value of successorList:  [nodeBravo nodeDelta]
+2021/04/10 15:31:19 alpha successor is nodeBravo , predecessor is nodeDelta
+2021/04/10 15:31:19 Stabilizing alpha
+2021/04/10 15:31:19 Value of successorList:  [nodeBravo nodeDelta]
+2021/04/10 15:31:20 alpha successor is nodeBravo , predecessor is nodeDelta
+2021/04/10 15:31:20 Stabilizing alpha
+2021/04/10 15:31:20 Value of successorList:  [nodeBravo nodeDelta]
+2021/04/10 15:31:21 alpha successor is nodeBravo , predecessor is nodeDelta
+2021/04/10 15:31:21 Stabilizing alpha
+2021/04/10 15:31:21 Value of successorList:  [nodeBravo nodeDelta]
+2021/04/10 15:31:21 --- FS: Triggering Migration to Chord Node nodeCharlie from alpha 
+2021/04/10 15:31:21 Has Filename:forgotten.rar, HashedFile: 31491, Checking if in between 53816 and 68601
+2021/04/10 15:31:21 Migrating Filename:forgotten.rar,
+2021/04/10 15:31:21 Writing file forgotten.rar, to Node nodeCharlie
+2021/04/10 15:31:21 Error sending message: rpc error: code = Unknown desc = open /app/chord/local: is a directory
+2021/04/10 15:31:21 Error in writing file: rpc error: code = Unknown desc = open /app/chord/local: is a directory
+2021/04/10 15:31:22 alpha successor is nodeBravo , predecessor is nodeDelta
+2021/04/10 15:31:22 Stabilizing alpha
+2021/04/10 15:31:22 Value of successorList:  [nodeBravo nodeDelta]
+2021/04/10 15:31:23 alpha successor is nodeBravo , predecessor is nodeDelta
+2021/04/10 15:31:23 Stabilizing alpha
+2021/04/10 15:31:23 Value of successorList:  [nodeBravo nodeDelta]
+2021/04/10 15:31:24 alpha successor is nodeBravo , predecessor is nodeDelta
+2021/04/10 15:31:24 Stabilizing alpha
+2021/04/10 15:31:24 Value of successorList:  [nodeBravo nodeDelta]
+2021/04/10 15:31:25 alpha successor is nodeBravo , predecessor is nodeDelta
+2021/04/10 15:31:25 Stabilizing alpha
+2021/04/10 15:31:25 Value of successorList:  [nodeBravo nodeDelta]
+2021/04/10 15:31:26 alpha successor is nodeBravo , predecessor is nodeDelta
+2021/04/10 15:31:26 Stabilizing alpha
+2021/04/10 15:31:26 Value of successorList:  [nodeBravo nodeDelta]
+2021/04/10 15:31:27 alpha successor is nodeBravo , predecessor is nodeDelta
+2021/04/10 15:31:27 Stabilizing alpha
+2021/04/10 15:31:27 Value of successorList:  [nodeBravo nodeDelta]
+2021/04/10 15:31:28 alpha successor is nodeBravo , predecessor is nodeDelta
+2021/04/10 15:31:28 Stabilizing alpha
+2021/04/10 15:31:28 Value of successorList:  [nodeBravo nodeDelta]
+2021/04/10 15:31:29 alpha successor is nodeBravo , predecessor is nodeDelta
+2021/04/10 15:31:29 Stabilizing alpha
+2021/04/10 15:31:29 Value of successorList:  [nodeBravo nodeDelta]
+2021/04/10 15:31:30 alpha successor is nodeBravo , predecessor is nodeDelta
+2021/04/10 15:31:30 Stabilizing alpha
+2021/04/10 15:31:30 Value of successorList:  [nodeBravo nodeDelta]
+2021/04/10 15:31:31 alpha successor is nodeBravo , predecessor is nodeDelta
+2021/04/10 15:31:31 Stabilizing alpha
+2021/04/10 15:31:31 Value of successorList:  [nodeBravo nodeDelta]
+2021/04/10 15:31:32 alpha successor is nodeBravo , predecessor is nodeCharlie
+2021/04/10 15:31:32 Stabilizing alpha
+2021/04/10 15:31:32 Value of successorList:  [nodeBravo nodeDelta]
+2021/04/10 15:31:33 alpha successor is nodeBravo , predecessor is nodeCharlie
+2021/04/10 15:31:33 Stabilizing alpha
+2021/04/10 15:31:33 Value of successorList:  [nodeBravo nodeDelta]
+2021/04/10 15:31:34 alpha successor is nodeBravo , predecessor is nodeCharlie
+2021/04/10 15:31:34 Stabilizing alpha
+2021/04/10 15:31:34 Value of successorList:  [nodeBravo nodeDelta]
+2021/04/10 15:31:35 alpha successor is nodeBravo , predecessor is nodeCharlie
+2021/04/10 15:31:35 Stabilizing alpha
+2021/04/10 15:31:35 Value of successorList:  [nodeBravo nodeDelta]
+2021/04/10 15:31:37 alpha successor is nodeBravo , predecessor is nodeCharlie
+2021/04/10 15:31:37 Stabilizing alpha
+2021/04/10 15:31:37 Value of successorList:  [nodeBravo nodeDelta]
+2021/04/10 15:31:38 alpha successor is nodeBravo , predecessor is nodeCharlie
+2021/04/10 15:31:38 Stabilizing alpha
+2021/04/10 15:31:38 Value of successorList:  [nodeBravo nodeDelta]
+2021/04/10 15:31:39 alpha successor is nodeBravo , predecessor is nodeCharlie
+2021/04/10 15:31:39 Stabilizing alpha
+2021/04/10 15:31:39 Value of successorList:  [nodeBravo nodeDelta]
+2021/04/10 15:31:40 alpha successor is nodeBravo , predecessor is nodeCharlie
+2021/04/10 15:31:40 Stabilizing alpha
+2021/04/10 15:31:40 Value of successorList:  [nodeBravo nodeDelta]
+2021/04/10 15:31:41 alpha successor is nodeBravo , predecessor is nodeCharlie
+2021/04/10 15:31:41 Stabilizing alpha
+2021/04/10 15:31:41 Value of successorList:  [nodeBravo nodeDelta]
+2021/04/10 15:31:42 alpha successor is nodeBravo , predecessor is nodeCharlie
+2021/04/10 15:31:42 Stabilizing alpha
+2021/04/10 15:31:42 Value of successorList:  [nodeBravo nodeDelta]
+2021/04/10 15:31:43 alpha successor is nodeBravo , predecessor is nodeCharlie
+2021/04/10 15:31:43 Stabilizing alpha
+2021/04/10 15:31:43 Value of successorList:  [nodeBravo nodeDelta]
+2021/04/10 15:31:44 alpha successor is nodeBravo , predecessor is nodeCharlie
+2021/04/10 15:31:44 Stabilizing alpha
+2021/04/10 15:31:44 Value of successorList:  [nodeBravo nodeDelta]
+2021/04/10 15:31:45 alpha successor is nodeBravo , predecessor is nodeCharlie
+2021/04/10 15:31:45 Stabilizing alpha
+2021/04/10 15:31:45 Value of successorList:  [nodeBravo nodeDelta]
+2021/04/10 15:31:46 alpha successor is nodeBravo , predecessor is nodeCharlie
+2021/04/10 15:31:46 Stabilizing alpha
+2021/04/10 15:31:46 Value of successorList:  [nodeBravo nodeDelta]
+2021/04/10 15:31:47 alpha successor is nodeBravo , predecessor is nodeCharlie
+2021/04/10 15:31:47 Stabilizing alpha
+2021/04/10 15:31:47 Value of successorList:  [nodeBravo nodeDelta]
+2021/04/10 15:31:48 alpha successor is nodeBravo , predecessor is nodeCharlie
+2021/04/10 15:31:48 Stabilizing alpha
+2021/04/10 15:31:48 Value of successorList:  [nodeBravo nodeDelta]
+2021/04/10 15:31:49 alpha successor is nodeBravo , predecessor is nodeCharlie
+2021/04/10 15:31:49 Stabilizing alpha
+2021/04/10 15:31:49 Value of successorList:  [nodeBravo nodeDelta]
+2021/04/10 15:31:50 alpha successor is nodeBravo , predecessor is nodeCharlie
+2021/04/10 15:31:50 Stabilizing alpha
+2021/04/10 15:31:50 Value of successorList:  [nodeBravo nodeDelta]
+2021/04/10 15:31:51 alpha successor is nodeBravo , predecessor is nodeCharlie
+2021/04/10 15:31:51 Stabilizing alpha
+2021/04/10 15:31:51 Value of successorList:  [nodeBravo nodeDelta]
+2021/04/10 15:31:52 alpha successor is nodeBravo , predecessor is nodeCharlie
+2021/04/10 15:31:52 Stabilizing alpha
+2021/04/10 15:31:52 Value of successorList:  [nodeBravo nodeDelta]
+2021/04/10 15:31:53 alpha successor is nodeBravo , predecessor is nodeCharlie
+2021/04/10 15:31:53 Stabilizing alpha
+2021/04/10 15:31:53 Value of successorList:  [nodeBravo nodeDelta]
+2021/04/10 15:31:54 alpha successor is nodeBravo , predecessor is nodeCharlie
+2021/04/10 15:31:54 Stabilizing alpha
+2021/04/10 15:31:54 Value of successorList:  [nodeBravo nodeDelta]
+2021/04/10 15:31:55 alpha successor is nodeBravo , predecessor is nodeCharlie
+2021/04/10 15:31:55 Stabilizing alpha
+2021/04/10 15:31:55 Value of successorList:  [nodeBravo nodeDelta]
+2021/04/10 15:31:56 alpha successor is nodeBravo , predecessor is nodeCharlie
+2021/04/10 15:31:56 Stabilizing alpha
+2021/04/10 15:31:56 Value of successorList:  [nodeBravo nodeDelta]
+2021/04/10 15:31:57 alpha successor is nodeBravo , predecessor is nodeCharlie
+2021/04/10 15:31:57 Stabilizing alpha
+2021/04/10 15:31:57 Value of successorList:  [nodeBravo nodeDelta]
+2021/04/10 15:31:58 alpha successor is nodeBravo , predecessor is nodeCharlie
+2021/04/10 15:31:58 Stabilizing alpha
+2021/04/10 15:31:58 Value of successorList:  [nodeBravo nodeDelta]
+2021/04/10 15:31:59 alpha successor is nodeBravo , predecessor is nodeCharlie
+2021/04/10 15:31:59 Stabilizing alpha
+2021/04/10 15:31:59 Value of successorList:  [nodeBravo nodeDelta]
+2021/04/10 15:32:00 alpha successor is nodeBravo , predecessor is nodeCharlie
+2021/04/10 15:32:00 Stabilizing alpha
+2021/04/10 15:32:00 Value of successorList:  [nodeBravo nodeDelta]
+2021/04/10 15:32:01 alpha successor is nodeBravo , predecessor is nodeCharlie
+2021/04/10 15:32:01 Stabilizing alpha
+2021/04/10 15:32:01 Value of successorList:  [nodeBravo nodeDelta]
+2021/04/10 15:32:02 alpha successor is nodeBravo , predecessor is nodeCharlie
+2021/04/10 15:32:02 Stabilizing alpha
+2021/04/10 15:32:02 Value of successorList:  [nodeBravo nodeDelta]
+2021/04/10 15:32:03 alpha successor is nodeBravo , predecessor is nodeCharlie
+2021/04/10 15:32:03 Stabilizing alpha
+2021/04/10 15:32:03 Value of successorList:  [nodeBravo nodeDelta]
+2021/04/10 15:32:04 alpha successor is nodeBravo , predecessor is nodeCharlie
+2021/04/10 15:32:04 Stabilizing alpha
+2021/04/10 15:32:04 Value of successorList:  [nodeBravo nodeDelta]
+2021/04/10 15:32:05 alpha successor is nodeBravo , predecessor is nodeCharlie
+2021/04/10 15:32:05 Stabilizing alpha
+2021/04/10 15:32:05 Value of successorList:  [nodeBravo nodeDelta]
+2021/04/10 15:32:06 alpha successor is nodeBravo , predecessor is nodeCharlie
+2021/04/10 15:32:06 Stabilizing alpha
+2021/04/10 15:32:06 Value of successorList:  [nodeBravo nodeDelta]
+2021/04/10 15:32:07 alpha successor is nodeBravo , predecessor is nodeCharlie
+2021/04/10 15:32:07 Stabilizing alpha
+2021/04/10 15:32:07 Value of successorList:  [nodeBravo nodeDelta]
+2021/04/10 15:32:08 alpha successor is nodeBravo , predecessor is nodeCharlie
+2021/04/10 15:32:08 Stabilizing alpha
+2021/04/10 15:32:08 Value of successorList:  [nodeBravo nodeDelta]
+2021/04/10 15:32:09 alpha successor is nodeBravo , predecessor is nodeCharlie
+2021/04/10 15:32:09 Stabilizing alpha
+2021/04/10 15:32:09 Value of successorList:  [nodeBravo nodeDelta]
+2021/04/10 15:32:10 alpha successor is nodeBravo , predecessor is nodeCharlie
+2021/04/10 15:32:10 Stabilizing alpha
+2021/04/10 15:32:10 Value of successorList:  [nodeBravo nodeDelta]
+2021/04/10 15:32:11 alpha successor is nodeBravo , predecessor is nodeCharlie
+2021/04/10 15:32:11 Stabilizing alpha
+2021/04/10 15:32:11 Value of successorList:  [nodeBravo nodeDelta]
+2021/04/10 15:32:12 alpha successor is nodeBravo , predecessor is nodeCharlie
+2021/04/10 15:32:12 Stabilizing alpha
+2021/04/10 15:32:12 Value of successorList:  [nodeBravo nodeDelta]
+2021/04/10 15:32:13 alpha successor is nodeBravo , predecessor is nodeCharlie
+2021/04/10 15:32:13 Stabilizing alpha
+2021/04/10 15:32:13 Value of successorList:  [nodeBravo nodeDelta]
+2021/04/10 15:32:14 alpha successor is nodeBravo , predecessor is nodeCharlie
+2021/04/10 15:32:14 Stabilizing alpha
+2021/04/10 15:32:14 Value of successorList:  [nodeBravo nodeDelta]
+2021/04/10 15:32:15 alpha successor is nodeBravo , predecessor is nodeCharlie
+2021/04/10 15:32:15 Stabilizing alpha
+2021/04/10 15:32:15 Value of successorList:  [nodeBravo nodeDelta]
+2021/04/10 15:32:16 alpha successor is nodeBravo , predecessor is nodeCharlie
+2021/04/10 15:32:16 Stabilizing alpha
+2021/04/10 15:32:16 Value of successorList:  [nodeBravo nodeDelta]
+2021/04/10 15:32:17 alpha successor is nodeBravo , predecessor is nodeCharlie
+2021/04/10 15:32:17 Stabilizing alpha
+2021/04/10 15:32:17 Value of successorList:  [nodeBravo nodeDelta]
+2021/04/10 15:32:18 alpha successor is nodeBravo , predecessor is nodeCharlie
+2021/04/10 15:32:18 Stabilizing alpha
+2021/04/10 15:32:18 Value of successorList:  [nodeBravo nodeDelta]
+2021/04/10 15:32:19 alpha successor is nodeBravo , predecessor is nodeCharlie
+2021/04/10 15:32:19 Stabilizing alpha
+2021/04/10 15:32:19 Value of successorList:  [nodeBravo nodeDelta]
+2021/04/10 15:32:20 alpha successor is nodeBravo , predecessor is nodeCharlie
+2021/04/10 15:32:20 Stabilizing alpha
+2021/04/10 15:32:20 Value of successorList:  [nodeBravo nodeDelta]
+2021/04/10 15:32:21 alpha successor is nodeBravo , predecessor is nodeCharlie
+2021/04/10 15:32:21 Stabilizing alpha
+2021/04/10 15:32:21 Value of successorList:  [nodeBravo nodeDelta]
+2021/04/10 15:32:22 alpha successor is nodeBravo , predecessor is nodeCharlie
+2021/04/10 15:32:22 Stabilizing alpha
+2021/04/10 15:32:22 Value of successorList:  [nodeBravo nodeDelta]
+2021/04/10 15:32:23 alpha successor is nodeBravo , predecessor is nodeCharlie
+2021/04/10 15:32:23 Stabilizing alpha
+2021/04/10 15:32:23 Value of successorList:  [nodeBravo nodeDelta]
+2021/04/10 15:32:24 alpha successor is nodeBravo , predecessor is nodeCharlie
+2021/04/10 15:32:24 Stabilizing alpha
+2021/04/10 15:32:24 Value of successorList:  [nodeBravo nodeDelta]
+2021/04/10 15:32:25 alpha successor is nodeBravo , predecessor is nodeCharlie
+2021/04/10 15:32:25 Stabilizing alpha
+2021/04/10 15:32:25 Value of successorList:  [nodeBravo nodeDelta]
+2021/04/10 15:32:26 alpha successor is nodeBravo , predecessor is nodeCharlie
+2021/04/10 15:32:26 Stabilizing alpha
+2021/04/10 15:32:26 Value of successorList:  [nodeBravo nodeDelta]
+2021/04/10 15:32:27 alpha successor is nodeBravo , predecessor is nodeCharlie
+2021/04/10 15:32:27 Stabilizing alpha
+2021/04/10 15:32:27 Value of successorList:  [nodeBravo nodeDelta]
+2021/04/10 15:32:28 alpha successor is nodeBravo , predecessor is nodeCharlie
+2021/04/10 15:32:28 Stabilizing alpha
+2021/04/10 15:32:28 Value of successorList:  [nodeBravo nodeDelta]
+2021/04/10 15:32:29 alpha successor is nodeBravo , predecessor is nodeCharlie
+2021/04/10 15:32:29 Stabilizing alpha
+2021/04/10 15:32:29 Value of successorList:  [nodeBravo nodeDelta]
+2021/04/10 15:32:30 alpha successor is nodeBravo , predecessor is nodeCharlie
+2021/04/10 15:32:30 Stabilizing alpha
+2021/04/10 15:32:30 Value of successorList:  [nodeBravo nodeDelta]
+2021/04/10 15:32:31 alpha successor is nodeBravo , predecessor is nodeCharlie
+2021/04/10 15:32:31 Stabilizing alpha
+2021/04/10 15:32:31 Value of successorList:  [nodeBravo nodeDelta]
+2021/04/10 15:32:32 alpha successor is nodeBravo , predecessor is nodeCharlie
+2021/04/10 15:32:32 Stabilizing alpha
+2021/04/10 15:32:32 Value of successorList:  [nodeBravo nodeDelta]
+2021/04/10 15:32:33 alpha successor is nodeBravo , predecessor is nodeCharlie
+2021/04/10 15:32:33 Stabilizing alpha
+2021/04/10 15:32:33 Value of successorList:  [nodeBravo nodeDelta]
+2021/04/10 15:32:34 alpha successor is nodeBravo , predecessor is nodeCharlie
+2021/04/10 15:32:34 Stabilizing alpha
+2021/04/10 15:32:34 Value of successorList:  [nodeBravo nodeDelta]
+2021/04/10 15:32:35 alpha successor is nodeBravo , predecessor is nodeCharlie
+2021/04/10 15:32:35 Stabilizing alpha
+2021/04/10 15:32:35 Value of successorList:  [nodeBravo nodeDelta]
+2021/04/10 15:32:36 alpha successor is nodeBravo , predecessor is nodeCharlie
+2021/04/10 15:32:36 Stabilizing alpha
+2021/04/10 15:32:36 Value of successorList:  [nodeBravo nodeDelta]
+2021/04/10 15:32:37 alpha successor is nodeBravo , predecessor is nodeCharlie
+2021/04/10 15:32:37 Stabilizing alpha
+2021/04/10 15:32:37 Value of successorList:  [nodeBravo nodeDelta]
+2021/04/10 15:32:38 alpha successor is nodeBravo , predecessor is nodeCharlie
+2021/04/10 15:32:38 Stabilizing alpha
+2021/04/10 15:32:38 Value of successorList:  [nodeBravo nodeDelta]
+2021/04/10 15:32:39 alpha successor is nodeBravo , predecessor is nodeCharlie
+2021/04/10 15:32:39 Stabilizing alpha
+2021/04/10 15:32:39 Value of successorList:  [nodeBravo nodeDelta]
+2021/04/10 15:32:40 alpha successor is nodeBravo , predecessor is nodeCharlie
+2021/04/10 15:32:40 Stabilizing alpha
+2021/04/10 15:32:40 Value of successorList:  [nodeBravo nodeDelta]
+2021/04/10 15:32:41 alpha successor is nodeBravo , predecessor is nodeCharlie
+2021/04/10 15:32:41 Stabilizing alpha
+2021/04/10 15:32:41 Value of successorList:  [nodeBravo nodeDelta]
+2021/04/10 15:32:42 alpha successor is nodeBravo , predecessor is nodeCharlie
+2021/04/10 15:32:42 Stabilizing alpha
+2021/04/10 15:32:43 Value of successorList:  [nodeBravo nodeDelta]
+2021/04/10 15:32:44 alpha successor is nodeBravo , predecessor is nodeCharlie
+2021/04/10 15:32:44 Stabilizing alpha
+2021/04/10 15:32:44 Value of successorList:  [nodeBravo nodeDelta]
+2021/04/10 15:32:45 alpha successor is nodeBravo , predecessor is nodeCharlie
+2021/04/10 15:32:45 Stabilizing alpha
+2021/04/10 15:32:45 Value of successorList:  [nodeBravo nodeDelta]
+2021/04/10 15:32:46 alpha successor is nodeBravo , predecessor is nodeCharlie
+2021/04/10 15:32:46 Stabilizing alpha
+2021/04/10 15:32:46 Value of successorList:  [nodeBravo nodeDelta]
+2021/04/10 15:32:47 alpha successor is nodeBravo , predecessor is nodeCharlie
+2021/04/10 15:32:47 Stabilizing alpha
+2021/04/10 15:32:47 Value of successorList:  [nodeBravo nodeDelta]
+2021/04/10 15:32:48 alpha successor is nodeBravo , predecessor is nodeCharlie
+2021/04/10 15:32:48 Stabilizing alpha
+2021/04/10 15:32:48 Value of successorList:  [nodeBravo nodeDelta]

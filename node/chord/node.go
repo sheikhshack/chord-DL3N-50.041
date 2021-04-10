@@ -124,7 +124,7 @@ func (n *Node) MigrationJoinHandler(requestID string) {
 	values := ""
 	//Loop through them and write over the ones that do not lie in between pred and current node, and then delete if the write is successful
 	for _, i := range files {
-		log.Printf("Has Filename:%v, HashedFile: %v", i.Name(), hash.Hash(i.Name()))
+		log.Printf("Has Filename:%v, HashedFile: %v, Checking if in between %v and %v", i.Name(), hash.Hash(i.Name()), hash.Hash(requestID), hash.Hash(n.ID))
 		if !hash.IsInRange(hash.Hash(i.Name()), hash.Hash(requestID), hash.Hash(n.ID)) {
 			keys += i.Name() + ","
 			val, _ := store.Get("local", i.Name())
@@ -144,6 +144,53 @@ func (n *Node) MigrationJoinHandler(requestID string) {
 			for _, i := range keys_list {
 				store.Migrate("local", "replica", i)
 			}
+		}
+
+		//Init deleting from last successor
+		_, err = n.Gossiper.DeleteFileFromNode(requestID, keys, "replica")
+		if err != nil {
+			print("Error in Deleting file: %+v\n", err)
+			return
+		}
+	}
+
+}
+
+//ask successor to migrate files that belong to current node
+func (n *Node) migrationFault(livenode string) {
+	if _, err := n.Gossiper.MigrationFaultFromNode(livenode); err != nil {
+		log.Fatalf("[MigrationFaultFromNode: %+v\n", err)
+	}
+}
+
+//predecessor has asked to migrate files from current nodes
+func (n *Node) MigrationFaultHandler(requestID string) {
+
+	// Get all the replica files in the store
+	files, err := store.GetAll("replica")
+	if err != nil {
+		print(err)
+		return
+	}
+	keys := ""
+	values := ""
+	//Loop through them and write over the ones that do not lie in between pred and current node, and then delete if the write is successful
+	for _, i := range files {
+		log.Printf("Has Filename:%v, HashedFile: %v, Checking if in between %v and %v", i.Name(), hash.Hash(i.Name()), hash.Hash(requestID), hash.Hash(n.ID))
+		if hash.IsInRange(hash.Hash(i.Name()), hash.Hash(requestID), hash.Hash(n.ID)) {
+			keys += i.Name() + ","
+			val, _ := store.Get("replica", i.Name())
+			values += string(val) + ","
+		}
+	}
+	if keys != "" {
+		//Init writing to predecessor
+		log.Printf("Migrating Filename:%v", keys)
+		n.ReplicateToSuccessorList(keys, values)
+		keys_list := strings.Split(keys, ",")
+		for _, i := range keys_list {
+			store.Migrate("replica", "local", i)
+
 		}
 
 		//Init deleting from last successor
@@ -254,21 +301,22 @@ func (n *Node) WriteFile(fileType, fileName, ip string) error {
 	log.Printf("--- FS: Triggering File Write to Chord Node for key [%v] with content %v to folder %v\n", key, val, fileType)
 	var keys_list []string
 	var val_list []string
-
 	if strings.Contains(key, ",") {
 		keys_list = strings.Split(key, ",")
 		val_list = strings.Split(val, ",")
+		keys_list = keys_list[:len(keys_list)-1]
+		val_list = val_list[:len(val_list)-1]
 	} else {
 		keys_list = []string{key}
 		val_list = []string{val}
 	}
+	log.Printf("Keys to be put in: %v, Val_list to be put in: %v", keys_list, val_list)
 	for i := 0; i < len(keys_list); i++ {
+		log.Printf("Storing %v with value %v", keys_list[i], val_list[i])
 		fileByte := []byte(val_list[i])
 		output := store.New(fileType, keys_list[i], fileByte)
 		if output != nil {
-			for x := 0; x <= i; x++ {
-				store.Delete(fileType, keys_list[x])
-			}
+			log.Printf("Error in writing to file:%v", output)
 			return output
 		}
 	}

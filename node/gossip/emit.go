@@ -324,3 +324,27 @@ func (g *Gossiper) MigrationJoinFromNode(nodeAddr string) (*pb.MigrationResponse
 	}
 	return response, nil
 }
+
+func (g *Gossiper) MigrationFaultFromNode(nodeAddr string) (*pb.MigrationResponse, error) {
+	g.report()
+
+	var conn *grpc.ClientConn
+	connectionParams := fmt.Sprintf("%s:%v", nodeAddr, LISTEN_PORT)
+
+	conn, err := grpc.Dial(connectionParams, grpc.WithInsecure())
+	if err != nil {
+		log.Fatalf("Cannot connect to: %s", err)
+
+	}
+	defer conn.Close()
+
+	client := pb.NewInternalListenerClient(conn)
+	response, err := client.MigrationFault(context.Background(), &pb.MigrationRequest{
+		RequesterID: g.Node.GetID(),
+	})
+	if err != nil {
+		log.Printf("Error sending message: %v", err)
+		return nil, err
+	}
+	return response, nil
+}

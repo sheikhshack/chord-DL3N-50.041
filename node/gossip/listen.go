@@ -231,6 +231,7 @@ func (g *Gossiper) DeleteFile(ctx context.Context, fetchRequest *pb.FetchChordRe
 
 	if strings.Contains(key, ",") {
 		keys_list = strings.Split(key, ",")
+		keys_list = keys_list[:len(keys_list)-1]
 	} else {
 		keys_list = []string{key}
 	}
@@ -263,9 +264,18 @@ func (g *Gossiper) ReadFile(ctx context.Context, fetchRequest *pb.FetchChordRequ
 
 func (g *Gossiper) MigrationJoin(ctx context.Context, migrationRequest *pb.MigrationRequest) (*pb.MigrationResponse, error) {
 	requestId := migrationRequest.RequesterID
-	log.Printf("--- FS: Triggering Migration to Chord Node %v from %v \n", requestId, g.Node.GetID())
+	log.Printf("--- FS: Triggering Migration (Join) to Chord Node %v from %v \n", requestId, g.Node.GetID())
 
 	g.Node.MigrationJoinHandler(requestId)
+
+	return &pb.MigrationResponse{Success: true}, nil
+}
+
+func (g *Gossiper) MigrationFault(ctx context.Context, migrationRequest *pb.MigrationRequest) (*pb.MigrationResponse, error) {
+	requestId := migrationRequest.RequesterID
+	log.Printf("--- FS: Triggering Migration (Fault) to Chord Node %v from %v \n", requestId, g.Node.GetID())
+
+	g.Node.MigrationFaultHandler(requestId)
 
 	return &pb.MigrationResponse{Success: true}, nil
 }

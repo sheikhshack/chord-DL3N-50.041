@@ -7,7 +7,7 @@ services:
     image: mike_node
     environment:
       - APP_NODE=bravo
-      - FILE_NAME=forgotten_sailor.rar
+      - FILE_NAME=forgotten.rar,remember.rar
       - CONTAINER_IP=godbless_DL3N_DNS
     depends_on:
       - alpha
