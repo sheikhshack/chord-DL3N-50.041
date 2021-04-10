@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"log"
 	"net"
-	"strings"
 
 	"google.golang.org/grpc"
 
@@ -28,6 +27,7 @@ type node interface {
 	MigrationJoinHandler(requestId string)
 	WriteFile(fileType, fileName, ip string) error
 	WriteFileAndReplicate(fileType, fileName, ip string) error
+	DeleteFile(fileType, fileName string) error
 	// for external API
 }
 
@@ -224,26 +224,8 @@ func (g *Gossiper) WriteFile(ctx context.Context, writeRequest *pb.ModRequest) (
 func (g *Gossiper) DeleteFile(ctx context.Context, fetchRequest *pb.FetchChordRequest) (*pb.ModResponse, error) {
 	log.Printf("Upload Method triggered \n")
 
-	key := fetchRequest.GetKey()
-	fileType := fetchRequest.FileType
-
-	var keys_list []string
-
-	if strings.Contains(key, ",") {
-		keys_list = strings.Split(key, ",")
-	} else {
-		keys_list = []string{key}
-	}
-	for i := 0; i < len(keys_list); i++ {
-		output := store.Delete(fileType, keys_list[i])
-		if output != nil {
-			return &pb.ModResponse{IP: g.Node.GetID()}, output
-		}
-	}
-
-	log.Printf("--- FS: Triggering File Delete in Node for key [%v] \n", key)
-
-	return &pb.ModResponse{IP: g.Node.GetID()}, nil
+	output := g.Node.DeleteFile(fetchRequest.FileType, fetchRequest.GetKey())
+	return &pb.ModResponse{IP: g.Node.GetID()}, output
 }
 
 // ReadFile allows returning of container IP from file within chord

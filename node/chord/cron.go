@@ -85,6 +85,40 @@ func (n *Node) updateSuccessorList(succSuccList []string, prevSuccessorList []st
 
 	log.Println("Values of new elements to be replicated: ", newElements)
 	log.Println("Values of missing elements to be removed: ", missingElements)
+
+	if len(newElements) > 0 || len(missingElements) > 0 {
+		keys, values := getAllLocalFiles()
+
+		if len(newElements) > 0 {
+			// Replicate local files to new replica(s)
+			n.replicateToNodeList(newElements, keys, values)
+		}
+
+		if len(missingElements) > 0 {
+			// Delete local files from old replica(s)
+			n.deleteFromNodeList(missingElements, keys)
+		}
+	}
+
+}
+
+func (n *Node) replicateToNodeList(nodeList []string, fileName, ip string) {
+	for i := range nodeList {
+		if nodeList[i] != n.ID {
+			n.replicateToNode(nodeList[i], fileName, ip)
+		}
+	}
+}
+
+func (n *Node) deleteFromNodeList(nodeList []string, fileName string) {
+	for i := range nodeList {
+		if nodeList[i] != n.ID {
+			_, err := n.Gossiper.DeleteFileFromNode(nodeList[i], fileName, "replica")
+			if err != nil {
+				print("Error in Deleting file: %+v\n", err)
+			}
+		}
+	}
 }
 
 //implemented differently from pseudocode, n thinks it might be the predecessor of id

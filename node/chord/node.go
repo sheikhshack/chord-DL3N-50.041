@@ -181,40 +181,6 @@ func (n *Node) cron() {
 	}
 }
 
-// // Fake test
-// func (n *Node) cron() {
-// 	time.Sleep(time.Millisecond * 10000)
-// 	for i := 0; ; i++ {
-// 		log.Println(n.ID, "successor is", n.GetSuccessor(), ", predecessor is", n.predecessor)
-// 		n.checkPredecessor()
-// 		n.stabilize()
-// 		n.fixFingers()
-// 		time.Sleep(time.Millisecond * 1000)
-
-// 		if i == 15 && n.ID == "charlie" {
-
-// 			// Create for own store
-// 			keyString := "store's key 1"
-// 			valueString := "store's value 1"
-// 			valueByte := []byte(valueString)
-// 			store.New(n.ID, keyString, valueByte)
-
-// 			n.ReplicateToSuccessorList(keyString, valueString)
-
-// 		}
-
-// 		if i > 20 {
-// 			keyString := "store's key 1"
-// 			content, err := store.Get("charlie", keyString)
-// 			if err != nil {
-// 				log.Println("[Read Fail] Error in finding key.")
-// 			} else {
-// 				log.Printf("[Read Successful] Value of content is: %s.\n", content)
-// 			}
-// 		}
-// 	}
-// }
-
 //change successor
 func (n *Node) SetSuccessor(id string) {
 	n.successorList[0] = id
@@ -258,6 +224,8 @@ func (n *Node) WriteFile(fileType, fileName, ip string) error {
 	if strings.Contains(key, ",") {
 		keys_list = strings.Split(key, ",")
 		val_list = strings.Split(val, ",")
+		keys_list = keys_list[:len(keys_list)-1]
+		val_list = val_list[:len(val_list)-1]
 	} else {
 		keys_list = []string{key}
 		val_list = []string{val}
@@ -274,6 +242,30 @@ func (n *Node) WriteFile(fileType, fileName, ip string) error {
 	}
 
 	return nil
+}
+
+func (n *Node) DeleteFile(fileType, fileName string) error {
+	key := fileName
+
+	log.Printf("--- FS: Triggering File Delete in Node for key [%v] \n", key)
+
+	var keys_list []string
+
+	if strings.Contains(key, ",") {
+		keys_list = strings.Split(key, ",")
+		keys_list = keys_list[:len(keys_list)-1]
+	} else {
+		keys_list = []string{key}
+	}
+	for i := 0; i < len(keys_list); i++ {
+		output := store.Delete(fileType, keys_list[i])
+		if output != nil {
+			return output
+		}
+	}
+
+	return nil
+
 }
 
 func (n *Node) WriteFileAndReplicate(fileType, fileName, ip string) error {
@@ -303,5 +295,4 @@ func (n *Node) replicateToNode(toID, fileName, ip string) bool {
 	}
 
 	return status
-
 }
