@@ -25,7 +25,7 @@ message Request {
     string InfoHash = 2;
     string Key = 3;
     string Value = 4;
-    string NodeId = 5;
+    string FileType = 5;
   }
 
   Command command = 1;
@@ -50,7 +50,7 @@ message Response {
 message ModRequest {
   string key = 1;
   string value = 2;
-  string nodeId = 3;
+  string fileType = 3;
 }
 
 message DLUploadRequest {
@@ -80,7 +80,7 @@ message ContainerInfo {
 
 message FetchChordRequest {
   string key = 1;
-  string nodeId = 2;
+  string fileType = 2;
 }
 
 message ModResponse {

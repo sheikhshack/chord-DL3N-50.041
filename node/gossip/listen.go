@@ -25,7 +25,7 @@ type node interface {
 	GetFingers() []string
 	NotifyHandler(possiblePredecessor string)
 	MigrationHandler(pred string)
-	WriteFile(nodeId, fileName, ip string) error
+	WriteFile(fileType, fileName, ip string) error
 	// for external API
 }
 
@@ -132,9 +132,9 @@ func (g *Gossiper) Emit(ctx context.Context, in *pb.Request) (*pb.Response, erro
 
 		key := in.GetBody().Key
 		value := in.GetBody().Value
-		nodeId := in.GetBody().NodeId
+		fileType := in.GetBody().FileType
 
-		g.replicateToNodeHandler(nodeId, key, value)
+		g.replicateToNodeHandler(fileType, key, value)
 
 		res = &pb.Response{
 			Command:     pb.Command_REPLICATE_TO_NODE,
@@ -186,8 +186,8 @@ func (g *Gossiper) notifyHandler(possiblePredecessor string) {
 	g.Node.NotifyHandler(possiblePredecessor)
 }
 
-func (g *Gossiper) replicateToNodeHandler(nodeId, key, value string) {
-	g.Node.WriteFile(nodeId, key, value)
+func (g *Gossiper) replicateToNodeHandler(fileType, key, value string) {
+	g.Node.WriteFile(fileType, key, value)
 }
 
 //// TODO: Move to legacy - DEFUNCT (leaving as reference for fk-up)
@@ -215,7 +215,7 @@ func (g *Gossiper) FetchChordIp(ctx context.Context, fetchRequest *pb.FetchChord
 
 func (g *Gossiper) WriteFile(ctx context.Context, writeRequest *pb.ModRequest) (*pb.ModResponse, error) {
 
-	output := g.Node.WriteFile(writeRequest.NodeId, writeRequest.Key, writeRequest.Value)
+	output := g.Node.WriteFile(writeRequest.FileType, writeRequest.Key, writeRequest.Value)
 	return &pb.ModResponse{IP: g.Node.GetID()}, output
 }
 
@@ -223,9 +223,9 @@ func (g *Gossiper) DeleteFile(ctx context.Context, fetchRequest *pb.FetchChordRe
 	log.Printf("Upload Method triggered \n")
 
 	key := fetchRequest.GetKey()
-	nodeId := fetchRequest.NodeId
+	fileType := fetchRequest.FileType
 
-	status := store.Delete(nodeId, key)
+	status := store.Delete(fileType, key)
 	log.Printf("--- FS: Triggering File Delete in Node for key [%v] \n", key)
 
 	return &pb.ModResponse{IP: g.Node.GetID()}, status
@@ -236,9 +236,9 @@ func (g *Gossiper) ReadFile(ctx context.Context, fetchRequest *pb.FetchChordRequ
 	log.Printf("Upload Method triggered \n")
 
 	key := fetchRequest.GetKey()
-	nodeId := fetchRequest.NodeId
+	fileType := fetchRequest.FileType
 
-	fileByte, status := store.Get(nodeId, key)
+	fileByte, status := store.Get(fileType, key)
 	// TODO: Might need to change this
 	containerIP := string(fileByte[:])
 	log.Printf("--- FS: Triggering File Delete in Node for key [%v] \n", key)

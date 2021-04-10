@@ -39,7 +39,7 @@ func New(id string) *Node {
 			DebugMode: false,
 		}
 	}
-	files, err := store.GetAll(n.ID)
+	files, err := store.GetAll("local")
 	if err != nil {
 		print(err)
 	}
@@ -113,8 +113,8 @@ func (n *Node) migrationInit(successor string) {
 //predecessor has asked to migrate files from current nodes
 func (n *Node) MigrationHandler(pred string) {
 
-	// Get all the files in the store
-	files, err := store.GetAll(n.ID)
+	// Get all the replica files in the store
+	files, err := store.GetAll("local")
 	if err != nil {
 		print(err)
 	}
@@ -123,12 +123,12 @@ func (n *Node) MigrationHandler(pred string) {
 	for _, i := range files {
 		log.Printf("Filename:%v, HashedFile: %v", i.Name(), hash.Hash(i.Name()))
 		if !hash.IsInRange(hash.Hash(i.Name()), hash.Hash(pred), hash.Hash(n.ID)) {
-			val, _ := store.Get(n.ID, i.Name())
+			val, _ := store.Get("local", i.Name())
 			_, err := n.Gossiper.WriteFileToNode(pred, i.Name(), string(val))
 			if err != nil {
 				log.Printf("Error in writing file: %+v\n", err)
 			} else {
-				store.Delete(n.ID, i.Name())
+				store.Delete("local", i.Name())
 			}
 		}
 
@@ -228,13 +228,13 @@ func (n *Node) GetFingers() []string {
 	return n.fingers
 }
 
-func (n *Node) WriteFile(nodeId, fileName, ip string) error {
+func (n *Node) WriteFile(fileType, fileName, ip string) error {
 	key := fileName
 	val := ip
 	log.Printf("--- FS: Triggering File Write to Chord Node for key [%v] with content %v \n", key, val)
 
 	fileByte := []byte(val)
-	output := store.New(nodeId, key, fileByte)
+	output := store.New(fileType, key, fileByte)
 
 	return output
 }

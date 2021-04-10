@@ -5,9 +5,9 @@ import (
 	"os"
 )
 
-// New creates a new file locally with the nodeId directory, filename key and contains value
-func New(nodeId, key string, value []byte) error {
-	filename, err := getFilename(nodeId, key)
+// New creates a new file locally with the fileType directory (local / replica), filename key and contains value
+func New(fileType, key string, value []byte) error {
+	filename, err := getFilename(fileType, key)
 	if err != nil {
 		return err
 	}
@@ -19,9 +19,9 @@ func New(nodeId, key string, value []byte) error {
 	return nil
 }
 
-// Get obtains the bytes stored in filename
-func Get(nodeId, key string) ([]byte, error) {
-	filename, err := getFilename(nodeId, key)
+// Get obtains the bytes stored in filename with fileType string (local / replica) and key string
+func Get(fileType, key string) ([]byte, error) {
+	filename, err := getFilename(fileType, key)
 	if err != nil {
 		return nil, err
 	}
@@ -33,9 +33,9 @@ func Get(nodeId, key string) ([]byte, error) {
 	return content, nil
 }
 
-// Get obtains the bytes stored in filename
-func GetAll(nodeId string) ([]os.FileInfo, error) {
-	dir, err := getOrCreateChordDir(nodeId)
+// Get obtains the bytes stored in filename with fileType string (local / replica)
+func GetAll(fileType string) ([]os.FileInfo, error) {
+	dir, err := getOrCreateChordDir(fileType)
 	if err != nil {
 		return nil, err
 	}
@@ -47,9 +47,9 @@ func GetAll(nodeId string) ([]os.FileInfo, error) {
 	return content, nil
 }
 
-// Delete removes the file
-func Delete(nodeId, key string) error {
-	filename, err := getFilename(nodeId, key)
+// Delete removes the file with fileType string (local / replica) and key string
+func Delete(fileType, key string) error {
+	filename, err := getFilename(fileType, key)
 	if err != nil {
 		return err
 	}
@@ -61,14 +61,14 @@ func Delete(nodeId, key string) error {
 }
 
 // Migrate file from 1 folder to another
-func Migrate(oldId, newId, key string) error {
+func Migrate(oldFileType, newFileType, key string) error {
 
-	oldFileName, err := getFilename(oldId, key)
+	oldFileName, err := getFilename(oldFileType, key)
 	if err != nil {
 		return err
 	}
 
-	newFileName, err := getFilename(newId, key)
+	newFileName, err := getFilename(newFileType, key)
 	if err != nil {
 		return err
 	}

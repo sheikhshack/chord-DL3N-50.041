@@ -1,6 +1,7 @@
 package store
 
 import (
+	"errors"
 	"os"
 	"path"
 
@@ -8,13 +9,25 @@ import (
 )
 
 // getOrCreateChordDir gets the path for chord store and creates it if it doesn't exist
-func getOrCreateChordDir(nodeId string) (dirPath string, err error) {
+func getOrCreateChordDir(fileType string) (dirPath string, err error) {
 	exPath, err := osext.ExecutableFolder()
 	if err != nil {
 		return "", err
 	}
 
-	dirPath = path.Join(exPath, "chord", nodeId)
+	switch fileType {
+
+	case "local":
+		dirPath = path.Join(exPath, "chord", fileType)
+
+	case "replica":
+		dirPath = path.Join(exPath, "chord", fileType)
+
+	default:
+		err := errors.New("invalid file type")
+		return "", err
+
+	}
 
 	if _, err := os.Stat(dirPath); os.IsNotExist(err) {
 		err = os.MkdirAll(dirPath, os.ModeDir+0777)
@@ -25,8 +38,8 @@ func getOrCreateChordDir(nodeId string) (dirPath string, err error) {
 	return dirPath, nil
 }
 
-func getFilename(nodeId, name string) (filename string, err error) {
-	if dirPath, err := getOrCreateChordDir(nodeId); err != nil {
+func getFilename(fileType, name string) (filename string, err error) {
+	if dirPath, err := getOrCreateChordDir(fileType); err != nil {
 		return "", err
 	} else {
 		filename = path.Join(dirPath, name)

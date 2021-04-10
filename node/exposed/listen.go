@@ -49,12 +49,12 @@ type ExternalService struct {
 func (e *ExternalService) Upload(ctx context.Context, uploadRequest *exposed.UploadRequest) (*exposed.UploadResponse, error) {
 	log.Printf("Upload Method triggered \n")
 
-	nodeId := uploadRequest.NodeId
+	fileType := uploadRequest.FileType
 	key := uploadRequest.Key
 	val := uploadRequest.Value
 
 	fileByte := []byte(val)
-	output := store.New(nodeId, key, fileByte)
+	output := store.New(fileType, key, fileByte)
 
 	return &exposed.UploadResponse{IP: e.Node.GetID()}, output
 }
@@ -69,10 +69,10 @@ func (e *ExternalService) CheckIP(ctx context.Context, lookupRequest *exposed.Ch
 func (e *ExternalService) Download(ctx context.Context, downloadRequest *exposed.DownloadRequest) (*exposed.DownloadResponse, error) {
 	log.Printf("Download Method triggered \n")
 
-	nodeId := downloadRequest.NodeId
+	fileType := downloadRequest.FileType
 	key := downloadRequest.Key
 
-	fileByte, status := store.Get(nodeId, key)
+	fileByte, status := store.Get(fileType, key)
 	if status == nil {
 		v := string(fileByte)
 		return &exposed.DownloadResponse{Value: v}, nil
