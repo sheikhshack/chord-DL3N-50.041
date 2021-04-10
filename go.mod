@@ -10,6 +10,7 @@ require (
 	github.com/kardianos/osext v0.0.0-20190222173326-2bc1f35cddc0
 	github.com/shirou/gopsutil/v3 v3.21.3 // indirect
 	github.com/stretchr/testify v1.7.0
+	github.com/thoas/go-funk v0.8.0
 	github.com/tklauser/go-sysconf v0.3.5 // indirect
 	github.com/xlab/treeprint v1.1.0 // indirect
 	golang.org/x/net v0.0.0-20210226172049-e18ecbb05110 // indirect

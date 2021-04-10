@@ -25,6 +25,10 @@ func (n *Node) stabilize() {
 		return
 	}
 
+	// Init temp previous successorList variable
+	prevSuccessorList := make([]string, SUCCESSOR_LIST_SIZE)
+	copy(prevSuccessorList, n.GetSuccessorList())
+
 	if hash.IsInRange(hash.Hash(x), hash.Hash(n.ID), hash.Hash(n.GetSuccessor())) {
 		// Check if x (supposedly predecessor of successor) is alive
 		if n.healthCheck(x) {
@@ -45,7 +49,7 @@ func (n *Node) stabilize() {
 		return
 	}
 
-	n.updateSuccessorList(succSuccList)
+	n.updateSuccessorList(succSuccList, prevSuccessorList)
 
 	log.Println("Value of successorList: ", n.successorList)
 
@@ -70,9 +74,17 @@ func (n *Node) fixSuccessorList() {
 	}
 }
 
-// TODO: SuccessorList will have duplicates (Might want to take note for replication) Might have to do away with copy with we want different size
-func (n *Node) updateSuccessorList(succSuccList []string) {
+// TODO: SuccessorList will have duplicates (Might want to take note for replication) Might have to do away with copy if we want different size
+func (n *Node) updateSuccessorList(succSuccList []string, prevSuccessorList []string) {
 	copy(n.successorList[1:], succSuccList[:SUCCESSOR_LIST_SIZE-1])
+
+	newElements, missingElements := compareList(prevSuccessorList, n.GetSuccessorList())
+
+	log.Println("Values of previous successor list: ", prevSuccessorList)
+	log.Println("Values of new successor list: ", n.GetSuccessorList())
+
+	log.Println("Values of new elements to be replicated: ", newElements)
+	log.Println("Values of missing elements to be removed: ", missingElements)
 }
 
 //implemented differently from pseudocode, n thinks it might be the predecessor of id
