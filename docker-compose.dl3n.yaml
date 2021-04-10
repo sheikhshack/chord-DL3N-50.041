@@ -7,8 +7,11 @@ services:
     build: 
       context: .
       dockerfile: Dockerfile.dl3ndemo
+    ports:
+      - 9000
     environment:
-      - CONTAINER_IP=dl3n-seeder
+      - NODE_ID=dl3n-seeder
+      - PEER_HOSTNAME=alpha
     depends_on:
       - alpha
       - bravo
@@ -19,8 +22,11 @@ services:
     build: 
       context: .
       dockerfile: Dockerfile.dl3ndemo
+    ports:
+      - 9000
     environment:
-      - CONTAINER_IP=dl3n-getter
+      - NODE_ID=dl3n-getter
+      - PEER_HOSTNAME=alpha
     depends_on:
       - alpha
       - bravo
