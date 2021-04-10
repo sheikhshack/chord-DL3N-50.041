@@ -15,9 +15,6 @@ func (n *Node) stabilize() {
 	}
 
 	x, err := n.Gossiper.GetPredecessor(n.ID, n.GetSuccessor())
-	// log.Println("node ID: ", n.ID)
-	// log.Println("node successorList[0]: ", n.GetSuccessor())
-	// log.Println("Value of x: ", x)
 
 	if err != nil {
 		log.Printf("error in stabilize[GetPredecessor]: %+v\n", err)
@@ -57,6 +54,9 @@ func (n *Node) stabilize() {
 }
 
 func (n *Node) healthCheck(id string) bool {
+	if id == "" || id == n.ID {
+		return true
+	}
 	res, err := n.Gossiper.Healthcheck(n.ID, id)
 	if err != nil {
 		return false
@@ -66,22 +66,28 @@ func (n *Node) healthCheck(id string) bool {
 
 // TODO: Mutex locks for this
 func (n *Node) fixSuccessorList() {
+	log.Printf("Fixing Successor List: %+v\n", n.GetSuccessorList())
 	if len(n.successorList) <= 1 {
 		n.successorList = make([]string, SUCCESSOR_LIST_SIZE)
 	} else {
 		n.successorList = n.successorList[1:]
 		n.successorList = append(n.successorList, "")
+
+		isNewSuccessorAlive := n.healthCheck(n.GetSuccessor())
+		if !isNewSuccessorAlive {
+			n.fixSuccessorList()
+		} else {
+			// TODO: Migrate from n.ID to n.GetSuccessor()
+			log.Printf("Found a live successor %s, calling migration on it.\n", n.GetSuccessor())
+
+		}
 	}
 }
 
-// TODO: SuccessorList will have duplicates (Might want to take note for replication) Might have to do away with copy if we want different size
 func (n *Node) updateSuccessorList(succSuccList []string, prevSuccessorList []string) {
 	copy(n.successorList[1:], succSuccList[:SUCCESSOR_LIST_SIZE-1])
 
 	newElements, missingElements := compareList(prevSuccessorList, n.GetSuccessorList())
-
-	log.Println("Values of previous successor list: ", prevSuccessorList)
-	log.Println("Values of new successor list: ", n.GetSuccessorList())
 
 	log.Println("Values of new elements to be replicated: ", newElements)
 	log.Println("Values of missing elements to be removed: ", missingElements)
@@ -89,12 +95,12 @@ func (n *Node) updateSuccessorList(succSuccList []string, prevSuccessorList []st
 	if len(newElements) > 0 || len(missingElements) > 0 {
 		keys, values := getAllLocalFiles()
 
-		if len(newElements) > 0 {
+		if len(newElements) > 0 && keys != "" {
 			// Replicate local files to new replica(s)
 			n.replicateToNodeList(newElements, keys, values)
 		}
 
-		if len(missingElements) > 0 {
+		if len(missingElements) > 0 && keys != "" {
 			// Delete local files from old replica(s)
 			n.deleteFromNodeList(missingElements, keys)
 		}
@@ -157,27 +163,7 @@ func (n *Node) checkPredecessor() {
 
 	if !n.healthCheck(n.predecessor) {
 		log.Printf("%s's Predecessor is down.\n", n.ID)
-
-		// n.migratePredecessorFiles(n.GetPredecessor())
 		n.SetPredecessor("")
 
 	}
 }
-
-// // Transfer all the files from predecessor to its own folder
-// func (n *Node) migratePredecessorFiles(predecessorID string) {
-
-// 	files, err := store.GetAll(predecessorID)
-
-// 	if err != nil {
-// 		log.Printf("Error in obtaining all files info in store: %+v\n", err)
-// 		return
-// 	}
-
-// 	for _, file := range files {
-// 		err := store.Migrate(predecessorID, n.ID, file.Name())
-// 		if err != nil {
-// 			log.Printf("Error in migrating file %s: %+v\n", file.Name(), err)
-// 		}
-// 	}
-// }
