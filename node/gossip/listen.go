@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"net"
+	"strings"
 
 	"google.golang.org/grpc"
 
@@ -24,8 +25,9 @@ type node interface {
 	GetID() string
 	GetFingers() []string
 	NotifyHandler(possiblePredecessor string)
-	MigrationHandler(pred string)
+	MigrationJoinHandler(requestId string)
 	WriteFile(fileType, fileName, ip string) error
+	WriteFileAndReplicate(fileType, fileName, ip string) error
 	// for external API
 }
 
@@ -225,10 +227,23 @@ func (g *Gossiper) DeleteFile(ctx context.Context, fetchRequest *pb.FetchChordRe
 	key := fetchRequest.GetKey()
 	fileType := fetchRequest.FileType
 
-	status := store.Delete(fileType, key)
+	var keys_list []string
+
+	if strings.Contains(key, ",") {
+		keys_list = strings.Split(key, ",")
+	} else {
+		keys_list = []string{key}
+	}
+	for i := 0; i < len(keys_list); i++ {
+		output := store.Delete(fileType, keys_list[i])
+		if output != nil {
+			return &pb.ModResponse{IP: g.Node.GetID()}, output
+		}
+	}
+
 	log.Printf("--- FS: Triggering File Delete in Node for key [%v] \n", key)
 
-	return &pb.ModResponse{IP: g.Node.GetID()}, status
+	return &pb.ModResponse{IP: g.Node.GetID()}, nil
 }
 
 // ReadFile allows returning of container IP from file within chord
@@ -241,18 +256,24 @@ func (g *Gossiper) ReadFile(ctx context.Context, fetchRequest *pb.FetchChordRequ
 	fileByte, status := store.Get(fileType, key)
 	// TODO: Might need to change this
 	containerIP := string(fileByte[:])
-	log.Printf("--- FS: Triggering File Delete in Node for key [%v] \n", key)
+	log.Printf("--- FS: Triggering File Read in Node for key [%v] \n", key)
 
 	return &pb.ContainerInfo{ContainerIP: containerIP}, status
 }
 
-func (g *Gossiper) MigrationInit(ctx context.Context, migrationRequest *pb.MigrationRequest) (*pb.MigrationResponse, error) {
+func (g *Gossiper) MigrationJoin(ctx context.Context, migrationRequest *pb.MigrationRequest) (*pb.MigrationResponse, error) {
 	requestId := migrationRequest.RequesterID
 	log.Printf("--- FS: Triggering Migration to Chord Node %v from %v \n", requestId, g.Node.GetID())
 
-	g.Node.MigrationHandler(requestId)
+	g.Node.MigrationJoinHandler(requestId)
 
 	return &pb.MigrationResponse{Success: true}, nil
+}
+
+func (g *Gossiper) WriteFileAndReplicate(ctx context.Context, writeRequest *pb.ModRequest) (*pb.ModResponse, error) {
+
+	output := g.Node.WriteFileAndReplicate(writeRequest.FileType, writeRequest.Key, writeRequest.Value)
+	return &pb.ModResponse{IP: g.Node.GetID()}, output
 }
 
 /////////////////////////////////////////
@@ -266,7 +287,7 @@ func (g *Gossiper) StoreKeyHash(ctx context.Context, dlUploadRequest *pb.DLUploa
 	log.Printf("--- DLCHORD: Triggering storage of file [%v] from [%v]\n", fileName, containerIP)
 
 	correctChordIP := g.Node.FindSuccessor(hash.Hash(fileName))
-	_, err := g.WriteFileToNode(correctChordIP, fileName, containerIP)
+	_, err := g.WriteFileAndReplicateToNode(correctChordIP, fileName, "local", containerIP)
 	if err != nil {
 		// TODO: return error
 		log.Fatalf("error in running Store Key Hash (ext) : %+v\n", err)
@@ -287,10 +308,10 @@ func (g *Gossiper) StoreKeyHash(ctx context.Context, dlUploadRequest *pb.DLUploa
 func (g *Gossiper) GetFileLocation(ctx context.Context, dlDownloadRequest *pb.DLDownloadRequest) (*pb.DLDownloadResponse, error) {
 	fileName := dlDownloadRequest.Filename
 	correctChordIP := g.Node.FindSuccessor(hash.Hash(fileName))
-	containerInfo, err := g.readFileFromNode(correctChordIP, fileName)
+	containerInfo, err := g.readFileFromNode(correctChordIP, fileName, "local")
 	if err != nil {
 		// TODO: return error
-		log.Fatalf("error in running Store Key Hash (ext) : %+v\n", err)
+		log.Fatalf("error in running GetFile Location (ext) : %+v\n", err)
 	}
 	return &pb.DLDownloadResponse{Container: containerInfo, ChordIP: correctChordIP}, nil
 

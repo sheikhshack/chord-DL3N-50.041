@@ -7,7 +7,7 @@ services:
     image: mike_node
     environment:
       - APP_NODE=bravo
-      - FILE_NAME=forgotten.rar
+      - FILE_NAME=forgotten_sailor.rar
       - CONTAINER_IP=godbless_DL3N_DNS
     depends_on:
       - alpha
@@ -38,6 +38,17 @@ services:
       - 9000
     environment:
       - NODE_ID=nodeCharlie
+      - PEER_HOSTNAME=alpha
+    restart: "no"
+    depends_on:
+      - bravo
+  delta:
+    container_name: nodeDelta
+    image: chord_node
+    ports:
+      - 9000
+    environment:
+      - NODE_ID=nodeDelta
       - PEER_HOSTNAME=alpha
     restart: "no"
     depends_on:
