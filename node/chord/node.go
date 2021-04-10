@@ -11,7 +11,7 @@ import (
 	"github.com/sheikhshack/distributed-chaos-50.041/node/store"
 )
 
-const SUCCESSOR_LIST_SIZE = 3
+const SUCCESSOR_LIST_SIZE = 2
 const FINGER_TABLE_SIZE = 16
 
 type Node struct {
@@ -193,12 +193,6 @@ func (n *Node) MigrationFaultHandler(requestID string) {
 
 		}
 
-		//Init deleting from last successor
-		_, err = n.Gossiper.DeleteFileFromNode(requestID, keys, "replica")
-		if err != nil {
-			print("Error in Deleting file: %+v\n", err)
-			return
-		}
 	}
 
 }

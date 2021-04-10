@@ -67,21 +67,24 @@ func (n *Node) healthCheck(id string) bool {
 // TODO: Mutex locks for this
 func (n *Node) fixSuccessorList() {
 	log.Printf("Fixing Successor List: %+v\n", n.GetSuccessorList())
-	if len(n.successorList) <= 1 {
-		n.successorList = make([]string, SUCCESSOR_LIST_SIZE)
+
+	n.successorList = n.successorList[1:]
+	n.successorList = append(n.successorList, "")
+
+	isNewSuccessorAlive := n.healthCheck(n.GetSuccessor())
+	if !isNewSuccessorAlive {
+		n.fixSuccessorList()
 	} else {
-		n.successorList = n.successorList[1:]
-		n.successorList = append(n.successorList, "")
 
-		isNewSuccessorAlive := n.healthCheck(n.GetSuccessor())
-		if !isNewSuccessorAlive {
-			n.fixSuccessorList()
-		} else {
-			// TODO: Migrate from n.ID to n.GetSuccessor()
+		if n.GetSuccessor() != "" {
 			log.Printf("Found a live successor %s, calling migration on it.\n", n.GetSuccessor())
-
+			n.migrationFault(n.GetSuccessor())
+		} else {
+			// TODO: How to find the missing successor? Ring break
 		}
+
 	}
+
 }
 
 func (n *Node) updateSuccessorList(succSuccList []string, prevSuccessorList []string) {
