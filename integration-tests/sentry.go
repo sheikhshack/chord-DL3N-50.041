@@ -6,7 +6,6 @@ import (
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/network"
 	"github.com/docker/go-connections/nat"
-	v1 "github.com/opencontainers/image-spec/specs-go/v1"
 	"io"
 	"log"
 	"os"
@@ -59,6 +58,7 @@ func (s *Sentry) SetupTestNetwork()  {
 }
 
 func (s *Sentry ) FireOffChordNode(master bool, name string) {
+	s.client.ContainerRemove(s.ctx, name , types.ContainerRemoveOptions{Force: true})
 	if master {
 
 		configs := &container.Config{
@@ -67,12 +67,16 @@ func (s *Sentry ) FireOffChordNode(master bool, name string) {
 			Env:             []string{"PEER_HOSTNAME="},
 			Image:           "sheikhshack/chord_node",
 		}
-		container, err := s.client.ContainerCreate(s.ctx, configs, &container.HostConfig{}, &network.NetworkingConfig{}, &v1.Platform{}, name )
+		container, err := s.client.ContainerCreate(s.ctx, configs, nil, nil,  nil, name )
 		if err != nil {
 			log.Fatalf("Failed building container: %v", err)
 		}
 		fmt.Println(container)
 		s.client.NetworkConnect(s.ctx, s.network, name, &network.EndpointSettings{})
+		if err:= s.client.ContainerStart(s.ctx, container.ID, types.ContainerStartOptions{}); err!= nil{
+			log.Fatalf("Failed to run container: %v", err)
+		}
+
 
 	}
 }
