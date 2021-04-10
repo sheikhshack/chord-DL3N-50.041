@@ -23,6 +23,9 @@ services:
       - 9000
     environment:
       - PEER_HOSTNAME=
+    networks:
+      - chord-network
+
 
   # TODO: @Lowen, would be good if this dockerfile also has the build and run command of your binaries
   chord_member:
@@ -36,3 +39,10 @@ services:
     restart: "no"
     depends_on:
       - alpha
+
+    networks:
+      - chord-network
+
+networks:
+  chord-network:
+    name: overlord-network
