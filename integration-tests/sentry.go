@@ -57,27 +57,31 @@ func (s *Sentry) SetupTestNetwork()  {
 
 }
 
-func (s *Sentry ) FireOffChordNode(master bool, name string) {
+func (s *Sentry ) FireOffChordNode(ringLeader bool, name string) {
 	s.client.ContainerRemove(s.ctx, name , types.ContainerRemoveOptions{Force: true})
-	if master {
-
-		configs := &container.Config{
-			Hostname:        name,
-			ExposedPorts:	 nat.PortSet{"9000/tcp": struct{}{}},
-			Env:             []string{"PEER_HOSTNAME="},
-			Image:           "sheikhshack/chord_node",
-		}
-		container, err := s.client.ContainerCreate(s.ctx, configs, nil, nil,  nil, name )
-		if err != nil {
-			log.Fatalf("Failed building container: %v", err)
-		}
-		fmt.Println(container)
-		s.client.NetworkConnect(s.ctx, s.network, name, &network.EndpointSettings{})
-		if err:= s.client.ContainerStart(s.ctx, container.ID, types.ContainerStartOptions{}); err!= nil{
-			log.Fatalf("Failed to run container: %v", err)
-		}
+	var env []string
+	if ringLeader {
+		env = []string{"PEER_HOSTNAME="}
+		name = "alpha"
+	} else {
+		env= []string{"PEER_HOSTNAME=alpha"}
+	}
 
 
+	configs := &container.Config{
+		Hostname:        name,
+		ExposedPorts:	 nat.PortSet{"9000/tcp": struct{}{}},
+		Env:             env ,
+		Image:           "sheikhshack/chord_node",
+	}
+	container, err := s.client.ContainerCreate(s.ctx, configs, nil, nil,  nil, name )
+	if err != nil {
+		log.Fatalf("Failed building container: %v", err)
+	}
+	fmt.Println(container)
+	s.client.NetworkConnect(s.ctx, s.network, name, &network.EndpointSettings{})
+	if err:= s.client.ContainerStart(s.ctx, container.ID, types.ContainerStartOptions{}); err!= nil{
+		log.Fatalf("Failed to run container: %v", err)
 	}
 }
 
@@ -88,5 +92,7 @@ func main() {
 	sentry := NewSentry(ctx, "apache1")
 	//sentry.BuildChordImage()
 	sentry.SetupTestNetwork()
-	sentry.FireOffChordNode(true, "cassandra-node")
+	sentry.FireOffChordNode(true, "master-node")
+	sentry.FireOffChordNode(false, "slave-node")
+
 }
