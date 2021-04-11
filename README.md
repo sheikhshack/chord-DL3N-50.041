@@ -29,6 +29,9 @@ The above command will start the Panopticon container.
            google.golang.org/grpc/cmd/protoc-gen-go-grpc
     ```
 3. Ensure that `$GOPATH/bin` is located within `PATH`
+    ```bash
+       export PATH="$PATH:$(go env GOPATH)/bin"
+    ```
 
 ### Build/Rebuild gRPC library
 Build the generated protoc code with:
@@ -49,7 +52,8 @@ for archiving
 
 ### Quick start (Build and Compose)
 ```bash
-docker build -t chord_node . && docker-compose up
+./builder.sh
+docker-compose up
 ```
 
 ### Build using DockerFile
