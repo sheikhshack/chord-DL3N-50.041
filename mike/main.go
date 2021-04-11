@@ -3,11 +3,13 @@ package main
 import (
 	"context"
 	"fmt"
-	gossip "github.com/sheikhshack/distributed-chaos-50.041/node/gossip/proto"
-	"google.golang.org/grpc"
 	"log"
 	"os"
+	"strings"
 	"time"
+
+	gossip "github.com/sheikhshack/distributed-chaos-50.041/node/gossip/proto"
+	"google.golang.org/grpc"
 )
 
 //func lookup(nodeAddr, key string) {
@@ -54,26 +56,26 @@ import (
 //}
 
 func writeExternalFile(nodeAddr, fileName, containerIP string) {
-		//log.Printf("Attempting to lookup string %v", key)
-		var conn *grpc.ClientConn
-		connectionParams := fmt.Sprintf("%s:%v", nodeAddr, 9000)
+	//log.Printf("Attempting to lookup string %v", key)
+	var conn *grpc.ClientConn
+	connectionParams := fmt.Sprintf("%s:%v", nodeAddr, 9000)
 
-		conn, err := grpc.Dial(connectionParams, grpc.WithInsecure())
-		if err != nil {
-			log.Fatalf("Cannot connect to: %s", err)
+	conn, err := grpc.Dial(connectionParams, grpc.WithInsecure())
+	if err != nil {
+		log.Fatalf("Cannot connect to: %s", err)
 
-		}
-		defer conn.Close()
-		client := gossip.NewInternalListenerClient(conn)
-		res, err := client.StoreKeyHash(context.Background(), &gossip.DLUploadRequest{
-			Filename:    fileName,
-			ContainerIP: containerIP,
-		})
-		if err != nil {
-			log.Fatalf("-- MIKE external fail %s", err)
-		}
+	}
+	defer conn.Close()
+	client := gossip.NewInternalListenerClient(conn)
+	res, err := client.StoreKeyHash(context.Background(), &gossip.DLUploadRequest{
+		Filename:    fileName,
+		ContainerIP: containerIP,
+	})
+	if err != nil {
+		log.Fatalf("-- MIKE external fail %s", err)
+	}
 
-		log.Printf("\nSuccess upload info to the following chord node: %+v\n", res)
+	log.Printf("\nSuccess upload info to the following chord node: %+v\n", res)
 }
 
 func resolveFile(nodeAddr, fileName string) {
@@ -89,7 +91,7 @@ func resolveFile(nodeAddr, fileName string) {
 	defer conn.Close()
 	client := gossip.NewInternalListenerClient(conn)
 	res, err := client.GetFileLocation(context.Background(), &gossip.DLDownloadRequest{
-		Filename:    fileName,
+		Filename: fileName,
 	})
 	if err != nil {
 		log.Fatalf("-- MIKE external fail %s", err)
@@ -104,19 +106,14 @@ func main() {
 	fileName := os.Getenv("FILE_NAME")
 	containerIP := os.Getenv("CONTAINER_IP")
 
-
-	//keys := [4]string{"AAA", "BBB", "XXX", "UYEWTFBBQ"}
-
-	//for i := 0; i < 999; i++ {
-	//	fmt.Println("Trying a new key...")
-	//	lookup(contactNode, keys[i%4])
-	//	time.Sleep(2 * time.Second)
-	fmt.Println("Sleeping the night away")
-	time.Sleep(5 * time.Second)
-	writeExternalFile(attachedNode, fileName, containerIP)
-	fmt.Println("Sleep again, retrieving back the same file in 5s")
-	time.Sleep(5 * time.Second)
-	resolveFile(attachedNode, fileName)
-
+	fileNames := strings.Split(fileName, ",")
+	for _, i := range fileNames {
+		fmt.Println("Sleeping the night away")
+		time.Sleep(5 * time.Second)
+		writeExternalFile(attachedNode, i, containerIP)
+		// fmt.Println("Sleep again, retrieving back the same file in 5s")
+		// time.Sleep(5 * time.Second)
+		// resolveFile(attachedNode, i)
+	}
 
 }

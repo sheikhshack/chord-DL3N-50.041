@@ -8,7 +8,9 @@ enum Command {
   HEALTHCHECK = 2;
   GET_PREDECESSOR = 3;
   NOTIFY = 4;
-  LOOKUP= 5 ;
+  LOOKUP= 5;
+  GET_SUCCESSOR_LIST = 6;
+  REPLICATE_TO_NODE = 7;
 }
 
 
@@ -21,6 +23,9 @@ message Request {
   message Body {
     int64 HashSlot = 1;
     string InfoHash = 2;
+    string Key = 3;
+    string Value = 4;
+    string FileType = 5;
   }
 
   Command command = 1;
@@ -32,6 +37,7 @@ message Request {
 message Response {
   message Body {
     string ID = 1;
+    repeated string SuccessorList = 2;
     bool IsHealthy = 4;
   }
 
@@ -44,6 +50,7 @@ message Response {
 message ModRequest {
   string key = 1;
   string value = 2;
+  string fileType = 3;
 }
 
 message DLUploadRequest {
@@ -71,22 +78,19 @@ message ContainerInfo {
 
 }
 
-
-
-
 message FetchChordRequest {
   string key = 1;
+  string fileType = 2;
 }
 
 message ModResponse {
   string IP = 1;
 }
 
-
 message DebugMessage {
   string fromID = 1;
   string predecessor = 2;
-  string successor = 3;
+  repeated string successorList = 3;
   repeated string fingers = 4;
 }
 
@@ -94,14 +98,26 @@ message DebugResponse {
   bool success = 1;
 }
 
+message MigrationRequest{
+  string requesterID = 1;
+}
+
+message MigrationResponse{
+  bool success = 1;
+}
+
+
 service InternalListener {
   // core service
   rpc Emit(Request) returns (Response) {}
   // chord file management services (internal)
   rpc ReadFile(FetchChordRequest) returns (ContainerInfo) {}
   rpc WriteFile(ModRequest) returns (ModResponse) {}
+  rpc WriteFileAndReplicate(ModRequest) returns (ModResponse) {}
   rpc DeleteFile(FetchChordRequest) returns (ModResponse) {}
   rpc FetchChordIp(FetchChordRequest) returns (ModResponse) {}
+  rpc MigrationJoin(MigrationRequest) returns (MigrationResponse) {}
+  rpc MigrationFault(MigrationRequest) returns (MigrationResponse) {}
   // defunct
 
   // D3L bridge protocol (external)

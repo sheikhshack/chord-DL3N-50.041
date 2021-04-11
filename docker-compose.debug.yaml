@@ -5,7 +5,6 @@ services:
   panopticon:
     container_name: panopticon
     image: panopticon
-
   alpha:
     container_name: alpha
     image: chord_node
@@ -37,7 +36,16 @@ services:
       - PEER_HOSTNAME=alpha
       - DEBUG=debug
     depends_on:
-      - alpha
-    deploy:
-      mode: replicated
-      replicas: 1
+      - bravo
+  delta:
+    container_name: delta
+    image: chord_node
+    ports:
+      - 9000
+    environment:
+      - NODE_ID=delta
+      - PEER_HOSTNAME=alpha
+      - DEBUG=debug
+    depends_on:
+      - charlie
+

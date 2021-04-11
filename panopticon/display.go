@@ -9,10 +9,10 @@ import (
 )
 
 type nodeData struct {
-	nodeID      string
-	predecessor string
-	successor   string
-	fingers     []string
+	nodeID        string
+	predecessor   string
+	successorList []string
+	fingers       []string
 }
 
 func (t Tower) display() {
@@ -36,14 +36,15 @@ func (t Tower) display() {
 		for _, node := range holder {
 			hID := hash.Hash(node.nodeID)
 			hpredecessor := hash.Hash(node.predecessor)
-			hsuccessor := hash.Hash(node.successor)
-			stabilized := node.predecessor != "" && node.successor != "" && hash.IsInRange(hID, hpredecessor, hsuccessor)
+			hsuccessor := hash.Hash(node.successorList[0])
+			stabilized := node.predecessor != "" && node.successorList[0] != "" && hash.IsInRange(hID, hpredecessor, hsuccessor)
 
-			fmt.Printf("%15s (%v): %15s (%v) %15s (%v) %9v\nFingers: %+v\n",
+			fmt.Printf("%15s (%v): %15s (%v) %15s (%v) %9v\nSuccessorList: %+v\nFingers: %+v\n",
 				node.nodeID, hID,
 				node.predecessor, hpredecessor,
-				node.successor, hsuccessor,
+				node.successorList[0], hsuccessor,
 				stabilized,
+				node.successorList,
 				node.fingers,
 			)
 		}

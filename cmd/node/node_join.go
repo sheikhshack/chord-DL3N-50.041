@@ -31,7 +31,6 @@ func main() {
 		node.InitRing()
 		log.Printf("%v: init-ed ring\n", node.ID)
 	} else {
-		time.Sleep(time.Millisecond * 5000)
 		node.Join(knownPeerID)
 
 	}
