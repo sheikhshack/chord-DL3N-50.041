@@ -2,54 +2,47 @@ version: '3.5'
 # have not configed network yet... in the future there will only
 # be one scaled service with dynamic port assignment. 
 services:
-  mike:
-    container_name: mike
-    image: mike_node
-    environment:
-      - APP_NODE=bravo
-      - FILE_NAME=alpha,nodeBravo,nodeCharlie,nodeDelta
-      - CONTAINER_IP=godbless_DL3N_DNS
-    depends_on:
-      - alpha
-      - bravo
+#  mike:
+#    container_name: mike
+#    image: mike_node
+#    environment:
+#      - APP_NODE=bravo
+#      - FILE_NAME=forgotten_sailor.rar
+#      - CONTAINER_IP=godbless_DL3N_DNS
+#    depends_on:
+#      - alpha
+#      - bravo
+#      - charlie
+
   alpha:
-    container_name: alpha
-    image: chord_node
+    container_name: chord_alpha
+    build:
+      context: .
+      dockerfile: Dockerfile
     ports:
       - 9000
     environment:
-      - NODE_ID=alpha
       - PEER_HOSTNAME=
-  bravo:
-    container_name: nodeBravo
-    image: chord_node
+    networks:
+      - chord-network
+
+
+  # TODO: @Lowen, would be good if this dockerfile also has the build and run command of your binaries
+  chord_member:
+    build:
+      context: .
+      dockerfile: Dockerfile
     ports:
       - 9000
     environment:
-      - NODE_ID=nodeBravo
       - PEER_HOSTNAME=alpha
     restart: "no"
     depends_on:
       - alpha
-  charlie:
-    container_name: nodeCharlie
-    image: chord_node
-    ports:
-      - 9000
-    environment:
-      - NODE_ID=nodeCharlie
-      - PEER_HOSTNAME=alpha
-    restart: "no"
-    depends_on:
-      - bravo
-  delta:
-    container_name: nodeDelta
-    image: chord_node
-    ports:
-      - 9000
-    environment:
-      - NODE_ID=nodeDelta
-      - PEER_HOSTNAME=alpha
-    restart: "no"
-    depends_on:
-      - bravo
+
+    networks:
+      - chord-network
+
+networks:
+  chord-network:
+    name: overlord-network
