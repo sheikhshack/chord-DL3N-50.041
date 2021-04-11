@@ -3,15 +3,16 @@ package main
 import (
 	"context"
 	"fmt"
+	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
+	"github.com/docker/docker/api/types/filters"
 	"github.com/docker/docker/api/types/network"
+	"github.com/docker/docker/client"
 	"github.com/docker/go-connections/nat"
 	"io"
 	"log"
 	"os"
-
-	"github.com/docker/docker/api/types"
-	"github.com/docker/docker/client"
+	"time"
 )
 
 type Sentry struct {
@@ -25,6 +26,8 @@ func NewSentry(ctx context.Context, network string) *Sentry {
 	if err!= nil {
 		log.Fatal("Error connecting to Docker engine", err)
 	}
+	client.ContainersPrune(ctx, filters.Args{})
+	client.NetworksPrune(ctx, filters.Args{})
 	return &Sentry{ctx: ctx, client: client, network: network}
 }
 
@@ -66,7 +69,9 @@ func (s *Sentry ) BuildMikeImage()  {
 
 func (s *Sentry) SetupTestNetwork()  {
 	// resets and remove current Network first
-	_ = s.client.NetworkRemove(s.ctx, s.network)
+	if err := s.client.NetworkRemove(s.ctx, s.network); err != nil {
+		log.Printf("Failed to remove network, %v\n", err)
+	}
 	opt := types.NetworkCreate{Attachable: true}
 	response, err := s.client.NetworkCreate(s.ctx, s.network, opt)
 	if err != nil {
@@ -76,16 +81,16 @@ func (s *Sentry) SetupTestNetwork()  {
 
 }
 
-func (s *Sentry ) FireOffMikeNode(contact string, name string) {
+func (s *Sentry ) FireOffMikeNode(contactNode, name, cmd1, cmd2 string) {
 	s.client.ContainerRemove(s.ctx, name , types.ContainerRemoveOptions{Force: true})
-	attachedNode := fmt.Sprintf("APP_NODE=%v", name)
+	attachedNode := fmt.Sprintf("APP_NODE=%v", contactNode)
 	env := []string{attachedNode}
 
 	configs := &container.Config{
 		Hostname:        name,
-		ExposedPorts:	 nat.PortSet{"9000/tcp": struct{}{}},
 		Env:             env ,
-		Image:           "sheikhshack/chord_node",
+		Image:           "sheikhshack/mike_node_tester",
+		Cmd:   			 []string{"writefile", cmd1, cmd2},
 	}
 	container, err := s.client.ContainerCreate(s.ctx, configs, nil, nil,  nil, name )
 	if err != nil {
@@ -99,6 +104,7 @@ func (s *Sentry ) FireOffMikeNode(contact string, name string) {
 }
 
 func (s *Sentry ) FireOffChordNode(ringLeader bool, name string) {
+	s.client.ContainerStop(s.ctx, name, nil)
 	s.client.ContainerRemove(s.ctx, name , types.ContainerRemoveOptions{Force: true})
 	var env []string
 	if ringLeader {
@@ -126,7 +132,11 @@ func (s *Sentry ) FireOffChordNode(ringLeader bool, name string) {
 	}
 }
 
-func (s * Sentry) CheckFile (fileName string) {
+func (s * Sentry) WriteFileToChord (viaNode, fileName, content string) {
+	command1 := fmt.Sprintf("-f %s", fileName)
+	command2 := fmt.Sprintf("-c %s", content)
+	s.FireOffMikeNode(viaNode, "mike_test", command1, command2)
+
 
 }
 
@@ -135,9 +145,15 @@ func (s * Sentry) CheckFile (fileName string) {
 func main() {
 	ctx := context.Background()
 	sentry := NewSentry(ctx, "apache1")
-	//sentry.BuildChordImage()
+	////sentry.BuildChordImage()
 	sentry.SetupTestNetwork()
 	sentry.FireOffChordNode(true, "master-node")
-	sentry.FireOffChordNode(false, "slave-node")
+	sentry.FireOffChordNode(false, "slave-node1")
+	sentry.FireOffChordNode(false, "slave-node2")
+	sentry.FireOffChordNode(false, "slave-node3")
+
+
+	time.Sleep(time.Second *  20)
+	sentry.WriteFileToChord("slave-node1", "wombat.txt", "I hate this shit")
 
 }

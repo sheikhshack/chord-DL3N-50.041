@@ -56,8 +56,8 @@ func init() {
 
 
 }
-func writeExternalFile(nodeAddr, fileName, containerIP string) {
-	log.Printf("Attempting to write file %v to node %v", fileName, nodeAddr)
+func writeExternalFile(nodeAddr, fileName, content string) {
+	log.Printf("Attempting to write file %v with content %v to node %v", fileName, content,  nodeAddr)
 	var conn *grpc.ClientConn
 	connectionParams := fmt.Sprintf("%s:%v", nodeAddr, 9000)
 
@@ -70,7 +70,7 @@ func writeExternalFile(nodeAddr, fileName, containerIP string) {
 	client := gossip.NewInternalListenerClient(conn)
 	res, err := client.StoreKeyHash(context.Background(), &gossip.DLUploadRequest{
 		Filename:    fileName,
-		ContainerIP: containerIP,
+		ContainerIP: content,
 	})
 	if err != nil {
 		log.Fatalf("-- MIKE external fail %s", err)
