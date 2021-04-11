@@ -11,7 +11,7 @@ import (
 	"github.com/sheikhshack/distributed-chaos-50.041/node/store"
 )
 
-const SUCCESSOR_LIST_SIZE = 2
+const SUCCESSOR_LIST_SIZE = 3
 const FINGER_TABLE_SIZE = 16
 
 type Node struct {
@@ -28,7 +28,7 @@ type Node struct {
 func New(id string) *Node {
 	// 16 is finger table size
 	n := &Node{ID: id, next: 0, fingers: make([]string, FINGER_TABLE_SIZE), successorList: make([]string, SUCCESSOR_LIST_SIZE)}
-	log.Printf("Node:%v, HashedValue:%v", n.ID, hash.Hash(n.ID))
+	log.Printf("Node:%v, HashedValue:%v", n.GetID(), hash.Hash(n.GetID()))
 	if os.Getenv("DEBUG") == "debug" {
 		n.Gossiper = &gossip.Gossiper{
 			Node:      n,
@@ -54,12 +54,12 @@ func New(id string) *Node {
 
 func (n *Node) InitRing() {
 	n.SetPredecessor("")
-	n.SetSuccessor(n.ID)
+	n.SetSuccessor(n.GetID())
 	go n.cron()
 }
 
 func (n *Node) Join(id string) {
-	successor, err := n.Gossiper.Join(n.ID, id)
+	successor, err := n.Gossiper.Join(n.GetID(), id)
 	if err != nil {
 		// TODO: handle this error
 		// we can pass the error back and have main.go to exit gracefully with helpful message
@@ -75,15 +75,15 @@ func (n *Node) Join(id string) {
 
 func (n *Node) FindSuccessor(hashed int) string {
 	// edge case of having only one node in ring
-	//if n.successor == n.ID {
-	//	return n.ID
+	//if n.successor == n.GetID() {
+	//	return n.GetID()
 	//}
-	if hash.IsInRange(hashed, hash.Hash(n.ID), hash.Hash(n.GetSuccessor())+1) {
+	if hash.IsInRange(hashed, hash.Hash(n.GetID()), hash.Hash(n.GetSuccessor())+1) {
 		return n.GetSuccessor()
 	} else {
 		nPrime := n.closestPrecedingNode(hashed)
 
-		successor, err := n.Gossiper.FindSuccessor(n.ID, nPrime, hashed)
+		successor, err := n.Gossiper.FindSuccessor(n.GetID(), nPrime, hashed)
 		if err != nil {
 
 			log.Printf("Error in FindSucessor(). Fixing fingerTables.\n")
@@ -93,11 +93,11 @@ func (n *Node) FindSuccessor(hashed int) string {
 			}
 
 			// Assume that FingerTables will eventually be corrected if there is >1 node alive
-			if n.successorList[0] != n.ID {
+			if n.successorList[0] != n.GetID() {
 				return n.FindSuccessor(hashed)
 			} else {
 				// No more alive successor nodes except itself (Same as commented out edge case)
-				return n.ID
+				return n.GetID()
 			}
 		}
 		return successor
@@ -124,9 +124,9 @@ func (n *Node) MigrationJoinHandler(requestID string) {
 	values := ""
 	//Loop through them and write over the ones that do not lie in between pred and current node, and then delete if the write is successful
 	for _, i := range files {
-		log.Printf("Has Filename:%v, HashedFile: %v, Checking if in between %v and %v", i.Name(), hash.Hash(i.Name()), hash.Hash(requestID), hash.Hash(n.ID))
-		if !hash.IsInRange(hash.Hash(i.Name()), hash.Hash(requestID)+1, hash.Hash(n.ID)+1) {
-			log.Printf("No, %v with hashed value %v, not in range %v and %v, will transfer file", i.Name(), hash.Hash(i.Name()), hash.Hash(requestID), hash.Hash(n.ID))
+		log.Printf("Has Filename:%v, HashedFile: %v, Checking if in between %v and %v", i.Name(), hash.Hash(i.Name()), hash.Hash(requestID), hash.Hash(n.GetID()))
+		if !hash.IsInRange(hash.Hash(i.Name()), hash.Hash(requestID)+1, hash.Hash(n.GetID())+1) {
+			log.Printf("No, %v with hashed value %v, not in range %v and %v, will transfer file", i.Name(), hash.Hash(i.Name()), hash.Hash(requestID), hash.Hash(n.GetID()))
 			keys += i.Name() + ","
 
 			val, _ := store.Get("local", i.Name())
@@ -178,8 +178,8 @@ func (n *Node) MigrationFaultHandler(requestID string) {
 	values := ""
 	//Loop through them and write over the ones that do not lie in between pred and current node, and then delete if the write is successful
 	for _, i := range files {
-		log.Printf("Has Filename:%v, HashedFile: %v, Checking if in between %v and %v", i.Name(), hash.Hash(i.Name()), hash.Hash(requestID), hash.Hash(n.ID))
-		if hash.IsInRange(hash.Hash(i.Name()), hash.Hash(requestID), hash.Hash(n.ID)) {
+		log.Printf("Has Filename:%v, HashedFile: %v, Checking if in between %v and %v", i.Name(), hash.Hash(i.Name()), hash.Hash(requestID), hash.Hash(n.GetID()))
+		if hash.IsInRange(hash.Hash(i.Name()), hash.Hash(requestID), hash.Hash(n.GetID())) {
 			keys += i.Name() + ","
 			val, _ := store.Get("replica", i.Name())
 			values += string(val) + ","
@@ -206,17 +206,17 @@ func (n *Node) closestPrecedingNode(hashed int) string {
 		if n.fingers[i] == "" {
 			continue
 		}
-		if hash.IsInRange(hash.Hash(n.fingers[i]), hash.Hash(n.ID), hashed) {
+		if hash.IsInRange(hash.Hash(n.fingers[i]), hash.Hash(n.GetID()), hashed) {
 			return n.fingers[i]
 		}
 	}
-	return n.ID
+	return n.GetID()
 }
 
 func (n *Node) cron() {
 	time.Sleep(time.Millisecond * 10000)
 	for {
-		log.Println(n.ID, "successor is", n.GetSuccessor(), ", predecessor is", n.predecessor)
+		log.Println(n.GetID(), "successor is", n.GetSuccessor(), ", predecessor is", n.predecessor)
 		n.checkPredecessor()
 		n.stabilize()
 		n.fixFingers()
@@ -320,7 +320,7 @@ func (n *Node) ReplicateToSuccessorList(fileName, ip string) {
 
 	// Assumes that successorList nodes repeat after it contains own node
 	for i := range n.successorList {
-		if n.successorList[i] != n.ID {
+		if n.successorList[i] != n.GetID() {
 			n.replicateToNode(n.successorList[i], fileName, ip)
 		} else {
 			break
@@ -329,7 +329,7 @@ func (n *Node) ReplicateToSuccessorList(fileName, ip string) {
 }
 
 func (n *Node) replicateToNode(toID, fileName, ip string) bool {
-	status, err := n.Gossiper.ReplicateToNode(n.ID, toID, fileName, ip)
+	status, err := n.Gossiper.ReplicateToNode(n.GetID(), toID, fileName, ip)
 
 	if err != nil {
 		log.Printf("Error in replicating file to Node: %s\n", toID)
