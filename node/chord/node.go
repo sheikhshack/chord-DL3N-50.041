@@ -125,8 +125,10 @@ func (n *Node) MigrationJoinHandler(requestID string) {
 	//Loop through them and write over the ones that do not lie in between pred and current node, and then delete if the write is successful
 	for _, i := range files {
 		log.Printf("Has Filename:%v, HashedFile: %v, Checking if in between %v and %v", i.Name(), hash.Hash(i.Name()), hash.Hash(requestID), hash.Hash(n.ID))
-		if !hash.IsInRange(hash.Hash(i.Name()), hash.Hash(requestID), hash.Hash(n.ID)) {
+		if !hash.IsInRange(hash.Hash(i.Name()), hash.Hash(requestID)+1, hash.Hash(n.ID)+1) {
+			log.Printf("No, %v with hashed value %v, not in range %v and %v, will transfer file", i.Name(), hash.Hash(i.Name()), hash.Hash(requestID), hash.Hash(n.ID))
 			keys += i.Name() + ","
+
 			val, _ := store.Get("local", i.Name())
 			values += string(val) + ","
 		}
@@ -147,7 +149,7 @@ func (n *Node) MigrationJoinHandler(requestID string) {
 		}
 
 		//Init deleting from last successor
-		_, err = n.Gossiper.DeleteFileFromNode(requestID, keys, "replica")
+		_, err = n.Gossiper.DeleteFileFromNode(n.successorList[SUCCESSOR_LIST_SIZE-1], keys, "replica")
 		if err != nil {
 			print("Error in Deleting file: %+v\n", err)
 			return
