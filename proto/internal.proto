@@ -8,7 +8,9 @@ enum Command {
   HEALTHCHECK = 2;
   GET_PREDECESSOR = 3;
   NOTIFY = 4;
-  LOOKUP= 5 ;
+  LOOKUP= 5;
+  GET_SUCCESSOR_LIST = 6;
+  REPLICATE_TO_NODE = 7;
 }
 
 
@@ -21,6 +23,8 @@ message Request {
   message Body {
     int64 HashSlot = 1;
     string InfoHash = 2;
+    string Key = 3;
+    string Value = 4;
   }
 
   Command command = 1;
@@ -32,6 +36,7 @@ message Request {
 message Response {
   message Body {
     string ID = 1;
+    repeated string SuccessorList = 2;
     bool IsHealthy = 4;
   }
 
@@ -86,7 +91,7 @@ message ModResponse {
 message DebugMessage {
   string fromID = 1;
   string predecessor = 2;
-  string successor = 3;
+  repeated string successorList = 3;
   repeated string fingers = 4;
 }
 
