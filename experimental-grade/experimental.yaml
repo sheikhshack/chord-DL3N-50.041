@@ -1,0 +1,36 @@
+version: '3.5'
+# have not configed network yet... in the future there will only
+# be one scaled service with dynamic port assignment.
+services:
+#  mike:
+#    container_name: mike
+#    image: mike_node
+#    environment:
+#      - APP_NODE=bravo
+#      - FILE_NAME=forgotten_sailor.rar
+#      - CONTAINER_IP=godbless_DL3N_DNS
+#    depends_on:
+#      - alpha
+#      - chord_node
+  alpha:
+    container_name: chord_alpha
+    build:
+      context: ..
+      dockerfile: ../Dockerfile
+    ports:
+      - 9000
+    environment:
+      - PEER_HOSTNAME=
+
+  chord_member:
+    build:
+      context: ..
+      dockerfile: ../Dockerfile
+    ports:
+      - 9000
+    environment:
+      - PEER_HOSTNAME=alpha
+    restart: "no"
+    depends_on:
+      - alpha
+

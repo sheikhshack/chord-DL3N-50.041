@@ -15,8 +15,11 @@ type DL3NNode struct {
 	server        *http.Server
 }
 
+// NodeDiscovery exposes an object to find other DL3N Nodes
+// TODO: Maybe rename this later.
 type NodeDiscovery interface {
-	FindSeederAddr(string) string
+	FindSeederAddr(infohash string) (string, error)
+	SetSeederAddr(infohash, addr string) error
 }
 
 // NewDL3NNode
@@ -53,10 +56,13 @@ func (d *DL3NNode) StopSeed() {
 
 func (d *DL3NNode) Get() error {
 	nd := d.NodeDiscovery
-	addr := nd.FindSeederAddr(d.DL3N.Hash)
+	addr, err := nd.FindSeederAddr(d.DL3N.Hash)
+	if err != nil {
+		return err
+	}
 
 	// Get the data
-	resp, err := http.Get(addr)
+	resp, err := http.Get("http://" + addr)
 	if err != nil {
 		return err
 	}
