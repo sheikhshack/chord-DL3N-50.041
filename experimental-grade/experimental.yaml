@@ -1,6 +1,6 @@
 version: '3.5'
 # have not configed network yet... in the future there will only
-# be one scaled service with dynamic port assignment. 
+# be one scaled service with dynamic port assignment.
 services:
 #  mike:
 #    container_name: mike
@@ -11,27 +11,21 @@ services:
 #      - CONTAINER_IP=godbless_DL3N_DNS
 #    depends_on:
 #      - alpha
-#      - bravo
-#      - charlie
-
+#      - chord_node
   alpha:
     container_name: chord_alpha
     build:
-      context: .
-      dockerfile: Dockerfile
+      context: ..
+      dockerfile: ../Dockerfile
     ports:
       - 9000
     environment:
       - PEER_HOSTNAME=
-    networks:
-      - chord-network
 
-
-  # TODO: @Lowen, would be good if this dockerfile also has the build and run command of your binaries
   chord_member:
     build:
-      context: .
-      dockerfile: Dockerfile
+      context: ..
+      dockerfile: ../Dockerfile
     ports:
       - 9000
     environment:
@@ -40,9 +34,3 @@ services:
     depends_on:
       - alpha
 
-    networks:
-      - chord-network
-
-networks:
-  chord-network:
-    name: overlord-network

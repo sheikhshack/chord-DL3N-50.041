@@ -1,0 +1,64 @@
+version: '3.5'
+# have not configed network yet... in the future there will only
+# be one scaled service with dynamic port assignment. 
+services:
+  dl3n-seeder:
+    container_name: dl3n-seeder
+    build: 
+      context: .
+      dockerfile: Dockerfile.dl3ndemo
+    ports:
+      - 9000
+    environment:
+      - NODE_ID=dl3n-seeder
+      - PEER_HOSTNAME=alpha
+    depends_on:
+      - alpha
+      - bravo
+      - charlie
+
+  dl3n-getter:
+    container_name: dl3n-getter
+    build: 
+      context: .
+      dockerfile: Dockerfile.dl3ndemo
+    ports:
+      - 9000
+    environment:
+      - NODE_ID=dl3n-getter
+      - PEER_HOSTNAME=alpha
+    depends_on:
+      - alpha
+      - bravo
+      - charlie
+
+  alpha:
+    container_name: alpha
+    image: chord_node
+    ports:
+      - 9000
+    environment:
+      - NODE_ID=alpha
+      - PEER_HOSTNAME=
+  bravo:
+    container_name: nodeBravo
+    image: chord_node
+    ports:
+      - 9000
+    environment:
+      - NODE_ID=nodeBravo
+      - PEER_HOSTNAME=alpha
+    restart: "no"
+    depends_on:
+      - alpha
+  charlie:
+    container_name: nodeCharlie
+    image: chord_node
+    ports:
+      - 9000
+    environment:
+      - NODE_ID=nodeCharlie
+      - PEER_HOSTNAME=alpha
+    restart: "no"
+    depends_on:
+      - bravo

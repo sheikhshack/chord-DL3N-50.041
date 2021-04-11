@@ -67,3 +67,9 @@ RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -tags netgo -ldflags '-w' 
 ```bash
 docker-compose up
 ```
+
+For dynamic scaling version:
+```bash
+docker-compose up --scale chord_member=9 #9 members
+
+```

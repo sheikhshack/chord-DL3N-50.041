@@ -10,7 +10,6 @@ RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -tags netgo -ldflags '-w' 
 #WORKDIR /built-app
 #COPY --from=builder /app/node_exec /built-app/
 # ENVARS
-ENV NODE_ID=123
 ENV PEER_HOSTNAME=godbless
 EXPOSE 9000 8888
 

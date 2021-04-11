@@ -1,6 +1,7 @@
 package dl3n
 
 import (
+	"bytes"
 	"crypto/sha1"
 	"encoding/json"
 	"fmt"
@@ -130,12 +131,17 @@ func (d *DL3N) WriteMetaFile(path string) error {
 		return err
 	}
 
-	b, err := json.MarshalIndent(d, "", "  ")
+	buf := bytes.NewBuffer(nil)
+	encoder := json.NewEncoder(buf)
+	encoder.SetIndent("", "  ")
+
+	err = encoder.Encode(d)
+
 	if err != nil {
 		return err
 	}
 
-	ioutil.WriteFile(path, b, os.ModeAppend)
+	ioutil.WriteFile(path, buf.Bytes(), os.ModeAppend)
 
 	return nil
 }
