@@ -13,31 +13,24 @@ services:
       - alpha
       - bravo
   alpha:
-    container_name: chord_alpha
-    build:
-      context: .
-      dockerfile: Dockerfile
+    container_name: alpha
+    image: chord_node
     ports:
       - 9000
     environment:
+      - NODE_ID=alpha
       - PEER_HOSTNAME=
-    networks:
-      - chord-network
-
-
-  # TODO: @Lowen, would be good if this dockerfile also has the build and run command of your binaries
-  chord_member:
-    build:
-      context: .
-      dockerfile: Dockerfile
+  bravo:
+    container_name: nodeBravo
+    image: chord_node
     ports:
       - 9000
     environment:
+      - NODE_ID=nodeBravo
       - PEER_HOSTNAME=alpha
     restart: "no"
     depends_on:
       - alpha
-<<<<<<< HEAD
   charlie:
     container_name: nodeCharlie
     image: chord_node
@@ -60,12 +53,3 @@ services:
     restart: "no"
     depends_on:
       - bravo
-=======
-
-    networks:
-      - chord-network
-
-networks:
-  chord-network:
-    name: overlord-network
->>>>>>> main
