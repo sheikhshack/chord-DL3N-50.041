@@ -23,6 +23,7 @@ services:
       - 9000
     environment:
       - PEER_HOSTNAME=
+      - SUCCESSOR_LIST_SIZE=3
     networks:
       - chord-network
 
@@ -36,6 +37,7 @@ services:
       - 9000
     environment:
       - PEER_HOSTNAME=alpha
+      - SUCCESSOR_LIST_SIZE=3
     restart: "no"
     depends_on:
       - alpha

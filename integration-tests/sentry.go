@@ -144,8 +144,9 @@ func (s * Sentry) WriteFileToChord (viaNode, fileName, content string) {
 
 func main() {
 	ctx := context.Background()
+	// INIT Test case 1
 	sentry := NewSentry(ctx, "apache1")
-	////sentry.BuildChordImage()
+
 	sentry.SetupTestNetwork()
 	sentry.FireOffChordNode(true, "master-node")
 	sentry.FireOffChordNode(false, "slave-node1")
