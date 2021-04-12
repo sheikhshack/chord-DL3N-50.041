@@ -12,7 +12,7 @@ func New(fileType, key string, value []byte) error {
 		return err
 	}
 
-	if err = ioutil.WriteFile(filename, value, 0666); err != nil {
+	if err = ioutil.WriteFile(filename, value, 0777); err != nil {
 		return err
 	}
 

@@ -47,16 +47,31 @@ func NewSentry(ctx context.Context, network string, replicaCount int, master str
 		panic(err)
 	}
 	for _, container := range containers {
-		go client.ContainerStop(ctx, container.ID, nil)
+		client.ContainerStop(ctx, container.ID, nil)
+		client.ContainerRemove(ctx, container.ID , types.ContainerRemoveOptions{Force: true})
+
+	}
+
+	volumes, err := client.VolumeList(ctx, filters.Args{})
+	if err != nil {
+		panic(err)
+	}
+	for _, vol := range volumes.Volumes {
+		if err := client.VolumeRemove(ctx, vol.Name, true); err != nil{
+			panic(err)
+		}
+
 
 	}
 
 	client.ContainersPrune(ctx, filters.Args{})
 	client.NetworksPrune(ctx, filters.Args{})
-	//client.VolumesPrune(ctx, filters.Args{}) // please make sure you have no volume from other stuff before running
+	client.VolumesPrune(ctx, filters.Args{}) // please make sure you have no volume from other stuff before running
 
-
-
+	err = os.RemoveAll("./volumes/")
+	if err != nil {
+		log.Println("Volumes not removed, ", err)
+	}
 	return &Sentry{ctx: ctx, client: client, network: network, replicaCount: replicaCount, master: master, slaves: slaves}
 }
 
@@ -111,6 +126,7 @@ func (s *Sentry) SetupTestNetwork()  {
 }
 
 func (s *Sentry ) FireOffMikeNode(contactNode, name, cmd1, cmd2 string) {
+
 	s.client.ContainerRemove(s.ctx, name , types.ContainerRemoveOptions{Force: true})
 	attachedNode := fmt.Sprintf("APP_NODE=%v", contactNode)
 	env := []string{attachedNode}
@@ -134,7 +150,6 @@ func (s *Sentry ) FireOffMikeNode(contactNode, name, cmd1, cmd2 string) {
 
 func (s *Sentry ) FireOffChordNode(ringLeader bool, name string) {
 
-
 	s.client.ContainerStop(s.ctx, name, nil)
 	s.client.ContainerRemove(s.ctx, name , types.ContainerRemoveOptions{Force: true})
 	replicaConfig := fmt.Sprintf("SUCCESSOR_LIST_SIZE=%v", s.replicaCount)
@@ -144,6 +159,11 @@ func (s *Sentry ) FireOffChordNode(ringLeader bool, name string) {
 		name = "alpha"
 	} else {
 		env= []string{"PEER_HOSTNAME=alpha", replicaConfig}
+	}
+
+	// Provisions volume mount point first
+	if err:= os.MkdirAll("./volumes/" + name, os.ModePerm); err != nil {
+		panic(err)
 	}
 
 
@@ -159,6 +179,8 @@ func (s *Sentry ) FireOffChordNode(ringLeader bool, name string) {
 				  Type:   mount.TypeBind,
 				  Source: getHostVol(name),
 				  Target: "/built-app/chord",
+				  ReadOnly: false,
+				  TmpfsOptions: &mount.TmpfsOptions{Mode: os.ModePerm},
 			  },
 		  },
 	}
@@ -195,6 +217,7 @@ func (s *Sentry) BringUpChordRing() {
 
 
 func main() {
+
 	ctx := context.Background()
 	//INIT Test case 1
 	master := "apache"
