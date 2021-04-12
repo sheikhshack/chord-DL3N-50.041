@@ -6,29 +6,58 @@ import (
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/filters"
+	"github.com/docker/docker/api/types/mount"
 	"github.com/docker/docker/api/types/network"
 	"github.com/docker/docker/client"
 	"github.com/docker/go-connections/nat"
 	"io"
 	"log"
 	"os"
+	"path/filepath"
 	"time"
 )
+
+
+func getHostVol(containerName string) string {
+	relativePath := fmt.Sprintf("./volumes/%s/", containerName)
+	dir, err := filepath.Abs(filepath.Dir(relativePath))
+	if err != nil {
+		panic(err)
+	}
+	return dir
+}
 
 type Sentry struct {
 	ctx context.Context
 	client *client.Client
 	network string
+	replicaCount int
+	master	string
+	slaves	[]string
 }
 
-func NewSentry(ctx context.Context, network string) *Sentry {
+func NewSentry(ctx context.Context, network string, replicaCount int, master string, slaves []string) *Sentry {
 	client, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
 	if err!= nil {
 		log.Fatal("Error connecting to Docker engine", err)
 	}
+	// remove all previous settings and running containers
+	containers, err := client.ContainerList(ctx, types.ContainerListOptions{})
+	if err != nil {
+		panic(err)
+	}
+	for _, container := range containers {
+		go client.ContainerStop(ctx, container.ID, nil)
+
+	}
+
 	client.ContainersPrune(ctx, filters.Args{})
 	client.NetworksPrune(ctx, filters.Args{})
-	return &Sentry{ctx: ctx, client: client, network: network}
+	//client.VolumesPrune(ctx, filters.Args{}) // please make sure you have no volume from other stuff before running
+
+
+
+	return &Sentry{ctx: ctx, client: client, network: network, replicaCount: replicaCount, master: master, slaves: slaves}
 }
 
 func (s *Sentry ) BuildChordImage()  {
@@ -104,14 +133,17 @@ func (s *Sentry ) FireOffMikeNode(contactNode, name, cmd1, cmd2 string) {
 }
 
 func (s *Sentry ) FireOffChordNode(ringLeader bool, name string) {
+
+
 	s.client.ContainerStop(s.ctx, name, nil)
 	s.client.ContainerRemove(s.ctx, name , types.ContainerRemoveOptions{Force: true})
+	replicaConfig := fmt.Sprintf("SUCCESSOR_LIST_SIZE=%v", s.replicaCount)
 	var env []string
 	if ringLeader {
-		env = []string{"PEER_HOSTNAME="}
+		env = []string{"PEER_HOSTNAME=", replicaConfig}
 		name = "alpha"
 	} else {
-		env= []string{"PEER_HOSTNAME=alpha"}
+		env= []string{"PEER_HOSTNAME=alpha", replicaConfig}
 	}
 
 
@@ -121,7 +153,16 @@ func (s *Sentry ) FireOffChordNode(ringLeader bool, name string) {
 		Env:             env ,
 		Image:           "sheikhshack/chord_node",
 	}
-	container, err := s.client.ContainerCreate(s.ctx, configs, nil, nil,  nil, name )
+	bindingHostConfig := &container.HostConfig{
+		  Mounts: []mount.Mount{
+			  {
+				  Type:   mount.TypeBind,
+				  Source: getHostVol(name),
+				  Target: "/built-app/chord",
+			  },
+		  },
+	}
+	container, err := s.client.ContainerCreate(s.ctx, configs, bindingHostConfig, nil,  nil, name )
 	if err != nil {
 		log.Fatalf("Failed building container: %v", err)
 	}
@@ -136,22 +177,31 @@ func (s * Sentry) WriteFileToChord (viaNode, fileName, content string) {
 	command1 := fmt.Sprintf("-f %s", fileName)
 	command2 := fmt.Sprintf("-c %s", content)
 	s.FireOffMikeNode(viaNode, "mike_test", command1, command2)
+}
 
+func (s *Sentry) BringUpChordRing() {
+	s.SetupTestNetwork()
+	// fireoff the master first, then the slaves
+	s.FireOffChordNode(true, s.master)
+	for _, v := range s.slaves {
+		go s.FireOffChordNode(false, v)
+	}
 
 }
 
 
 
+
+
+
 func main() {
 	ctx := context.Background()
-	// INIT Test case 1
-	sentry := NewSentry(ctx, "apache1")
+	//INIT Test case 1
+	master := "apache"
+	slaves := []string{"slave-node1", "slave-node2", "slave-node3"}
+	sentry := NewSentry(ctx, "apache1", 3, master, slaves)
+	sentry.BringUpChordRing()
 
-	sentry.SetupTestNetwork()
-	sentry.FireOffChordNode(true, "master-node")
-	sentry.FireOffChordNode(false, "slave-node1")
-	sentry.FireOffChordNode(false, "slave-node2")
-	sentry.FireOffChordNode(false, "slave-node3")
 
 
 	time.Sleep(time.Second *  20)
