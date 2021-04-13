@@ -315,15 +315,15 @@ func (n *Node) DeleteFile(fileType, fileName string) error {
 	return nil
 }
 
-func (n *Node) DeleteFileAndReplicate(fileType, fileName string) error {
-	//	TODO: not panic
-	panic("panik")
-}
-
 func (n *Node) WriteFileAndReplicate(fileType, fileName, ip string) error {
 	n.WriteFile(fileType, fileName, ip)
 	n.ReplicateToSuccessorList(fileName, ip)
 	return nil
+}
+
+func (n *Node) DeleteFileAndReplicate(fileType, fileName string) error {
+	//	TODO: not panic
+	panic("panik")
 }
 
 func (n *Node) ReplicateToSuccessorList(fileName, ip string) {
@@ -338,13 +338,19 @@ func (n *Node) ReplicateToSuccessorList(fileName, ip string) {
 	}
 }
 
-func (n *Node) replicateToNode(toID, fileName, ip string) bool {
-	status, err := n.Gossiper.ReplicateToNode(n.GetID(), toID, fileName, ip)
+func (n *Node) replicateToNode(toID, fileName, ip string) {
+
+	_, err := n.Gossiper.WriteFileToNode(toID, fileName, "replica", ip)
 
 	if err != nil {
 		log.Printf("Error in replicating file to Node: %s\n", toID)
-		return false
 	}
 
-	return status
+}
+
+func (n *Node) deleteToNode(toID, fileName, fileType string) {
+	_, err := n.Gossiper.DeleteFileFromNode(toID, fileName, fileType)
+	if err != nil {
+		print("Error in Deleting file: %+v\n", err)
+	}
 }
