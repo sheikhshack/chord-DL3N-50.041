@@ -111,7 +111,6 @@ func (n *Node) updateSuccessorList(succSuccList []string, prevSuccessorList []st
 func (n *Node) replicateToNodeList(nodeList []string, fileName, ip string) {
 	for i := range nodeList {
 		if nodeList[i] != n.GetID() {
-			log.Printf("[REPLICATION] From Node %s to Node %s.\n", n.GetID(), nodeList[i])
 			n.replicateToNode(nodeList[i], fileName, ip)
 		}
 	}
@@ -120,8 +119,7 @@ func (n *Node) replicateToNodeList(nodeList []string, fileName, ip string) {
 func (n *Node) deleteFromNodeList(nodeList []string, fileName string) {
 	for i := range nodeList {
 		if nodeList[i] != n.GetID() {
-			log.Printf("[DELETE FROM REPLICA] From Node %s to Node %s.\n", n.GetID(), nodeList[i])
-			n.deleteToNode(nodeList[i], fileName, "replica")
+			n.deleteFromNode(nodeList[i], fileName)
 		}
 	}
 }

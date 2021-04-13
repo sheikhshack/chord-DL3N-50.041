@@ -193,7 +193,7 @@ func (n *Node) MigrationFaultHandler(requestID string) {
 	if keys != "" {
 		//Init writing to predecessor
 		log.Printf("Migrating Filename:%v", keys)
-		n.ReplicateToSuccessorList(keys, values)
+		n.replicateToSuccessorList(keys, values)
 		keys_list := strings.Split(keys, ",")
 		for _, i := range keys_list {
 			store.Migrate("replica", "local", i)
@@ -315,17 +315,24 @@ func (n *Node) DeleteFile(fileType, fileName string) error {
 }
 
 func (n *Node) WriteFileAndReplicate(fileType, fileName, ip string) error {
-	n.WriteFile(fileType, fileName, ip)
-	n.ReplicateToSuccessorList(fileName, ip)
+	err := n.WriteFile(fileType, fileName, ip)
+	if err != nil {
+		return err
+	}
+	n.replicateToSuccessorList(fileName, ip)
 	return nil
 }
 
 func (n *Node) DeleteFileAndReplicate(fileType, fileName string) error {
-	//	TODO: not panic
-	panic("panik")
+	err := n.DeleteFile(fileType, fileName)
+	if err != nil {
+		return err
+	}
+	n.deleteFromSuccessorList(fileName)
+	return nil
 }
 
-func (n *Node) ReplicateToSuccessorList(fileName, ip string) {
+func (n *Node) replicateToSuccessorList(fileName, ip string) {
 
 	// Assumes that successorList nodes repeat after it contains own node
 	for i := range n.successorList {
@@ -337,8 +344,21 @@ func (n *Node) ReplicateToSuccessorList(fileName, ip string) {
 	}
 }
 
+func (n *Node) deleteFromSuccessorList(fileName string) {
+
+	// Assumes that successorList nodes repeat after it contains own node
+	for i := range n.successorList {
+		if n.successorList[i] != n.GetID() {
+			n.deleteFromNode(n.successorList[i], fileName)
+		} else {
+			break
+		}
+	}
+}
+
 func (n *Node) replicateToNode(toID, fileName, ip string) {
 
+	log.Printf("[REPLICATION] From Node %s to Node %s.\n", n.GetID(), toID)
 	_, err := n.Gossiper.WriteFileToNode(toID, fileName, "replica", ip)
 
 	if err != nil {
@@ -347,8 +367,10 @@ func (n *Node) replicateToNode(toID, fileName, ip string) {
 
 }
 
-func (n *Node) deleteToNode(toID, fileName, fileType string) {
-	_, err := n.Gossiper.DeleteFileFromNode(toID, fileName, fileType)
+func (n *Node) deleteFromNode(toID, fileName string) {
+
+	log.Printf("[DELETE FROM REPLICA] From Node %s to Node %s.\n", n.GetID(), toID)
+	_, err := n.Gossiper.DeleteFileFromNode(toID, fileName, "replica")
 	if err != nil {
 		print("Error in Deleting file: %+v\n", err)
 	}

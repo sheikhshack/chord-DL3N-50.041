@@ -58,6 +58,10 @@ message DLDownloadRequest {
   string filename = 1;
 }
 
+message DLDeleteRequest {
+  string filename = 1;
+}
+
 
 message DLResponse {
   string chordIP = 1;
@@ -67,6 +71,11 @@ message DLResponse {
 message DLDownloadResponse {
   ContainerInfo container = 1;
   string chordIP = 2;
+}
+
+message DLDeleteResponse {
+  string chordIP =1;
+  DlowenStatus status = 2;
 }
 
 message ContainerInfo {
@@ -120,6 +129,7 @@ service InternalListener {
   // D3L bridge protocol (external)
   rpc StoreKeyHash(DLUploadRequest) returns (DLResponse) {}
   rpc GetFileLocation(DLDownloadRequest) returns (DLDownloadResponse) {}
+  rpc DeleteClientFile(DLDeleteRequest) returns (DLDeleteResponse) {}
 
   rpc Debug(DebugMessage) returns (DebugResponse) {}
 }

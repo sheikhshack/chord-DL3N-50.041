@@ -296,3 +296,25 @@ func (g *Gossiper) GetFileLocation(ctx context.Context, dlDownloadRequest *pb.DL
 	return &pb.DLDownloadResponse{Container: containerInfo, ChordIP: correctChordIP}, nil
 
 }
+
+func (g *Gossiper) DeleteClientFile(ctx context.Context, dlDeleteRequest *pb.DLDeleteRequest) (*pb.DLDeleteResponse, error) {
+	fileName := dlDeleteRequest.Filename
+	log.Printf("--- DLCHORD: Triggering delete of file [%v]\n", fileName)
+
+	correctChordIP := g.Node.FindSuccessor(hash.Hash(fileName))
+	_, err := g.DeleteFileAndReplicateToNode(correctChordIP, fileName, "local")
+	if err != nil {
+		// TODO: return error
+		log.Fatalf("error in running DeleteClientFile (ext) : %+v\n", err)
+	}
+	status := pb.DlowenStatus_SAME_NODE
+	if correctChordIP != g.Node.GetID() {
+		status = pb.DlowenStatus_REDIRECTED_NODE
+	}
+
+	return &pb.DLDeleteResponse{
+		ChordIP: correctChordIP,
+		Status:  status,
+	}, nil
+
+}
