@@ -132,21 +132,6 @@ func (g *Gossiper) Emit(ctx context.Context, in *pb.Request) (*pb.Response, erro
 			Body:        &pb.Response_Body{},
 		}
 
-	case pb.Command_REPLICATE_TO_NODE:
-
-		key := in.GetBody().Key
-		value := in.GetBody().Value
-		fileType := in.GetBody().FileType
-
-		g.replicateToNodeHandler(fileType, key, value)
-
-		res = &pb.Response{
-			Command:     pb.Command_REPLICATE_TO_NODE,
-			RequesterID: in.GetRequesterID(),
-			TargetID:    in.GetTargetID(),
-			Body:        &pb.Response_Body{},
-		}
-
 	default:
 		return nil, errors.New("command not recognised")
 	}
@@ -188,10 +173,6 @@ func (g *Gossiper) getSuccessorListHandler() []string {
 // notifyHandler might also update n.predecessor and trigger data transfer if appropriate.
 func (g *Gossiper) notifyHandler(possiblePredecessor string) {
 	g.Node.NotifyHandler(possiblePredecessor)
-}
-
-func (g *Gossiper) replicateToNodeHandler(fileType, key, value string) {
-	g.Node.WriteFile(fileType, key, value)
 }
 
 //// TODO: Move to legacy - DEFUNCT (leaving as reference for fk-up)

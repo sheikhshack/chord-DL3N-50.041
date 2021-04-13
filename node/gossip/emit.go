@@ -171,26 +171,6 @@ func (g *Gossiper) Notify(fromID, toID string) error {
 	return nil
 }
 
-// Replicate file to node
-func (g *Gossiper) ReplicateToNode(fromID, toID, key, value string) (bool, error) {
-	req := &pb.Request{
-		Command:     pb.Command_REPLICATE_TO_NODE,
-		RequesterID: fromID,
-		TargetID:    toID,
-		Body: &pb.Request_Body{
-			Key:      key,
-			Value:    value,
-			FileType: "replica",
-		},
-	}
-
-	_, err := g.emit(toID, req)
-	if err != nil {
-		return false, err
-	}
-	return true, nil
-}
-
 // external dialing service called w/o emit //
 func (g *Gossiper) WriteFileToNode(nodeAddr, fileName, fileType, ip string) (*pb.ModResponse, error) {
 	g.report()

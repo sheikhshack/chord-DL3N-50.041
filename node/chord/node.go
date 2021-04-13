@@ -12,7 +12,6 @@ import (
 	"github.com/sheikhshack/distributed-chaos-50.041/node/store"
 )
 
-//const SUCCESSOR_LIST_SIZE = 3
 const FINGER_TABLE_SIZE = 16
 
 type Node struct {
