@@ -23,7 +23,7 @@ func (n *Node) stabilize() {
 	}
 
 	// Init temp previous successorList variable
-	prevSuccessorList := make([]string, SUCCESSOR_LIST_SIZE)
+	prevSuccessorList := make([]string, n.replicaCount)
 	copy(prevSuccessorList, n.GetSuccessorList())
 
 	if hash.IsInRange(hash.Hash(x), hash.Hash(n.GetID()), hash.Hash(n.GetSuccessor())) {
@@ -88,7 +88,7 @@ func (n *Node) fixSuccessorList() {
 }
 
 func (n *Node) updateSuccessorList(succSuccList []string, prevSuccessorList []string) {
-	copy(n.successorList[1:], succSuccList[:SUCCESSOR_LIST_SIZE-1])
+	copy(n.successorList[1:], succSuccList[:n.replicaCount-1])
 
 	newElements, missingElements := compareList(prevSuccessorList, n.GetSuccessorList())
 

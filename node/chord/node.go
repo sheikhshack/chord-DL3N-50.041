@@ -3,6 +3,7 @@ package chord
 import (
 	"log"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 
@@ -11,7 +12,7 @@ import (
 	"github.com/sheikhshack/distributed-chaos-50.041/node/store"
 )
 
-const SUCCESSOR_LIST_SIZE = 3
+//const SUCCESSOR_LIST_SIZE = 3
 const FINGER_TABLE_SIZE = 16
 
 type Node struct {
@@ -20,6 +21,7 @@ type Node struct {
 	predecessor   string
 	next          int
 	successorList []string
+	replicaCount  int
 
 	Gossiper *gossip.Gossiper
 }
@@ -27,8 +29,12 @@ type Node struct {
 // New creates and returns a new Node
 func New(id string) *Node {
 	// 16 is finger table size
-	n := &Node{ID: id, next: 0, fingers: make([]string, FINGER_TABLE_SIZE), successorList: make([]string, SUCCESSOR_LIST_SIZE)}
-	log.Printf("Node:%v, HashedValue:%v", n.GetID(), hash.Hash(n.GetID()))
+	replicaCount, err := strconv.Atoi(os.Getenv("SUCCESSOR_LIST_SIZE"))
+	if err != nil{
+		log.Fatalf("Node INIT error, invalid SUCCESSOR_LIST_SIZE: %v", err)
+	}
+	n := &Node{ID: id, next: 0, fingers: make([]string, FINGER_TABLE_SIZE), successorList: make([]string, replicaCount), replicaCount: replicaCount}
+	log.Printf("Node:%v, HashedValue:%v with replica count %v", n.GetID(), hash.Hash(n.GetID()), n.replicaCount)
 	if os.Getenv("DEBUG") == "debug" {
 		n.Gossiper = &gossip.Gossiper{
 			Node:      n,
@@ -149,7 +155,7 @@ func (n *Node) MigrationJoinHandler(requestID string) {
 		}
 
 		//Init deleting from last successor
-		_, err = n.Gossiper.DeleteFileFromNode(n.successorList[SUCCESSOR_LIST_SIZE-1], keys, "replica")
+		_, err = n.Gossiper.DeleteFileFromNode(n.successorList[n.replicaCount-1], keys, "replica")
 		if err != nil {
 			print("Error in Deleting file: %+v\n", err)
 			return
