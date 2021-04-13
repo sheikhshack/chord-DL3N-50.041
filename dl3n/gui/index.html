@@ -1,0 +1,16 @@
+<html>
+    <body>
+        <form>
+            <input type="file" id="fileUpload"/>
+            <input type="submit"/>
+        </form>
+
+        <script>
+            let file = null;
+            const fileUpload = document.getElementById("fileUpload");
+            fileUpload.addEventListener("change", () => {
+                file = fileUpload.files[0];
+            })
+        </script>
+    </body>
+</html>
