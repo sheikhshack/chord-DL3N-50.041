@@ -115,6 +115,7 @@ service InternalListener {
   rpc WriteFile(ModRequest) returns (ModResponse) {}
   rpc WriteFileAndReplicate(ModRequest) returns (ModResponse) {}
   rpc DeleteFile(FetchChordRequest) returns (ModResponse) {}
+  rpc DeleteFileAndReplicate(FetchChordRequest) returns (ModResponse) {}
   rpc FetchChordIp(FetchChordRequest) returns (ModResponse) {}
   rpc MigrationJoin(MigrationRequest) returns (MigrationResponse) {}
   rpc MigrationFault(MigrationRequest) returns (MigrationResponse) {}

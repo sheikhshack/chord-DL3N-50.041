@@ -29,6 +29,7 @@ type node interface {
 	WriteFile(fileType, fileName, ip string) error
 	WriteFileAndReplicate(fileType, fileName, ip string) error
 	DeleteFile(fileType, fileName string) error
+	DeleteFileAndReplicate(fileType, fileName string) error
 	// for external API
 }
 
@@ -265,6 +266,12 @@ func (g *Gossiper) MigrationFault(ctx context.Context, migrationRequest *pb.Migr
 func (g *Gossiper) WriteFileAndReplicate(ctx context.Context, writeRequest *pb.ModRequest) (*pb.ModResponse, error) {
 
 	output := g.Node.WriteFileAndReplicate(writeRequest.FileType, writeRequest.Key, writeRequest.Value)
+	return &pb.ModResponse{IP: g.Node.GetID()}, output
+}
+
+func (g *Gossiper) DeleteFileAndReplicate(ctx context.Context, fetchRequest *pb.FetchChordRequest) (*pb.ModResponse, error) {
+
+	output := g.Node.DeleteFileAndReplicate(fetchRequest.FileType, fetchRequest.GetKey())
 	return &pb.ModResponse{IP: g.Node.GetID()}, output
 }
 

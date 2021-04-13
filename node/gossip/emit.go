@@ -248,6 +248,33 @@ func (g *Gossiper) WriteFileAndReplicateToNode(nodeAddr, fileName, fileType, ip 
 	return response, nil
 }
 
+func (g *Gossiper) DeleteFileAndReplicateToNode(nodeAddr, fileName, fileType string) (*pb.ModResponse, error) {
+	g.report()
+
+	var conn *grpc.ClientConn
+	connectionParams := fmt.Sprintf("%s:%v", nodeAddr, LISTEN_PORT)
+	//log.Printf("Sending Request: %+v, %+v", request, request.Command)
+
+	conn, err := grpc.Dial(connectionParams, grpc.WithInsecure())
+	if err != nil {
+		log.Fatalf("Cannot connect to: %s", err)
+
+	}
+	defer conn.Close()
+
+	log.Printf("Deleting file %v from Node %v", fileName, nodeAddr)
+	client := pb.NewInternalListenerClient(conn)
+	response, err := client.DeleteFileAndReplicate(context.Background(), &pb.FetchChordRequest{
+		Key:      fileName,
+		FileType: fileType,
+	})
+	if err != nil {
+		log.Printf("Error sending message: %v", err)
+		return nil, err
+	}
+	return response, nil
+}
+
 func (g *Gossiper) DeleteFileFromNode(nodeAddr, fileName, fileType string) (*pb.ModResponse, error) {
 	g.report()
 

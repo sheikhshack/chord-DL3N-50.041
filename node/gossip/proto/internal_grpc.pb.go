@@ -25,6 +25,7 @@ type InternalListenerClient interface {
 	WriteFile(ctx context.Context, in *ModRequest, opts ...grpc.CallOption) (*ModResponse, error)
 	WriteFileAndReplicate(ctx context.Context, in *ModRequest, opts ...grpc.CallOption) (*ModResponse, error)
 	DeleteFile(ctx context.Context, in *FetchChordRequest, opts ...grpc.CallOption) (*ModResponse, error)
+	DeleteFileAndReplicate(ctx context.Context, in *FetchChordRequest, opts ...grpc.CallOption) (*ModResponse, error)
 	FetchChordIp(ctx context.Context, in *FetchChordRequest, opts ...grpc.CallOption) (*ModResponse, error)
 	MigrationJoin(ctx context.Context, in *MigrationRequest, opts ...grpc.CallOption) (*MigrationResponse, error)
 	MigrationFault(ctx context.Context, in *MigrationRequest, opts ...grpc.CallOption) (*MigrationResponse, error)
@@ -81,6 +82,15 @@ func (c *internalListenerClient) WriteFileAndReplicate(ctx context.Context, in *
 func (c *internalListenerClient) DeleteFile(ctx context.Context, in *FetchChordRequest, opts ...grpc.CallOption) (*ModResponse, error) {
 	out := new(ModResponse)
 	err := c.cc.Invoke(ctx, "/internal.InternalListener/DeleteFile", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *internalListenerClient) DeleteFileAndReplicate(ctx context.Context, in *FetchChordRequest, opts ...grpc.CallOption) (*ModResponse, error) {
+	out := new(ModResponse)
+	err := c.cc.Invoke(ctx, "/internal.InternalListener/DeleteFileAndReplicate", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -152,6 +162,7 @@ type InternalListenerServer interface {
 	WriteFile(context.Context, *ModRequest) (*ModResponse, error)
 	WriteFileAndReplicate(context.Context, *ModRequest) (*ModResponse, error)
 	DeleteFile(context.Context, *FetchChordRequest) (*ModResponse, error)
+	DeleteFileAndReplicate(context.Context, *FetchChordRequest) (*ModResponse, error)
 	FetchChordIp(context.Context, *FetchChordRequest) (*ModResponse, error)
 	MigrationJoin(context.Context, *MigrationRequest) (*MigrationResponse, error)
 	MigrationFault(context.Context, *MigrationRequest) (*MigrationResponse, error)
@@ -180,6 +191,9 @@ func (UnimplementedInternalListenerServer) WriteFileAndReplicate(context.Context
 }
 func (UnimplementedInternalListenerServer) DeleteFile(context.Context, *FetchChordRequest) (*ModResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteFile not implemented")
+}
+func (UnimplementedInternalListenerServer) DeleteFileAndReplicate(context.Context, *FetchChordRequest) (*ModResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteFileAndReplicate not implemented")
 }
 func (UnimplementedInternalListenerServer) FetchChordIp(context.Context, *FetchChordRequest) (*ModResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method FetchChordIp not implemented")
@@ -298,6 +312,24 @@ func _InternalListener_DeleteFile_Handler(srv interface{}, ctx context.Context, 
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(InternalListenerServer).DeleteFile(ctx, req.(*FetchChordRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _InternalListener_DeleteFileAndReplicate_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(FetchChordRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(InternalListenerServer).DeleteFileAndReplicate(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/internal.InternalListener/DeleteFileAndReplicate",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(InternalListenerServer).DeleteFileAndReplicate(ctx, req.(*FetchChordRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -436,6 +468,10 @@ var InternalListener_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "DeleteFile",
 			Handler:    _InternalListener_DeleteFile_Handler,
+		},
+		{
+			MethodName: "DeleteFileAndReplicate",
+			Handler:    _InternalListener_DeleteFileAndReplicate_Handler,
 		},
 		{
 			MethodName: "FetchChordIp",
