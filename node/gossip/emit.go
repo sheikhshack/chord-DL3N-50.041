@@ -3,10 +3,10 @@ package gossip
 import (
 	"context"
 	"fmt"
-	"log"
 
 	"google.golang.org/grpc"
 
+	"github.com/sheikhshack/distributed-chaos-50.041/log"
 	pb "github.com/sheikhshack/distributed-chaos-50.041/node/gossip/proto"
 )
 
@@ -52,11 +52,10 @@ func (g *Gossiper) emit(nodeAddr string, request *pb.Request) (*pb.Response, err
 
 	var conn *grpc.ClientConn
 	connectionParams := fmt.Sprintf("%s:%v", nodeAddr, LISTEN_PORT)
-	//log.Printf("Sending Request: %+v, %+v", request, request.Command)
 
 	conn, err := grpc.Dial(connectionParams, grpc.WithInsecure())
 	if err != nil {
-		log.Fatalf("Cannot connect to: %s", err)
+		log.Error.Fatalf("Cannot connect to: %s", err)
 
 	}
 	defer conn.Close()
@@ -64,7 +63,7 @@ func (g *Gossiper) emit(nodeAddr string, request *pb.Request) (*pb.Response, err
 	client := pb.NewInternalListenerClient(conn)
 	response, err := client.Emit(context.Background(), request)
 	if err != nil {
-		log.Printf("Error sending message: %v", err)
+		//log.Warn.Printf("Error sending message: %v", err)
 		return nil, err
 	}
 	return response, nil
@@ -201,12 +200,12 @@ func (g *Gossiper) WriteFileToNode(nodeAddr, fileName, fileType, ip string) (*pb
 
 	conn, err := grpc.Dial(connectionParams, grpc.WithInsecure())
 	if err != nil {
-		log.Fatalf("Cannot connect to: %s", err)
+		log.Error.Fatalf("Cannot connect to: %s", err)
 
 	}
 	defer conn.Close()
 
-	log.Printf("Writing file %v to Node %v", fileName, nodeAddr)
+	log.Info.Printf("Writing file %v to Node %v", fileName, nodeAddr)
 	client := pb.NewInternalListenerClient(conn)
 	response, err := client.WriteFile(context.Background(), &pb.ModRequest{
 		Key:      fileName,
@@ -214,7 +213,7 @@ func (g *Gossiper) WriteFileToNode(nodeAddr, fileName, fileType, ip string) (*pb
 		FileType: fileType,
 	})
 	if err != nil {
-		log.Printf("Error sending message: %v", err)
+		log.Warn.Printf("Error sending message: %v", err)
 		return nil, err
 	}
 	return response, nil
@@ -229,12 +228,12 @@ func (g *Gossiper) WriteFileAndReplicateToNode(nodeAddr, fileName, fileType, ip 
 
 	conn, err := grpc.Dial(connectionParams, grpc.WithInsecure())
 	if err != nil {
-		log.Fatalf("Cannot connect to: %s", err)
+		log.Error.Fatalf("Cannot connect to: %s", err)
 
 	}
 	defer conn.Close()
 
-	log.Printf("Writing file %v to Node %v", fileName, nodeAddr)
+	log.Info.Printf("Writing file %v to Node %v", fileName, nodeAddr)
 	client := pb.NewInternalListenerClient(conn)
 	response, err := client.WriteFileAndReplicate(context.Background(), &pb.ModRequest{
 		Key:      fileName,
@@ -242,7 +241,7 @@ func (g *Gossiper) WriteFileAndReplicateToNode(nodeAddr, fileName, fileType, ip 
 		FileType: fileType,
 	})
 	if err != nil {
-		log.Printf("Error sending message: %v", err)
+		log.Warn.Printf("Error sending message: %v", err)
 		return nil, err
 	}
 	return response, nil
@@ -257,19 +256,19 @@ func (g *Gossiper) DeleteFileFromNode(nodeAddr, fileName, fileType string) (*pb.
 
 	conn, err := grpc.Dial(connectionParams, grpc.WithInsecure())
 	if err != nil {
-		log.Fatalf("Cannot connect to: %s", err)
+		log.Error.Fatalf("Cannot connect to: %s", err)
 
 	}
 	defer conn.Close()
 
-	log.Printf("Deleting file %v from Node %v", fileName, nodeAddr)
+	log.Info.Printf("Deleting file %v from Node %v", fileName, nodeAddr)
 	client := pb.NewInternalListenerClient(conn)
 	response, err := client.DeleteFile(context.Background(), &pb.FetchChordRequest{
 		Key:      fileName,
 		FileType: fileType,
 	})
 	if err != nil {
-		log.Printf("Error sending message: %v", err)
+		log.Warn.Printf("Error sending message: %v", err)
 		return nil, err
 	}
 	return response, nil
@@ -284,7 +283,7 @@ func (g *Gossiper) readFileFromNode(nodeAddr, fileName, fileType string) (*pb.Co
 
 	conn, err := grpc.Dial(connectionParams, grpc.WithInsecure())
 	if err != nil {
-		log.Fatalf("Cannot connect to: %s", err)
+		log.Error.Fatalf("Cannot connect to: %s", err)
 
 	}
 	defer conn.Close()
@@ -295,7 +294,7 @@ func (g *Gossiper) readFileFromNode(nodeAddr, fileName, fileType string) (*pb.Co
 		FileType: fileType,
 	})
 	if err != nil {
-		log.Printf("Error sending message: %v", err)
+		log.Warn.Printf("Error sending message: %v", err)
 		return nil, err
 	}
 	return response, nil
@@ -309,7 +308,7 @@ func (g *Gossiper) MigrationJoinFromNode(nodeAddr string) (*pb.MigrationResponse
 
 	conn, err := grpc.Dial(connectionParams, grpc.WithInsecure())
 	if err != nil {
-		log.Fatalf("Cannot connect to: %s", err)
+		log.Error.Fatalf("Cannot connect to: %s", err)
 
 	}
 	defer conn.Close()
@@ -319,7 +318,7 @@ func (g *Gossiper) MigrationJoinFromNode(nodeAddr string) (*pb.MigrationResponse
 		RequesterID: g.Node.GetID(),
 	})
 	if err != nil {
-		log.Printf("Error sending message: %v", err)
+		log.Warn.Printf("Error sending message: %v", err)
 		return nil, err
 	}
 	return response, nil
@@ -333,7 +332,7 @@ func (g *Gossiper) MigrationFaultFromNode(nodeAddr string) (*pb.MigrationRespons
 
 	conn, err := grpc.Dial(connectionParams, grpc.WithInsecure())
 	if err != nil {
-		log.Fatalf("Cannot connect to: %s", err)
+		log.Error.Fatalf("Cannot connect to: %s", err)
 
 	}
 	defer conn.Close()
@@ -343,7 +342,7 @@ func (g *Gossiper) MigrationFaultFromNode(nodeAddr string) (*pb.MigrationRespons
 		RequesterID: g.Node.GetID(),
 	})
 	if err != nil {
-		log.Printf("Error sending message: %v", err)
+		log.Warn.Printf("Error sending message: %v", err)
 		return nil, err
 	}
 	return response, nil

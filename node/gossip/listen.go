@@ -4,11 +4,11 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"log"
 	"net"
 
 	"google.golang.org/grpc"
 
+	"github.com/sheikhshack/distributed-chaos-50.041/log"
 	pb "github.com/sheikhshack/distributed-chaos-50.041/node/gossip/proto"
 	"github.com/sheikhshack/distributed-chaos-50.041/node/hash"
 	"github.com/sheikhshack/distributed-chaos-50.041/node/store"
@@ -16,20 +16,20 @@ import (
 
 // methods available to the gossiper via the node package
 type node interface {
-	FindSuccessor(hashed int) string
 	GetPredecessor() string
 	GetSuccessorList() []string
 	GetSuccessor() string
 	SetSuccessor(id string)
 	GetID() string
 	GetFingers() []string
+
+	FindSuccessor(hashed int) string
 	NotifyHandler(possiblePredecessor string)
 	MigrationJoinHandler(requestId string)
 	MigrationFaultHandler(requestId string)
-	WriteFile(fileType, fileName, ip string) error
+	WriteFiles(fileType, fileName, ip string) error
 	WriteFileAndReplicate(fileType, fileName, ip string) error
-	DeleteFile(fileType, fileName string) error
-	// for external API
+	DeleteFiles(fileType, fileName string) error
 }
 
 type Gossiper struct {
@@ -42,15 +42,15 @@ type Gossiper struct {
 func (g *Gossiper) NewServerAndListen(listenPort int) *grpc.Server {
 	lis, err := net.Listen("tcp", fmt.Sprintf(":%v", listenPort))
 	if err != nil {
-		log.Fatalf("failed to listen: %v", err)
+		log.Error.Fatalf("failed to listen: %v", err)
 	}
 
 	s := grpc.NewServer()
 	pb.RegisterInternalListenerServer(s, g)
 	if err := s.Serve(lis); err != nil {
-		log.Fatalf("failed to serve: %v", err)
+		log.Error.Fatalf("failed to serve: %v", err)
 	} else {
-		log.Printf("Listening on port %v\n", listenPort)
+		log.Info.Printf("Listening on port %v\n", listenPort)
 	}
 	return s
 }
@@ -59,8 +59,6 @@ func (g *Gossiper) NewServerAndListen(listenPort int) *grpc.Server {
 // TODO: consider that we need to spin up goroutine whenever we serve a new request
 func (g *Gossiper) Emit(ctx context.Context, in *pb.Request) (*pb.Response, error) {
 	g.report()
-
-	//log.Printf("Receving Request: %+v %+v\n", in, in.Command)
 	var res *pb.Response
 
 	switch in.Command {
@@ -75,7 +73,7 @@ func (g *Gossiper) Emit(ctx context.Context, in *pb.Request) (*pb.Response, erro
 				ID: id,
 			},
 		}
-		// log.Printf("Sending Response: %+v \n", res)
+
 	case pb.Command_JOIN:
 		fromID := in.GetRequesterID()
 		id := g.joinHandler(fromID)
@@ -137,7 +135,10 @@ func (g *Gossiper) Emit(ctx context.Context, in *pb.Request) (*pb.Response, erro
 		value := in.GetBody().Value
 		fileType := in.GetBody().FileType
 
-		g.replicateToNodeHandler(fileType, key, value)
+		err := g.replicateToNodeHandler(fileType, key, value)
+		if err != nil {
+			return nil, err
+		}
 
 		res = &pb.Response{
 			Command:     pb.Command_REPLICATE_TO_NODE,
@@ -150,7 +151,6 @@ func (g *Gossiper) Emit(ctx context.Context, in *pb.Request) (*pb.Response, erro
 		return nil, errors.New("command not recognised")
 	}
 
-	//log.Printf("Sending Response: %+v \n", res)
 	return res, nil
 }
 
@@ -161,6 +161,7 @@ func (g *Gossiper) findSuccessorHandler(key int) (id string) {
 
 // handler to join
 func (g *Gossiper) joinHandler(fromID string) string {
+	log.Info.Printf("Node %v request to join ring\n", fromID)
 	//fromID= previous node's id
 	if g.Node.GetID() == g.Node.GetSuccessor() {
 		g.Node.SetSuccessor(fromID)
@@ -189,28 +190,13 @@ func (g *Gossiper) notifyHandler(possiblePredecessor string) {
 	g.Node.NotifyHandler(possiblePredecessor)
 }
 
-func (g *Gossiper) replicateToNodeHandler(fileType, key, value string) {
-	g.Node.WriteFile(fileType, key, value)
+func (g *Gossiper) replicateToNodeHandler(fileType, key, value string) error {
+	return g.Node.WriteFiles(fileType, key, value)
 }
-
-//// TODO: Move to legacy - DEFUNCT (leaving as reference for fk-up)
-//func (g *Gossiper) Download(ctx context.Context, downloadRequest *pb.DownloadRequest) (*pb.DownloadResponse, error) {
-//	log.Printf("Download Method triggered \n")
-//	key := downloadRequest.Key
-//
-//	fileByte, status := store.Get(key)
-//	if status == nil {
-//		v := string(fileByte)
-//		return &pb.DownloadResponse{Value: v}, nil
-//	} else {
-//		return nil, status
-//	}
-//}
 
 ////////// Internal CHORD file management
 // FetchChordIp is basically unused for now, leaving as legacy
 func (g *Gossiper) FetchChordIp(ctx context.Context, fetchRequest *pb.FetchChordRequest) (*pb.ModResponse, error) {
-	log.Printf("Lookup Method \n")
 	key := fetchRequest.GetKey()
 	ip := g.Node.FindSuccessor(hash.Hash(key))
 	return &pb.ModResponse{IP: ip}, nil
@@ -218,35 +204,31 @@ func (g *Gossiper) FetchChordIp(ctx context.Context, fetchRequest *pb.FetchChord
 
 func (g *Gossiper) WriteFile(ctx context.Context, writeRequest *pb.ModRequest) (*pb.ModResponse, error) {
 
-	output := g.Node.WriteFile(writeRequest.FileType, writeRequest.Key, writeRequest.Value)
+	output := g.Node.WriteFiles(writeRequest.FileType, writeRequest.Key, writeRequest.Value)
 	return &pb.ModResponse{IP: g.Node.GetID()}, output
 }
 
 func (g *Gossiper) DeleteFile(ctx context.Context, fetchRequest *pb.FetchChordRequest) (*pb.ModResponse, error) {
-	log.Printf("Upload Method triggered \n")
-
-	output := g.Node.DeleteFile(fetchRequest.FileType, fetchRequest.GetKey())
+	output := g.Node.DeleteFiles(fetchRequest.FileType, fetchRequest.GetKey())
 	return &pb.ModResponse{IP: g.Node.GetID()}, output
 }
 
 // ReadFile allows returning of container IP from file within chord
 func (g *Gossiper) ReadFile(ctx context.Context, fetchRequest *pb.FetchChordRequest) (*pb.ContainerInfo, error) {
-	log.Printf("Upload Method triggered \n")
-
 	key := fetchRequest.GetKey()
 	fileType := fetchRequest.FileType
 
 	fileByte, status := store.Get(fileType, key)
 	// TODO: Might need to change this
 	containerIP := string(fileByte[:])
-	log.Printf("--- FS: Triggering File Read in Node for key [%v] \n", key)
+	//log.Printf("--- FS: Triggering File Read in Node for key [%v] \n", key)
 
 	return &pb.ContainerInfo{ContainerIP: containerIP}, status
 }
 
 func (g *Gossiper) MigrationJoin(ctx context.Context, migrationRequest *pb.MigrationRequest) (*pb.MigrationResponse, error) {
 	requestId := migrationRequest.RequesterID
-	log.Printf("--- FS: Triggering Migration (Join) to Chord Node %v from %v \n", requestId, g.Node.GetID())
+	//log.Printf("--- FS: Triggering Migration (Join) to Chord Node %v from %v \n", requestId, g.Node.GetID())
 
 	g.Node.MigrationJoinHandler(requestId)
 
@@ -255,7 +237,7 @@ func (g *Gossiper) MigrationJoin(ctx context.Context, migrationRequest *pb.Migra
 
 func (g *Gossiper) MigrationFault(ctx context.Context, migrationRequest *pb.MigrationRequest) (*pb.MigrationResponse, error) {
 	requestId := migrationRequest.RequesterID
-	log.Printf("--- FS: Triggering Migration (Fault) to Chord Node %v from %v \n", requestId, g.Node.GetID())
+	//log.Printf("--- FS: Triggering Migration (Fault) to Chord Node %v from %v \n", requestId, g.Node.GetID())
 
 	g.Node.MigrationFaultHandler(requestId)
 
@@ -276,13 +258,13 @@ func (g *Gossiper) WriteFileAndReplicate(ctx context.Context, writeRequest *pb.M
 func (g *Gossiper) StoreKeyHash(ctx context.Context, dlUploadRequest *pb.DLUploadRequest) (*pb.DLResponse, error) {
 	fileName := dlUploadRequest.Filename
 	containerIP := dlUploadRequest.ContainerIP
-	log.Printf("--- DLCHORD: Triggering storage of file [%v] from [%v]\n", fileName, containerIP)
+	log.Info.Printf("[EXT] Storing file [%v] from [%v]\n", fileName, containerIP)
 
 	correctChordIP := g.Node.FindSuccessor(hash.Hash(fileName))
 	_, err := g.WriteFileAndReplicateToNode(correctChordIP, fileName, "local", containerIP)
 	if err != nil {
 		// TODO: return error
-		log.Fatalf("error in running Store Key Hash (ext) : %+v\n", err)
+		log.Error.Fatalf("error in running Store Key Hash (ext) : %+v\n", err)
 	}
 	status := pb.DlowenStatus_SAME_NODE
 	if correctChordIP != g.Node.GetID() {
@@ -303,7 +285,7 @@ func (g *Gossiper) GetFileLocation(ctx context.Context, dlDownloadRequest *pb.DL
 	containerInfo, err := g.readFileFromNode(correctChordIP, fileName, "local")
 	if err != nil {
 		// TODO: return error
-		log.Fatalf("error in running GetFile Location (ext) : %+v\n", err)
+		log.Error.Fatalf("error in running GetFile Location (ext) : %+v\n", err)
 	}
 	return &pb.DLDownloadResponse{Container: containerInfo, ChordIP: correctChordIP}, nil
 

@@ -1,38 +1,29 @@
 package main
 
 import (
-	"fmt"
-	"log"
-	"os"
-	"time"
-
 	"github.com/sheikhshack/distributed-chaos-50.041/node/chord"
 	"github.com/sheikhshack/distributed-chaos-50.041/node/gossip"
-	"github.com/sheikhshack/distributed-chaos-50.041/node/utils"
+	"log"
+	"os"
 )
 
 func main() {
-	_ = os.Mkdir("tmp", os.ModeDir+0777)
-	logFileName := fmt.Sprintf("./tmp/log_%.23s.txt", time.Now().UTC())
-
-	utils.SetLogFile(logFileName)
 
 	id, err := os.Hostname()
-	if err != nil{
-		// crash me baby
+	if err != nil {
 		log.Fatal("Docker engine -- hostname issues", err)
 	}
 	knownPeerID := os.Getenv("PEER_HOSTNAME")
-	log.Printf("starting NODE_ID: %v\n", id)
+	log.Printf("Starting NODE_ID: %v\n", id)
 
 	node := chord.New(id)
 
 	if knownPeerID == "" {
 		node.InitRing()
-		log.Printf("%v: init-ed ring\n", node.ID)
+		log.Printf("%v: Ring setup\n", node.ID)
 	} else {
 		node.Join(knownPeerID)
-
+		log.Printf("%v: Joined ring\n", node.ID)
 	}
 
 	node.Gossiper.NewServerAndListen(gossip.LISTEN_PORT)

@@ -19,10 +19,10 @@ import (
 	"context"
 	"fmt"
 	gossip "github.com/sheikhshack/distributed-chaos-50.041/node/gossip/proto"
+	"github.com/spf13/cobra"
 	"google.golang.org/grpc"
 	"log"
 	"os"
-	"github.com/spf13/cobra"
 )
 
 var fileName string
@@ -51,13 +51,12 @@ var readFileCmd = &cobra.Command{
 func init() {
 	rootCmd.AddCommand(writeFileCmd)
 	rootCmd.AddCommand(readFileCmd)
-	writeFileCmd.PersistentFlags().StringVarP(&fileName, "fileName", "f","", "filename to insert")
-	writeFileCmd.PersistentFlags().StringVarP(&content, "content", "c","", "content to insert")
-
-
+	writeFileCmd.PersistentFlags().StringVarP(&fileName, "fileName", "f", "", "filename to insert")
+	writeFileCmd.PersistentFlags().StringVarP(&content, "content", "c", "", "content to insert")
 }
+
 func writeExternalFile(nodeAddr, fileName, content string) {
-	log.Printf("Attempting to write file %v with content %v to node %v", fileName, content,  nodeAddr)
+	log.Printf("Attempting to write file %v with content %v to node %v", fileName, content, nodeAddr)
 	var conn *grpc.ClientConn
 	connectionParams := fmt.Sprintf("%s:%v", nodeAddr, 9000)
 
