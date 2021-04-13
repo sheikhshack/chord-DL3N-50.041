@@ -30,7 +30,7 @@ type Node struct {
 func New(id string) *Node {
 	// 16 is finger table size
 	replicaCount, err := strconv.Atoi(os.Getenv("SUCCESSOR_LIST_SIZE"))
-	if err != nil{
+	if err != nil {
 		log.Fatalf("Node INIT error, invalid SUCCESSOR_LIST_SIZE: %v", err)
 	}
 	n := &Node{ID: id, next: 0, fingers: make([]string, FINGER_TABLE_SIZE), successorList: make([]string, replicaCount), replicaCount: replicaCount}
@@ -313,7 +313,11 @@ func (n *Node) DeleteFile(fileType, fileName string) error {
 	}
 
 	return nil
+}
 
+func (n *Node) DeleteFileAndReplicate(fileType, fileName string) error {
+	//	TODO: not panic
+	panic("panik")
 }
 
 func (n *Node) WriteFileAndReplicate(fileType, fileName, ip string) error {
