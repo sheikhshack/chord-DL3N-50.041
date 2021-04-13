@@ -10,9 +10,11 @@ import (
 	"github.com/docker/docker/api/types/network"
 	"github.com/docker/docker/client"
 	"github.com/docker/go-connections/nat"
+	sentryFS "github.com/sheikhshack/distributed-chaos-50.041/integration-tests/sentry"
 	"io"
 	"log"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"time"
 )
@@ -47,7 +49,7 @@ func NewSentry(ctx context.Context, network string, replicaCount int, master str
 		panic(err)
 	}
 	for _, container := range containers {
-		client.ContainerStop(ctx, container.ID, nil)
+		client.ContainerKill(ctx, container.ID, "SIGKILL")
 		client.ContainerRemove(ctx, container.ID , types.ContainerRemoveOptions{Force: true})
 
 	}
@@ -72,9 +74,20 @@ func NewSentry(ctx context.Context, network string, replicaCount int, master str
 	if err != nil {
 		log.Println("Volumes not removed, ", err)
 	}
+
+	cmd := exec.Command("sudo", "rm","-rf", "./volumes")
+	cmd.Stderr = os.Stderr
+	cmd.Stdin = os.Stdin
+	cmd.Stdout = os.Stdout
+
+	err = cmd.Run()
+	if err != nil {
+		fmt.Println(err)
+	}
 	return &Sentry{ctx: ctx, client: client, network: network, replicaCount: replicaCount, master: master, slaves: slaves}
 }
 
+// Legacy: BuildChordImage should be commented out unless you know what youre doing
 func (s *Sentry ) BuildChordImage()  {
 	opt := types.ImageBuildOptions{
 		Dockerfile:   "../Dockerfile",
@@ -93,6 +106,21 @@ func (s *Sentry ) BuildChordImage()  {
 	}
 }
 
+func (s *Sentry) FindContainerID(name string) string{
+	containers, err := s.client.ContainerList(s.ctx, types.ContainerListOptions{})
+	if err != nil {
+		panic(err)
+	}
+	for _, container := range containers {
+		if container.Names[0] == name{
+			return container.ID
+		}
+
+	}
+	return ""
+}
+
+// Legacy: BuildMikeImage should be commented out, unless you know what youre doing
 func (s *Sentry ) BuildMikeImage()  {
 	opt := types.ImageBuildOptions{
 		Dockerfile:   "../Dockerfile.mike",
@@ -111,6 +139,7 @@ func (s *Sentry ) BuildMikeImage()  {
 	}
 }
 
+// SetupTestNetwork sets up the common docker network
 func (s *Sentry) SetupTestNetwork()  {
 	// resets and remove current Network first
 	if err := s.client.NetworkRemove(s.ctx, s.network); err != nil {
@@ -125,6 +154,7 @@ func (s *Sentry) SetupTestNetwork()  {
 
 }
 
+// FireOffMikeNode starts the mike client (for testing purposes only)
 func (s *Sentry ) FireOffMikeNode(contactNode, name, cmd1, cmd2 string) {
 
 	s.client.ContainerRemove(s.ctx, name , types.ContainerRemoveOptions{Force: true})
@@ -148,6 +178,7 @@ func (s *Sentry ) FireOffMikeNode(contactNode, name, cmd1, cmd2 string) {
 	}
 }
 
+// FireOffChordNode basically starts the container
 func (s *Sentry ) FireOffChordNode(ringLeader bool, name string) {
 
 	s.client.ContainerStop(s.ctx, name, nil)
@@ -195,12 +226,24 @@ func (s *Sentry ) FireOffChordNode(ringLeader bool, name string) {
 	}
 }
 
-func (s * Sentry) WriteFileToChord (viaNode, fileName, content string) {
+func (s *Sentry) StopContainer(name string)  {
+	containerID := s.FindContainerID(name)
+	s.client.ContainerStop(s.ctx, containerID, nil )
+}
+
+func (s *Sentry) ForceStopContainer (name string){
+	containerID := s.FindContainerID(name)
+	s.client.ContainerKill(s.ctx, containerID,"SIGKILL" )
+}
+
+// Writes a file via a directed chord node
+func (s *Sentry) WriteFileToChord (viaNode, fileName, content string) {
 	command1 := fmt.Sprintf("-f %s", fileName)
 	command2 := fmt.Sprintf("-c %s", content)
 	s.FireOffMikeNode(viaNode, "mike_test", command1, command2)
 }
 
+// Procedure to bring up the test case ring
 func (s *Sentry) BringUpChordRing() {
 	s.SetupTestNetwork()
 	// fireoff the master first, then the slaves
@@ -211,23 +254,27 @@ func (s *Sentry) BringUpChordRing() {
 
 }
 
+func (s *Sentry) ReportChordFS(){
 
-
-
-
+}
 
 func main() {
 
 	ctx := context.Background()
-	//INIT Test case 1
+	//INIT Test case 1 - Replication Setup of 3
+	testReplica := 3
 	master := "apache"
-	slaves := []string{"slave-node1", "slave-node2", "slave-node3"}
-	sentry := NewSentry(ctx, "apache1", 3, master, slaves)
+	slaves := []string{"slave-node1", "slave-node2", "slave-node3", "slave-node4", "slave-node5"}
+	sentry := NewSentry(ctx, "apache1", testReplica, master, slaves)
 	sentry.BringUpChordRing()
-
-
-
-	time.Sleep(time.Second *  20)
+	time.Sleep(time.Second *  15)
 	sentry.WriteFileToChord("slave-node1", "wombat.txt", "I hate this shit")
+	fmt.Println("-- TEST1: Sending the file over to a node (random) w/ system replica set to ")
+	time.Sleep(time.Second * 10)
+	sentryFS.ReadFileInVolume()
+
+
+
 
 }
+
