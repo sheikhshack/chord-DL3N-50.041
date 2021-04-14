@@ -48,7 +48,6 @@ func (g *GuiServer) StartServer() {
 
 	getStateHandler := func(w http.ResponseWriter, r *http.Request) {
 		setupResponse(&w, r)
-		fmt.Println("/getState")
 
 		serverState.Mutex.Lock()
 
@@ -63,7 +62,6 @@ func (g *GuiServer) StartServer() {
 
 	uploadHandler := func(w http.ResponseWriter, r *http.Request) {
 		setupResponse(&w, r)
-		fmt.Println("/upload")
 
 		r.ParseMultipartForm(10 << 20)
 		inFile, inHandler, err := r.FormFile("uploadFile")
@@ -100,7 +98,6 @@ func (g *GuiServer) StartServer() {
 
 	startSeedHandler := func(w http.ResponseWriter, r *http.Request) {
 		setupResponse(&w, r)
-		fmt.Println("/startSeed")
 
 		serverState.Mutex.Lock()
 		defer serverState.Mutex.Unlock()
@@ -119,7 +116,6 @@ func (g *GuiServer) StartServer() {
 
 	stopSeedHandler := func(w http.ResponseWriter, r *http.Request) {
 		setupResponse(&w, r)
-		fmt.Println("/stopSeed")
 
 		serverState.Mutex.Lock()
 		defer serverState.Mutex.Unlock()
@@ -138,7 +134,6 @@ func (g *GuiServer) StartServer() {
 
 	uploadMetaHandler := func(w http.ResponseWriter, r *http.Request) {
 		setupResponse(&w, r)
-		fmt.Println("/uploadMeta")
 
 		r.ParseMultipartForm(10 << 20)
 		inFile, _, err := r.FormFile("uploadMeta")
@@ -175,7 +170,6 @@ func (g *GuiServer) StartServer() {
 
 	startGetHandler := func(w http.ResponseWriter, r *http.Request) {
 		setupResponse(&w, r)
-		fmt.Println("/startGet")
 
 		serverState.Mutex.Lock()
 		g.getterNode = dl3n.NewDL3NNode(serverState.GetMeta, g.NodeDiscovery)
@@ -199,7 +193,6 @@ func (g *GuiServer) StartServer() {
 
 	getFileHandler := func(w http.ResponseWriter, r *http.Request) {
 		setupResponse(&w, r)
-		fmt.Println("/getFile")
 
 		serverState.Mutex.Lock()
 		filePath := serverState.GetMeta.Name
@@ -214,7 +207,6 @@ func (g *GuiServer) StartServer() {
 
 	indexHandler := func(w http.ResponseWriter, r *http.Request) {
 		setupResponse(&w, r)
-		fmt.Println("/")
 		io.WriteString(w, index)
 	}
 
