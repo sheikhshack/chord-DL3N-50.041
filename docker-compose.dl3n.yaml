@@ -8,10 +8,11 @@ services:
       context: .
       dockerfile: Dockerfile.dl3ndemo
     ports:
-      - 9000
+      - 3001:3000
     environment:
       - NODE_ID=dl3n-seeder
       - PEER_HOSTNAME=alpha
+      - SUCCESSOR_LIST_SIZE=3
     depends_on:
       - alpha
       - bravo
@@ -23,10 +24,11 @@ services:
       context: .
       dockerfile: Dockerfile.dl3ndemo
     ports:
-      - 9000
+      - 3002:3000
     environment:
       - NODE_ID=dl3n-getter
       - PEER_HOSTNAME=alpha
+      - SUCCESSOR_LIST_SIZE=3
     depends_on:
       - alpha
       - bravo
@@ -34,31 +36,40 @@ services:
 
   alpha:
     container_name: alpha
-    image: chord_node
+    build: 
+      context: .
+      dockerfile: Dockerfile
     ports:
       - 9000
     environment:
       - NODE_ID=alpha
       - PEER_HOSTNAME=
+      - SUCCESSOR_LIST_SIZE=3
   bravo:
     container_name: nodeBravo
-    image: chord_node
+    build: 
+      context: .
+      dockerfile: Dockerfile
     ports:
       - 9000
     environment:
       - NODE_ID=nodeBravo
       - PEER_HOSTNAME=alpha
+      - SUCCESSOR_LIST_SIZE=3
     restart: "no"
     depends_on:
       - alpha
   charlie:
     container_name: nodeCharlie
-    image: chord_node
+    build: 
+      context: .
+      dockerfile: Dockerfile
     ports:
       - 9000
     environment:
       - NODE_ID=nodeCharlie
       - PEER_HOSTNAME=alpha
+      - SUCCESSOR_LIST_SIZE=3
     restart: "no"
     depends_on:
       - bravo
