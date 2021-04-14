@@ -2,6 +2,7 @@ package gossip
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"google.golang.org/grpc"
@@ -51,6 +52,9 @@ func (g *Gossiper) emit(nodeAddr string, request *pb.Request) (*pb.Response, err
 	g.report()
 
 	var conn *grpc.ClientConn
+	if nodeAddr == ""{
+		return nil, errors.New("Failed GRPC dialing, empty string")
+	}
 	connectionParams := fmt.Sprintf("%s:%v", nodeAddr, LISTEN_PORT)
 
 	conn, err := grpc.Dial(connectionParams, grpc.WithInsecure())

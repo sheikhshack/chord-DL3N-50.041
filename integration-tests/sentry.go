@@ -103,7 +103,7 @@ func (s *Sentry ) BuildChordImage()  {
 }
 
 func (s *Sentry) FindContainerID(name string) string{
-	containers, err := s.client.ContainerList(s.ctx, types.ContainerListOptions{})
+	containers, err := s.client.ContainerList(s.ctx, types.ContainerListOptions{All: true})
 	if err != nil {
 		panic(err)
 	}
@@ -116,6 +116,18 @@ func (s *Sentry) FindContainerID(name string) string{
 	return ""
 }
 
+func (s *Sentry) FindNetworkID(name string) string{
+	containers, err := s.client.NetworkList(s.ctx, types.NetworkListOptions{})
+	if err != nil {
+		panic(err)
+	}
+	for _, net := range containers {
+		if net.Name == name{
+			return net.ID
+		}
+	}
+	return ""
+}
 // Legacy: BuildMikeImage should be commented out, unless you know what youre doing
 func (s *Sentry ) BuildMikeImage()  {
 	opt := types.ImageBuildOptions{
@@ -229,7 +241,8 @@ func (s *Sentry ) FireOffChordNode(ringLeader bool, name string) {
 
 func (s *Sentry) StopContainer(name string)  {
 	containerID := s.FindContainerID(name)
-	s.client.ContainerStop(s.ctx, containerID, nil )
+	s.client.ContainerKill(s.ctx, containerID,"SIGKILL" )
+
 }
 
 func (s *Sentry) ForceStopContainer (name string){
@@ -237,6 +250,11 @@ func (s *Sentry) ForceStopContainer (name string){
 	s.client.ContainerKill(s.ctx, containerID,"SIGKILL" )
 	s.client.ContainerRemove(s.ctx, containerID , types.ContainerRemoveOptions{Force: true})
 
+}
+
+func (s *Sentry) StartContainerAgain(name string)  {
+	containerID := s.FindContainerID(name)
+	s.client.ContainerRestart(s.ctx, containerID,nil )
 
 }
 
@@ -246,6 +264,28 @@ func (s *Sentry) WriteFileToChord (viaNode, fileName, content string) {
 	command2 := fmt.Sprintf("-c=%s", content)
 	s.FireOffMikeNode(viaNode, "mike_test", command1, command2)
 }
+
+func (s *Sentry) InterruptConnection (name, networkName string) {
+	netID := s.FindNetworkID(networkName)
+	cont := s.FindContainerID(name)
+	s.client.NetworkDisconnect(s.ctx, netID, cont, true)
+
+}
+
+func (s *Sentry) ReestablishConnection (name, networkName string) {
+	netID := s.FindNetworkID(networkName)
+	cont := s.FindContainerID(name)
+	s.client.NetworkConnect(s.ctx, netID, cont, nil)
+
+}
+
+//func (s *Sentry) RestartContainer(name string) {
+//	contID := s.FindContainerID(name)
+//
+//	dur:= 50 * time.Second
+//	fmt.Println("-- MECH: Restarting node", contID)
+//	s.client.ContainerRestart(s.ctx, contID, &dur)
+//}
 
 // Procedure to bring up the test case ring
 func (s *Sentry) BringUpChordRing() {
@@ -327,6 +367,7 @@ func test2() {
 	time.Sleep(5 * time.Second)
 	fmt.Println("-- TEST2.4: Current chord file system as such:")
 	sentryFS.ReadFileInVolume()
+	sentry.BringDownRing()
 
 }
 //INIT Test case 1 - Replication Setup of 3
@@ -357,7 +398,36 @@ func test1() {
 
 }
 
+func test4 () {
+	ctx := context.Background()
+	network := "apache1"
+	testReplica := 3
+	master := "apache"
+	slaves := []string{"slave-node1", "slave-node2", "slave-node3", "slave-node4", "slave-node5"}
+	sentry := NewSentry(ctx, network, testReplica, master, slaves)
+
+	sentry.BringUpChordRing()
+	time.Sleep(time.Second *  15)
+	fmt.Println("-- TEST4: Bringing slave-node1 out of network")
+	sentry.WriteFileToChord("slave-node1", "slave-node1", "I hate this shit")
+	time.Sleep(time.Second * 10)
+	fmt.Println("-- TEST4: Current file system before fault")
+	sentryFS.ReadFileInVolume()
+
+	sentry.StopContainer("slave-node1")
+	time.Sleep(time.Second * 5)
+	fmt.Println("-- TEST4: Current file system for reads during loss of 1")
+	sentryFS.ReadFileInVolume()
+
+	sentry.StartContainerAgain("slave-node1")
+	time.Sleep(time.Second * 5)
+	fmt.Println("-- TEST4: Current file system after 1 joins back the ring")
+	sentryFS.ReadFileInVolume()
+
+}
+
+
 
 func main() {
-	test2()
+	test4()
 }

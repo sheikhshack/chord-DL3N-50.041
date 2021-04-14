@@ -19,16 +19,21 @@ func (n *Node) cron() {
 
 //TODO: Handle the case when the node is in the successorList as well
 func (n *Node) stabilize() {
+	log.Warn.Printf("Running stabelize, value of succList: %+v\n", n.successorList)
 	if n.GetSuccessor() == n.GetID() {
 		return
 	}
 
 	x, err := n.Gossiper.GetPredecessor(n.GetID(), n.GetSuccessor())
+
 	if err != nil {
 		log.Warn.Printf("Successor %v is down: %+v\n", n.GetSuccessor(), err)
 		n.fixSuccessorList()
 		return
 	}
+	log.Warn.Printf("Running stabelize, value of x: %+v\n", x)
+
+
 
 	// Init temp previous successorList variable
 	prevSuccessorList := make([]string, n.replicaCount)
@@ -71,6 +76,7 @@ func (n *Node) healthCheck(id string) bool {
 
 // TODO: Mutex locks for this
 func (n *Node) fixSuccessorList() {
+	log.Warn.Printf("Value of succ %+v\n",n.successorList)
 	n.successorList = n.successorList[1:]
 	n.successorList = append(n.successorList, "")
 
@@ -84,11 +90,9 @@ func (n *Node) fixSuccessorList() {
 			n.migrationFault(n.GetSuccessor())
 		} else {
 			log.Error.Fatalf("Break in chord logical structure. Shutting down node.\n")
-			return
+			//return
 		}
-
 	}
-
 }
 
 func (n *Node) updateSuccessorList(successor_SuccessorList []string, prevSuccessorList []string) {
