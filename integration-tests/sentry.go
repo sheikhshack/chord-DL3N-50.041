@@ -185,8 +185,10 @@ func (s *Sentry ) FireOffChordNode(ringLeader bool, name string) {
 
 	var env []string
 	if ringLeader {
-		env = []string{"PEER_HOSTNAME=", replicaConfig, dnsName}
 		name = "alpha"
+		dnsName = fmt.Sprintf("MY_PEER_DNS=%s", name)
+		env = []string{"PEER_HOSTNAME=", replicaConfig, dnsName}
+
 	} else {
 		env= []string{"PEER_HOSTNAME=alpha", replicaConfig, dnsName}
 	}
