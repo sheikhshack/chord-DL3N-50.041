@@ -70,10 +70,6 @@ func NewSentry(ctx context.Context, network string, replicaCount int, master str
 	client.NetworksPrune(ctx, filters.Args{})
 	client.VolumesPrune(ctx, filters.Args{}) // please make sure you have no volume from other stuff before running
 
-	err = os.RemoveAll("./volumes/")
-	if err != nil {
-		log.Println("Volumes not removed, ", err)
-	}
 
 	cmd := exec.Command("sudo", "rm","-rf", "./volumes")
 	cmd.Stderr = os.Stderr
@@ -112,7 +108,7 @@ func (s *Sentry) FindContainerID(name string) string{
 		panic(err)
 	}
 	for _, container := range containers {
-		if container.Names[0] == name{
+		if container.Names[0] == "/" + name{
 			return container.ID
 		}
 
@@ -234,6 +230,12 @@ func (s *Sentry) StopContainer(name string)  {
 func (s *Sentry) ForceStopContainer (name string){
 	containerID := s.FindContainerID(name)
 	s.client.ContainerKill(s.ctx, containerID,"SIGKILL" )
+	s.client.ContainerRemove(s.ctx, containerID , types.ContainerRemoveOptions{Force: true})
+	err := os.RemoveAll("./volumes/" +name)
+	if err != nil {
+		log.Println("Volumes not removed, ", err)
+	}
+
 }
 
 // Writes a file via a directed chord node
@@ -321,6 +323,7 @@ func main() {
 	current_replica := "slave-node1"
 	sentry.ForceStopContainer(current_replica)
 	fmt.Println("-- TEST2: Removing current primary ", current_replica)
+	sentryFS.DeleteFilesystemLink(current_replica)
 	time.Sleep(time.Second * 5)
 	sentryFS.ReadFileInVolume()
 

@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"os/exec"
 	"path/filepath"
 )
 
@@ -34,5 +35,18 @@ func ReadFiles(){
 	}
 	for _, file := range fileInfos {
 		fmt.Println(file.Name())
+	}
+}
+
+func DeleteFilesystemLink(name string){
+	fmt.Println("-- FS: Removing FS for ", name)
+	cmd := exec.Command("sudo", "rm","-rf", "./volumes" + "/" + name)
+	cmd.Stderr = os.Stderr
+	cmd.Stdin = os.Stdin
+	cmd.Stdout = os.Stdout
+
+	err := cmd.Run()
+	if err != nil {
+		fmt.Println(err)
 	}
 }
