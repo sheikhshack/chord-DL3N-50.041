@@ -197,6 +197,12 @@ func (g *GuiServer) StartServer() {
 		serverState.Mutex.Unlock()
 	}
 
+	indexHandler := func(w http.ResponseWriter, r *http.Request) {
+		fmt.Println("/")
+
+		io.WriteString(w, index)
+	}
+
 	http.HandleFunc("/upload", uploadHandler)
 	http.HandleFunc("/getState", getStateHandler)
 	http.HandleFunc("/startSeed", startSeedHandler)
@@ -204,6 +210,7 @@ func (g *GuiServer) StartServer() {
 	http.HandleFunc("/uploadMeta", uploadMetaHandler)
 	http.HandleFunc("/startGet", startGetHandler)
 	http.HandleFunc("/getFile", getFileHandler)
+	http.HandleFunc("/", indexHandler)
 
 	addr := "0.0.0.0:3000"
 	fmt.Printf("Starting gui server on %s ... \n", addr)
