@@ -242,8 +242,8 @@ func (s *Sentry) ForceStopContainer (name string){
 
 // Writes a file via a directed chord node
 func (s *Sentry) WriteFileToChord (viaNode, fileName, content string) {
-	command1 := fmt.Sprintf("-f %s", fileName)
-	command2 := fmt.Sprintf("-c %s", content)
+	command1 := fmt.Sprintf("-f=%s", fileName)
+	command2 := fmt.Sprintf("-c=%s", content)
 	s.FireOffMikeNode(viaNode, "mike_test", command1, command2)
 }
 
@@ -307,12 +307,13 @@ func test2() {
 	slaves := []string{"nodeBravo", "nodeDelta"}
 	sentry := NewSentry(ctx, "test2-network", testReplica, master, slaves)
 	sentry.BringUpChordRing()
-	time.Sleep(time.Second *  15)
+	time.Sleep(time.Second *  10)
+	fmt.Println("-- TEST2.2: Sending the files over to a node (random) w/ system replica set to ", testReplica)
+
 	sentry.WriteFileToChord("alpha", "alpha", "Alpha file content")
 	sentry.WriteFileToChord("alpha", "nodeBravo", "Bravo file content")
 	sentry.WriteFileToChord("alpha", "nodeCharlie", "Charlie file content")
 	sentry.WriteFileToChord("alpha", "nodeDelta", "Delta file content")
-	fmt.Println("-- TEST2.2: Sending the files over to a node (random) w/ system replica set to ", testReplica)
 	time.Sleep(time.Second * 10)
 	sentryFS.ReadFileInVolume()
 	fmt.Println("-- TEST2.3: Bringing up Node charlie (previously not existent) ")
@@ -350,6 +351,7 @@ func test1() {
 	sentryFS.DeleteFilesystemLink(current_replica)
 	time.Sleep(time.Second * 5)
 	sentryFS.ReadFileInVolume()
+	sentry.BringDownRing()
 
 	// INIT Test case 2 -
 

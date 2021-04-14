@@ -23,6 +23,7 @@ import (
 	"google.golang.org/grpc"
 	"log"
 	"os"
+	"time"
 )
 
 var fileName string
@@ -76,6 +77,7 @@ func writeExternalFile(nodeAddr, fileName, content string) {
 	}
 
 	log.Printf("\nSuccess upload info to the following chord node: %+v\n", res)
+	time.Sleep(time.Second * 1)
 }
 
 // Unimplemented

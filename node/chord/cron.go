@@ -9,7 +9,6 @@ import (
 )
 
 func (n *Node) cron() {
-	time.Sleep(time.Millisecond * 10000)
 	for {
 		n.checkPredecessor()
 		n.stabilize()
