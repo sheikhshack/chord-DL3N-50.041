@@ -1,12 +1,149 @@
-<html>
-    <body>
-        <form
-            enctype="multipart/form-data"
-            action="http://localhost:8080/upload"
-            method="post"
-        >
-            <input type="file" name="myFile" />
-            <input type="submit" value="upload" />
-        </form>
-    </body>
+<!doctype html>
+<html lang="en">
+
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+        integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+
+    <title>DL3N Demo</title>
+
+    <style>
+        html,
+        body {
+            height: 100%;
+        }
+
+        .files input {
+            outline: 2px dashed grey;
+            outline-offset: -10px;
+            -webkit-transition: outline-offset .15s ease-in-out, background-color .15s linear;
+            transition: outline-offset .15s ease-in-out, background-color .15s linear;
+            padding: 120px 0px 85px 35%;
+            text-align: center !important;
+            margin: 0;
+            width: 100% !important;
+        }
+
+        .files input:focus {
+            outline: 2px dashed grey;
+            outline-offset: -10px;
+            -webkit-transition: outline-offset .15s ease-in-out, background-color .15s linear;
+            transition: outline-offset .15s ease-in-out, background-color .15s linear;
+            border: 1px solid grey;
+        }
+
+        .files {
+            position: relative
+        }
+
+        .files:after {
+            pointer-events: none;
+            position: absolute;
+            top: 60px;
+            left: 0;
+            width: 50px;
+            right: 0;
+            height: 56px;
+            content: "";
+            background-image: url(https://image.flaticon.com/icons/png/128/109/109612.png);
+            display: block;
+            margin: 0 auto;
+            background-size: 100%;
+            background-repeat: no-repeat;
+        }
+
+        .color input {
+            background-color: #f1f1f1;
+        }
+
+        .files:before {
+            position: absolute;
+            bottom: 10px;
+            left: 0;
+            pointer-events: none;
+            width: 100%;
+            right: 0;
+            height: 40px;
+            content: " or drag it here";
+            display: block;
+            margin: 0 auto;
+            color: grey;
+            font-weight: 600;
+            text-transform: capitalize;
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body class="d-flex flex-column align-items-center justify-content-center">
+    <div class="container">
+        <h1 class="text-center">DL3N Demo</h1>
+        <div class="card">
+            <div class="card-header">
+                <p class="mb-0">Current State: <b><a id="currentState">WAITING</a></b></p>
+            </div>
+            <div class="card-body">
+                <ul class="nav nav-tabs">
+                    <li class="nav-item">
+                        <a href="#seed" class="nav-link active" data-toggle="tab">Seed File</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#get" class="nav-link" data-toggle="tab">Get File</a>
+                    </li>
+                </ul>
+                <div class="tab-content container py-2">
+                    <div class="tab-pane show active" id="seed">
+                        <h4>Upload file to seed</h4>
+                        <form id="fileUpload" enctype="multipart/form-data" action="/upload" method="post">
+                            <div class="form-group files">
+                                <input name="uploadFile" type="file" class="form-control">
+                            </div>
+                            <button type="submit" class="btn btn-primary">Generate metadata file</button>
+                        </form>
+                    </div>
+                    <div class="tab-pane" id="get">
+                        <p>Get tab content ...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+        integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+        crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+        integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
+        crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+        integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+        crossorigin="anonymous"></script>
+
+    <script>
+        // Change to empty in index.go
+        const SEEDER_BASE_URL = "http://localhost:3001"
+        const GETTER_BASE_URL = "http://localhost:3002"
+
+        const fileUploadForm = $("#fileUpload");
+
+        fileUploadForm.submit(function (e) {
+            e.preventDefault()
+            const formData = new FormData(e.target);
+            console.log(formData)
+
+            fetch(SEEDER_BASE_URL + "/upload", {
+                method: "POST",
+                body: formData
+            })
+        })
+    </script>
+</body>
+
 </html>

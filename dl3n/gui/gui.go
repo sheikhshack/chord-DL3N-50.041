@@ -34,6 +34,12 @@ func NewGuiServer(nd dl3n.NodeDiscovery, s string) *GuiServer {
 	return g
 }
 
+func setupResponse(w *http.ResponseWriter, req *http.Request) {
+	(*w).Header().Set("Access-Control-Allow-Origin", "*")
+	(*w).Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
+	(*w).Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
+}
+
 func (g *GuiServer) StartServer() {
 	serverState := &ServerState{
 		Mutex: &sync.Mutex{},
@@ -41,6 +47,7 @@ func (g *GuiServer) StartServer() {
 	}
 
 	getStateHandler := func(w http.ResponseWriter, r *http.Request) {
+		setupResponse(&w, r)
 		fmt.Println("/getState")
 
 		serverState.Mutex.Lock()
@@ -55,6 +62,7 @@ func (g *GuiServer) StartServer() {
 	}
 
 	uploadHandler := func(w http.ResponseWriter, r *http.Request) {
+		setupResponse(&w, r)
 		fmt.Println("/upload")
 
 		r.ParseMultipartForm(10 << 20)
@@ -80,6 +88,7 @@ func (g *GuiServer) StartServer() {
 		serverState.Mutex.Lock()
 
 		serverState.SeedMeta = d
+
 		w.Header().Set("Content-Type", "application/json")
 
 		encoder := json.NewEncoder(w)
@@ -90,6 +99,7 @@ func (g *GuiServer) StartServer() {
 	}
 
 	startSeedHandler := func(w http.ResponseWriter, r *http.Request) {
+		setupResponse(&w, r)
 		fmt.Println("/startSeed")
 
 		serverState.Mutex.Lock()
@@ -108,6 +118,7 @@ func (g *GuiServer) StartServer() {
 	}
 
 	stopSeedHandler := func(w http.ResponseWriter, r *http.Request) {
+		setupResponse(&w, r)
 		fmt.Println("/stopSeed")
 
 		serverState.Mutex.Lock()
@@ -126,6 +137,7 @@ func (g *GuiServer) StartServer() {
 	}
 
 	uploadMetaHandler := func(w http.ResponseWriter, r *http.Request) {
+		setupResponse(&w, r)
 		fmt.Println("/uploadMeta")
 
 		r.ParseMultipartForm(10 << 20)
@@ -151,6 +163,7 @@ func (g *GuiServer) StartServer() {
 		serverState.Mutex.Lock()
 
 		serverState.GetMeta = d
+
 		w.Header().Set("Content-Type", "application/json")
 
 		encoder := json.NewEncoder(w)
@@ -161,6 +174,7 @@ func (g *GuiServer) StartServer() {
 	}
 
 	startGetHandler := func(w http.ResponseWriter, r *http.Request) {
+		setupResponse(&w, r)
 		fmt.Println("/startGet")
 
 		serverState.Mutex.Lock()
@@ -184,6 +198,7 @@ func (g *GuiServer) StartServer() {
 	}
 
 	getFileHandler := func(w http.ResponseWriter, r *http.Request) {
+		setupResponse(&w, r)
 		fmt.Println("/getFile")
 
 		serverState.Mutex.Lock()
@@ -198,8 +213,8 @@ func (g *GuiServer) StartServer() {
 	}
 
 	indexHandler := func(w http.ResponseWriter, r *http.Request) {
+		setupResponse(&w, r)
 		fmt.Println("/")
-
 		io.WriteString(w, index)
 	}
 
