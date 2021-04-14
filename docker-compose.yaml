@@ -24,6 +24,7 @@ services:
     environment:
       - PEER_HOSTNAME=
       - SUCCESSOR_LIST_SIZE=3
+      - LOG=info
     networks:
       - chord-network
 
@@ -38,6 +39,7 @@ services:
     environment:
       - PEER_HOSTNAME=alpha
       - SUCCESSOR_LIST_SIZE=3
+      - LOG=info
     restart: "no"
     depends_on:
       - alpha

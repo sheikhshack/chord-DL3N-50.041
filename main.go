@@ -1,7 +1,10 @@
 package main
 
-import "fmt"
+import (
+	"github.com/sheikhshack/distributed-chaos-50.041/log"
+)
 
 func main() {
-	fmt.Print("hello world")
+	log.PrintTest()
+	log.Error.Printf("errrrr\n")
 }
