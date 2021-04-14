@@ -3,32 +3,32 @@ package sentryFS
 import (
 	"fmt"
 	"io/ioutil"
-	"log"
 	"os"
 	"os/exec"
-	"path/filepath"
 )
 
-func ReadFileInVolume(){
+func ReadFileInVolume() {
 	fmt.Println("--- Current FS State -----------")
-	err := filepath.Walk("./volumes",
-		func(path string, info os.FileInfo, err error) error {
-			if err != nil {
-				return err
-			}
-			if info.IsDir() == false{
-				filer, _ := os.Open(path)
-				b, _:= ioutil.ReadAll(filer)
-				fmt.Printf("%s : %s\n", path, b)
-			}
-			return nil
-		})
-	if err != nil {
-		log.Println(err)
-	}
+	printDirectory("volumes", "./volumes", 0)
+
+	//err := filepath.Walk("./volumes",
+	//	func(path string, info os.FileInfo, err error) error {
+	//		if err != nil {
+	//			return err
+	//		}
+	//		if info.IsDir() == false{
+	//			filer, _ := os.Open(path)
+	//			b, _:= ioutil.ReadAll(filer)
+	//			fmt.Printf("%s : %s\n", path, b)
+	//		}
+	//		return nil
+	//	})
+	//if err != nil {
+	//	log.Println(err)
+	//}
 }
 
-func ReadFiles(){
+func ReadFiles() {
 	fileInfos, err := ioutil.ReadDir("./volumes")
 	if err != nil {
 		fmt.Println("Error in accessing directory:", err)
@@ -38,9 +38,9 @@ func ReadFiles(){
 	}
 }
 
-func DeleteFilesystemLink(name string){
+func DeleteFilesystemLink(name string) {
 	fmt.Println("-- FS: Removing FS for ", name)
-	cmd := exec.Command("sudo", "rm","-rf", "./volumes" + "/" + name)
+	cmd := exec.Command("sudo", "rm", "-rf", "./volumes"+"/"+name)
 	cmd.Stderr = os.Stderr
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout
