@@ -12,7 +12,6 @@ import (
 	"github.com/sheikhshack/distributed-chaos-50.041/node/store"
 )
 
-//const SUCCESSOR_LIST_SIZE = 3
 const FINGER_TABLE_SIZE = 16
 
 type Node struct {
@@ -30,7 +29,7 @@ type Node struct {
 func New(id string) *Node {
 	// 16 is finger table size
 	replicaCount, err := strconv.Atoi(os.Getenv("SUCCESSOR_LIST_SIZE"))
-	if err != nil{
+	if err != nil {
 		log.Fatalf("Node INIT error, invalid SUCCESSOR_LIST_SIZE: %v", err)
 	}
 	n := &Node{ID: id, next: 0, fingers: make([]string, FINGER_TABLE_SIZE), successorList: make([]string, replicaCount), replicaCount: replicaCount}
@@ -194,7 +193,7 @@ func (n *Node) MigrationFaultHandler(requestID string) {
 	if keys != "" {
 		//Init writing to predecessor
 		log.Printf("Migrating Filename:%v", keys)
-		n.ReplicateToSuccessorList(keys, values)
+		n.replicateToSuccessorList(keys, values)
 		keys_list := strings.Split(keys, ",")
 		for _, i := range keys_list {
 			store.Migrate("replica", "local", i)
@@ -313,16 +312,27 @@ func (n *Node) DeleteFile(fileType, fileName string) error {
 	}
 
 	return nil
-
 }
 
 func (n *Node) WriteFileAndReplicate(fileType, fileName, ip string) error {
-	n.WriteFile(fileType, fileName, ip)
-	n.ReplicateToSuccessorList(fileName, ip)
+	err := n.WriteFile(fileType, fileName, ip)
+	if err != nil {
+		return err
+	}
+	n.replicateToSuccessorList(fileName, ip)
 	return nil
 }
 
-func (n *Node) ReplicateToSuccessorList(fileName, ip string) {
+func (n *Node) DeleteFileAndReplicate(fileType, fileName string) error {
+	err := n.DeleteFile(fileType, fileName)
+	if err != nil {
+		return err
+	}
+	n.deleteFromSuccessorList(fileName)
+	return nil
+}
+
+func (n *Node) replicateToSuccessorList(fileName, ip string) {
 
 	// Assumes that successorList nodes repeat after it contains own node
 	for i := range n.successorList {
@@ -334,13 +344,34 @@ func (n *Node) ReplicateToSuccessorList(fileName, ip string) {
 	}
 }
 
-func (n *Node) replicateToNode(toID, fileName, ip string) bool {
-	status, err := n.Gossiper.ReplicateToNode(n.GetID(), toID, fileName, ip)
+func (n *Node) deleteFromSuccessorList(fileName string) {
+
+	// Assumes that successorList nodes repeat after it contains own node
+	for i := range n.successorList {
+		if n.successorList[i] != n.GetID() {
+			n.deleteFromNode(n.successorList[i], fileName)
+		} else {
+			break
+		}
+	}
+}
+
+func (n *Node) replicateToNode(toID, fileName, ip string) {
+
+	log.Printf("[REPLICATION] From Node %s to Node %s.\n", n.GetID(), toID)
+	_, err := n.Gossiper.WriteFileToNode(toID, fileName, "replica", ip)
 
 	if err != nil {
 		log.Printf("Error in replicating file to Node: %s\n", toID)
-		return false
 	}
 
-	return status
+}
+
+func (n *Node) deleteFromNode(toID, fileName string) {
+
+	log.Printf("[DELETE FROM REPLICA] From Node %s to Node %s.\n", n.GetID(), toID)
+	_, err := n.Gossiper.DeleteFileFromNode(toID, fileName, "replica")
+	if err != nil {
+		print("Error in Deleting file: %+v\n", err)
+	}
 }

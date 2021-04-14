@@ -10,7 +10,6 @@ enum Command {
   NOTIFY = 4;
   LOOKUP= 5;
   GET_SUCCESSOR_LIST = 6;
-  REPLICATE_TO_NODE = 7;
 }
 
 
@@ -23,9 +22,6 @@ message Request {
   message Body {
     int64 HashSlot = 1;
     string InfoHash = 2;
-    string Key = 3;
-    string Value = 4;
-    string FileType = 5;
   }
 
   Command command = 1;
@@ -62,6 +58,10 @@ message DLDownloadRequest {
   string filename = 1;
 }
 
+message DLDeleteRequest {
+  string filename = 1;
+}
+
 
 message DLResponse {
   string chordIP = 1;
@@ -71,6 +71,11 @@ message DLResponse {
 message DLDownloadResponse {
   ContainerInfo container = 1;
   string chordIP = 2;
+}
+
+message DLDeleteResponse {
+  string chordIP =1;
+  DlowenStatus status = 2;
 }
 
 message ContainerInfo {
@@ -115,6 +120,7 @@ service InternalListener {
   rpc WriteFile(ModRequest) returns (ModResponse) {}
   rpc WriteFileAndReplicate(ModRequest) returns (ModResponse) {}
   rpc DeleteFile(FetchChordRequest) returns (ModResponse) {}
+  rpc DeleteFileAndReplicate(FetchChordRequest) returns (ModResponse) {}
   rpc FetchChordIp(FetchChordRequest) returns (ModResponse) {}
   rpc MigrationJoin(MigrationRequest) returns (MigrationResponse) {}
   rpc MigrationFault(MigrationRequest) returns (MigrationResponse) {}
@@ -123,6 +129,7 @@ service InternalListener {
   // D3L bridge protocol (external)
   rpc StoreKeyHash(DLUploadRequest) returns (DLResponse) {}
   rpc GetFileLocation(DLDownloadRequest) returns (DLDownloadResponse) {}
+  rpc DeleteClientFile(DLDeleteRequest) returns (DLDeleteResponse) {}
 
   rpc Debug(DebugMessage) returns (DebugResponse) {}
 }

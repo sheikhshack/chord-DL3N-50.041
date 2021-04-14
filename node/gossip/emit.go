@@ -171,26 +171,6 @@ func (g *Gossiper) Notify(fromID, toID string) error {
 	return nil
 }
 
-// Replicate file to node
-func (g *Gossiper) ReplicateToNode(fromID, toID, key, value string) (bool, error) {
-	req := &pb.Request{
-		Command:     pb.Command_REPLICATE_TO_NODE,
-		RequesterID: fromID,
-		TargetID:    toID,
-		Body: &pb.Request_Body{
-			Key:      key,
-			Value:    value,
-			FileType: "replica",
-		},
-	}
-
-	_, err := g.emit(toID, req)
-	if err != nil {
-		return false, err
-	}
-	return true, nil
-}
-
 // external dialing service called w/o emit //
 func (g *Gossiper) WriteFileToNode(nodeAddr, fileName, fileType, ip string) (*pb.ModResponse, error) {
 	g.report()
@@ -239,6 +219,33 @@ func (g *Gossiper) WriteFileAndReplicateToNode(nodeAddr, fileName, fileType, ip 
 	response, err := client.WriteFileAndReplicate(context.Background(), &pb.ModRequest{
 		Key:      fileName,
 		Value:    ip,
+		FileType: fileType,
+	})
+	if err != nil {
+		log.Printf("Error sending message: %v", err)
+		return nil, err
+	}
+	return response, nil
+}
+
+func (g *Gossiper) DeleteFileAndReplicateToNode(nodeAddr, fileName, fileType string) (*pb.ModResponse, error) {
+	g.report()
+
+	var conn *grpc.ClientConn
+	connectionParams := fmt.Sprintf("%s:%v", nodeAddr, LISTEN_PORT)
+	//log.Printf("Sending Request: %+v, %+v", request, request.Command)
+
+	conn, err := grpc.Dial(connectionParams, grpc.WithInsecure())
+	if err != nil {
+		log.Fatalf("Cannot connect to: %s", err)
+
+	}
+	defer conn.Close()
+
+	log.Printf("Deleting file %v from Node %v", fileName, nodeAddr)
+	client := pb.NewInternalListenerClient(conn)
+	response, err := client.DeleteFileAndReplicate(context.Background(), &pb.FetchChordRequest{
+		Key:      fileName,
 		FileType: fileType,
 	})
 	if err != nil {

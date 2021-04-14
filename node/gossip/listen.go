@@ -29,6 +29,7 @@ type node interface {
 	WriteFile(fileType, fileName, ip string) error
 	WriteFileAndReplicate(fileType, fileName, ip string) error
 	DeleteFile(fileType, fileName string) error
+	DeleteFileAndReplicate(fileType, fileName string) error
 	// for external API
 }
 
@@ -131,21 +132,6 @@ func (g *Gossiper) Emit(ctx context.Context, in *pb.Request) (*pb.Response, erro
 			Body:        &pb.Response_Body{},
 		}
 
-	case pb.Command_REPLICATE_TO_NODE:
-
-		key := in.GetBody().Key
-		value := in.GetBody().Value
-		fileType := in.GetBody().FileType
-
-		g.replicateToNodeHandler(fileType, key, value)
-
-		res = &pb.Response{
-			Command:     pb.Command_REPLICATE_TO_NODE,
-			RequesterID: in.GetRequesterID(),
-			TargetID:    in.GetTargetID(),
-			Body:        &pb.Response_Body{},
-		}
-
 	default:
 		return nil, errors.New("command not recognised")
 	}
@@ -187,10 +173,6 @@ func (g *Gossiper) getSuccessorListHandler() []string {
 // notifyHandler might also update n.predecessor and trigger data transfer if appropriate.
 func (g *Gossiper) notifyHandler(possiblePredecessor string) {
 	g.Node.NotifyHandler(possiblePredecessor)
-}
-
-func (g *Gossiper) replicateToNodeHandler(fileType, key, value string) {
-	g.Node.WriteFile(fileType, key, value)
 }
 
 //// TODO: Move to legacy - DEFUNCT (leaving as reference for fk-up)
@@ -268,6 +250,12 @@ func (g *Gossiper) WriteFileAndReplicate(ctx context.Context, writeRequest *pb.M
 	return &pb.ModResponse{IP: g.Node.GetID()}, output
 }
 
+func (g *Gossiper) DeleteFileAndReplicate(ctx context.Context, fetchRequest *pb.FetchChordRequest) (*pb.ModResponse, error) {
+
+	output := g.Node.DeleteFileAndReplicate(fetchRequest.FileType, fetchRequest.GetKey())
+	return &pb.ModResponse{IP: g.Node.GetID()}, output
+}
+
 /////////////////////////////////////////
 ////////// EXPOSED TO D3LOWEN ///////////
 /////////////////////////////////////////
@@ -306,5 +294,27 @@ func (g *Gossiper) GetFileLocation(ctx context.Context, dlDownloadRequest *pb.DL
 		log.Fatalf("error in running GetFile Location (ext) : %+v\n", err)
 	}
 	return &pb.DLDownloadResponse{Container: containerInfo, ChordIP: correctChordIP}, nil
+
+}
+
+func (g *Gossiper) DeleteClientFile(ctx context.Context, dlDeleteRequest *pb.DLDeleteRequest) (*pb.DLDeleteResponse, error) {
+	fileName := dlDeleteRequest.Filename
+	log.Printf("--- DLCHORD: Triggering delete of file [%v]\n", fileName)
+
+	correctChordIP := g.Node.FindSuccessor(hash.Hash(fileName))
+	_, err := g.DeleteFileAndReplicateToNode(correctChordIP, fileName, "local")
+	if err != nil {
+		// TODO: return error
+		log.Fatalf("error in running DeleteClientFile (ext) : %+v\n", err)
+	}
+	status := pb.DlowenStatus_SAME_NODE
+	if correctChordIP != g.Node.GetID() {
+		status = pb.DlowenStatus_REDIRECTED_NODE
+	}
+
+	return &pb.DLDeleteResponse{
+		ChordIP: correctChordIP,
+		Status:  status,
+	}, nil
 
 }
