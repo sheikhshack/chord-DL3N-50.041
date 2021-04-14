@@ -254,6 +254,49 @@ func (s *Sentry) BringUpChordRing() {
 
 }
 
+func (s *Sentry) BringDownRing() {
+	containers, err := s.client.ContainerList(s.ctx, types.ContainerListOptions{})
+	if err != nil {
+		panic(err)
+	}
+	for _, container := range containers {
+		s.client.ContainerKill(s.ctx, container.ID, "SIGKILL")
+		s.client.ContainerRemove(s.ctx, container.ID , types.ContainerRemoveOptions{Force: true})
+
+	}
+
+	volumes, err := s.client.VolumeList(s.ctx, filters.Args{})
+	if err != nil {
+		panic(err)
+	}
+	for _, vol := range volumes.Volumes {
+		if err := s.client.VolumeRemove(s.ctx, vol.Name, true); err != nil{
+			panic(err)
+		}
+	}
+
+	s.client.ContainersPrune(s.ctx, filters.Args{})
+	s.client.NetworksPrune(s.ctx, filters.Args{})
+	s.client.VolumesPrune(s.ctx, filters.Args{}) // please make sure you have no volume from other stuff before running
+
+
+	err = os.RemoveAll("./volumes/")
+	if err != nil {
+		log.Println("Volumes not removed, ", err)
+	}
+
+	cmd := exec.Command("sudo", "rm","-rf", "./volumes")
+	cmd.Stderr = os.Stderr
+	cmd.Stdin = os.Stdin
+	cmd.Stdout = os.Stdout
+
+	err = cmd.Run()
+	if err != nil {
+		fmt.Println(err)
+	}
+}
+
+
 func (s *Sentry) ReportChordFS(){
 
 }
@@ -269,12 +312,19 @@ func main() {
 	sentry.BringUpChordRing()
 	time.Sleep(time.Second *  15)
 	sentry.WriteFileToChord("slave-node1", "wombat.txt", "I hate this shit")
-	fmt.Println("-- TEST1: Sending the file over to a node (random) w/ system replica set to ")
+	fmt.Println("-- TEST1: Sending the file over to a node (random) w/ system replica set to ", testReplica)
 	time.Sleep(time.Second * 10)
 	sentryFS.ReadFileInVolume()
+	fmt.Println("-- TEST1: End of procedure ")
 
 
+	current_replica := "slave-node1"
+	sentry.ForceStopContainer(current_replica)
+	fmt.Println("-- TEST2: Removing current primary ", current_replica)
+	time.Sleep(time.Second * 5)
+	sentryFS.ReadFileInVolume()
 
+	// INIT Test case 2 -
 
 }
 
