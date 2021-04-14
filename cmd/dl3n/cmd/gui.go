@@ -16,9 +16,12 @@ limitations under the License.
 package cmd
 
 import (
+	"github.com/sheikhshack/distributed-chaos-50.041/dl3n"
 	"github.com/sheikhshack/distributed-chaos-50.041/dl3n/gui"
 	"github.com/spf13/cobra"
 )
+
+var guiChordAddr string
 
 // guiCmd represents the gui command
 var guiCmd = &cobra.Command{
@@ -34,19 +37,16 @@ to quickly create a Cobra application.`,
 }
 
 func runGui(cmd *cobra.Command, args []string) {
-	gui.StartServer()
+	ip := getIP()
+	seederAddr := ip + ":11111"
+
+	nd := dl3n.NewChordNodeDiscovery(guiChordAddr)
+	g := gui.NewGuiServer(nd, seederAddr)
+	g.StartServer()
 }
 
 func init() {
 	rootCmd.AddCommand(guiCmd)
 
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// guiCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// guiCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	guiCmd.Flags().StringVarP(&guiChordAddr, "addr", "a", "127.0.0.1", "address of a chord DHT node to connect to.")
 }

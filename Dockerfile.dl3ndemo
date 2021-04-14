@@ -24,4 +24,4 @@ RUN dos2unix *
 EXPOSE 9000
 
 # do nothing
-CMD sleep 86400
+CMD ./chord_node_exec & ./dl3n gui
