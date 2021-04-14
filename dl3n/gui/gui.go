@@ -19,7 +19,7 @@ type ServerState struct {
 }
 
 type GuiServer struct {
-	NodeDiscovery *dl3n.NodeDiscovery
+	NodeDiscovery dl3n.NodeDiscovery
 	seederAddr    string
 	seederNode    *dl3n.DL3NNode
 	getterNode    *dl3n.DL3NNode
@@ -27,7 +27,7 @@ type GuiServer struct {
 
 func NewGuiServer(nd dl3n.NodeDiscovery, s string) *GuiServer {
 	g := &GuiServer{
-		NodeDiscovery: &nd,
+		NodeDiscovery: nd,
 		seederAddr:    s,
 	}
 
@@ -94,10 +94,11 @@ func (g *GuiServer) StartServer() {
 
 		serverState.Mutex.Lock()
 		defer serverState.Mutex.Unlock()
-		g.seederNode = dl3n.NewDL3NNode(serverState.SeedMeta, *g.NodeDiscovery)
+		g.seederNode = dl3n.NewDL3NNode(serverState.SeedMeta, g.NodeDiscovery)
 		serverState.State = "SEEDING"
 
-		// g.seederNode.StartSeed(g.seederAddr)
+		g.NodeDiscovery.SetSeederAddr(serverState.SeedMeta.Hash, g.seederAddr)
+		g.seederNode.StartSeed(g.seederAddr)
 
 		w.Header().Set("Content-Type", "application/json")
 
@@ -106,13 +107,13 @@ func (g *GuiServer) StartServer() {
 		encoder.Encode(serverState)
 	}
 
-	stopSeeedHandler := func(w http.ResponseWriter, r *http.Request) {
+	stopSeedHandler := func(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("/stopSeed")
 
 		serverState.Mutex.Lock()
 		defer serverState.Mutex.Unlock()
 
-		// g.seederNode.StopSeed()
+		g.seederNode.StopSeed()
 		g.seederNode = nil
 		serverState.State = "WAIT"
 		serverState.SeedMeta = nil
@@ -163,7 +164,7 @@ func (g *GuiServer) StartServer() {
 		fmt.Println("/startGet")
 
 		serverState.Mutex.Lock()
-		g.getterNode = dl3n.NewDL3NNode(serverState.GetMeta, *g.NodeDiscovery)
+		g.getterNode = dl3n.NewDL3NNode(serverState.GetMeta, g.NodeDiscovery)
 		serverState.State = "GETTING"
 
 		w.Header().Set("Content-Type", "application/json")
@@ -199,12 +200,12 @@ func (g *GuiServer) StartServer() {
 	http.HandleFunc("/upload", uploadHandler)
 	http.HandleFunc("/getState", getStateHandler)
 	http.HandleFunc("/startSeed", startSeedHandler)
-	http.HandleFunc("/stopSeed", stopSeeedHandler)
+	http.HandleFunc("/stopSeed", stopSeedHandler)
 	http.HandleFunc("/uploadMeta", uploadMetaHandler)
 	http.HandleFunc("/startGet", startGetHandler)
 	http.HandleFunc("/getFile", getFileHandler)
 
 	addr := "0.0.0.0:3000"
-	fmt.Printf("Starting  on %s ... \n", addr)
-	go http.ListenAndServe(addr, nil)
+	fmt.Printf("Starting gui server on %s ... \n", addr)
+	http.ListenAndServe(addr, nil)
 }
