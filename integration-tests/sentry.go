@@ -155,6 +155,7 @@ func (s *Sentry ) FireOffMikeNode(contactNode, name, cmd1, cmd2 string) {
 
 	s.client.ContainerRemove(s.ctx, name , types.ContainerRemoveOptions{Force: true})
 	attachedNode := fmt.Sprintf("APP_NODE=%v", contactNode)
+
 	env := []string{attachedNode}
 
 	configs := &container.Config{
@@ -180,12 +181,14 @@ func (s *Sentry ) FireOffChordNode(ringLeader bool, name string) {
 	s.client.ContainerStop(s.ctx, name, nil)
 	s.client.ContainerRemove(s.ctx, name , types.ContainerRemoveOptions{Force: true})
 	replicaConfig := fmt.Sprintf("SUCCESSOR_LIST_SIZE=%v", s.replicaCount)
+	dnsName := fmt.Sprintf("MY_PEER_DNS=%s", name)
+
 	var env []string
 	if ringLeader {
-		env = []string{"PEER_HOSTNAME=", replicaConfig}
+		env = []string{"PEER_HOSTNAME=", replicaConfig, dnsName}
 		name = "alpha"
 	} else {
-		env= []string{"PEER_HOSTNAME=alpha", replicaConfig}
+		env= []string{"PEER_HOSTNAME=alpha", replicaConfig, dnsName}
 	}
 
 	// Provisions volume mount point first
@@ -312,11 +315,12 @@ func test2() {
 	sentryFS.ReadFileInVolume()
 	fmt.Println("-- TEST2.3: Bringing up Node charlie (previously not existent) ")
 	sentry.FireOffChordNode(false, "nodeCharlie")
-	time.Sleep(5 * time.Second)
+	time.Sleep(15 * time.Second)
 	fmt.Println("-- TEST2.3: Current chord file system as such:")
 	sentryFS.ReadFileInVolume()
 	fmt.Println("-- TEST2.4: Bringing down chord node charlie")
 	sentry.ForceStopContainer("nodeCharlie")
+	sentryFS.DeleteFilesystemLink("nodeCharlie")
 	time.Sleep(5 * time.Second)
 	fmt.Println("-- TEST2.4: Current chord file system as such:")
 	sentryFS.ReadFileInVolume()

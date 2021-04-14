@@ -13,6 +13,7 @@ ENV PEER_HOSTNAME=godbless
 # defaults to 3 replicas!
 ENV SUCCESSOR_LIST_SIZE=3
 ENV LOG=info
+ENV MY_PEER_DNS=DEFAULT
 EXPOSE 9000 8888
 
 CMD  ["./node_exec"]
