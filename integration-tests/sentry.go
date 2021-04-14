@@ -231,10 +231,7 @@ func (s *Sentry) ForceStopContainer (name string){
 	containerID := s.FindContainerID(name)
 	s.client.ContainerKill(s.ctx, containerID,"SIGKILL" )
 	s.client.ContainerRemove(s.ctx, containerID , types.ContainerRemoveOptions{Force: true})
-	err := os.RemoveAll("./volumes/" +name)
-	if err != nil {
-		log.Println("Volumes not removed, ", err)
-	}
+
 
 }
 
@@ -281,12 +278,6 @@ func (s *Sentry) BringDownRing() {
 	s.client.NetworksPrune(s.ctx, filters.Args{})
 	s.client.VolumesPrune(s.ctx, filters.Args{}) // please make sure you have no volume from other stuff before running
 
-
-	err = os.RemoveAll("./volumes/")
-	if err != nil {
-		log.Println("Volumes not removed, ", err)
-	}
-
 	cmd := exec.Command("sudo", "rm","-rf", "./volumes")
 	cmd.Stderr = os.Stderr
 	cmd.Stdin = os.Stdin
@@ -303,10 +294,37 @@ func (s *Sentry) ReportChordFS(){
 
 }
 
-func main() {
-
+func test2() {
 	ctx := context.Background()
 	//INIT Test case 1 - Replication Setup of 3
+	testReplica := 3
+	master := "alpha"
+	slaves := []string{"nodeBravo", "nodeDelta"}
+	sentry := NewSentry(ctx, "test2-network", testReplica, master, slaves)
+	sentry.BringUpChordRing()
+	time.Sleep(time.Second *  15)
+	sentry.WriteFileToChord("alpha", "alpha", "Alpha file content")
+	sentry.WriteFileToChord("alpha", "nodeBravo", "Bravo file content")
+	sentry.WriteFileToChord("alpha", "nodeCharlie", "Charlie file content")
+	sentry.WriteFileToChord("alpha", "nodeDelta", "Delta file content")
+	fmt.Println("-- TEST2.2: Sending the files over to a node (random) w/ system replica set to ", testReplica)
+	time.Sleep(time.Second * 10)
+	sentryFS.ReadFileInVolume()
+	fmt.Println("-- TEST2.3: Bringing up Node charlie (previously not existent) ")
+	sentry.FireOffChordNode(false, "nodeCharlie")
+	time.Sleep(5 * time.Second)
+	fmt.Println("-- TEST2.3: Current chord file system as such:")
+	sentryFS.ReadFileInVolume()
+	fmt.Println("-- TEST2.4: Bringing down chord node charlie")
+	sentry.ForceStopContainer("nodeCharlie")
+	time.Sleep(5 * time.Second)
+	fmt.Println("-- TEST2.4: Current chord file system as such:")
+	sentryFS.ReadFileInVolume()
+
+}
+//INIT Test case 1 - Replication Setup of 3
+func test1() {
+	ctx := context.Background()
 	testReplica := 3
 	master := "apache"
 	slaves := []string{"slave-node1", "slave-node2", "slave-node3", "slave-node4", "slave-node5"}
@@ -331,3 +349,7 @@ func main() {
 
 }
 
+
+func main() {
+	test2()
+}
