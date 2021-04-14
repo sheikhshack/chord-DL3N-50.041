@@ -1,6 +1,7 @@
 package store
 
 import (
+	"github.com/sheikhshack/distributed-chaos-50.041/log"
 	"io/ioutil"
 	"os"
 )
@@ -11,11 +12,26 @@ func New(fileType, key string, value []byte) error {
 	if err != nil {
 		return err
 	}
+	log.Info.Printf("[FS] Creating File: %v\n", filename)
 
 	if err = ioutil.WriteFile(filename, value, 0777); err != nil {
 		return err
 	}
 
+	return nil
+}
+
+// Delete removes the file with fileType string (local / replica) and key string
+func Delete(fileType, key string) error {
+	filename, err := getFilename(fileType, key)
+	if err != nil {
+		return err
+	}
+	log.Info.Printf("[FS] Deleting File: %v\n", filename)
+
+	if err = os.Remove(filename); err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -47,21 +63,8 @@ func GetAll(fileType string) ([]os.FileInfo, error) {
 	return content, nil
 }
 
-// Delete removes the file with fileType string (local / replica) and key string
-func Delete(fileType, key string) error {
-	filename, err := getFilename(fileType, key)
-	if err != nil {
-		return err
-	}
-
-	if err = os.Remove(filename); err != nil {
-		return err
-	}
-	return nil
-}
-
-// Migrate file from 1 folder to another
-func Migrate(oldFileType, newFileType, key string) error {
+// LocalMigrate moves a file from 1 folder to another in the local filesystem
+func LocalMigrate(oldFileType, newFileType, key string) error {
 
 	oldFileName, err := getFilename(oldFileType, key)
 	if err != nil {

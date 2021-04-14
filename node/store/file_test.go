@@ -69,7 +69,7 @@ func TestMigrate(t *testing.T) {
 	filename, err := getFilename("alpha", "testwrite")
 	assert.Nilf(err, "error in obtaining filename")
 
-	err = Migrate("alpha", "charlie", "testwrite")
+	err = LocalMigrate("alpha", "charlie", "testwrite")
 	assert.Nilf(err, "error in migrating")
 
 	defer os.Remove(filename)

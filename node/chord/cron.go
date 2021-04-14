@@ -1,23 +1,32 @@
 package chord
 
 import (
-	"log"
 	"math"
+	"time"
 
+	"github.com/sheikhshack/distributed-chaos-50.041/log"
 	"github.com/sheikhshack/distributed-chaos-50.041/node/hash"
 )
 
+func (n *Node) cron() {
+	time.Sleep(time.Millisecond * 10000)
+	for {
+		n.checkPredecessor()
+		n.stabilize()
+		n.fixFingers()
+		time.Sleep(time.Millisecond * 1000)
+	}
+}
+
 //TODO: Handle the case when the node is in the successorList as well
 func (n *Node) stabilize() {
-	log.Println("Stabilizing", n.GetID())
 	if n.GetSuccessor() == n.GetID() {
 		return
 	}
 
 	x, err := n.Gossiper.GetPredecessor(n.GetID(), n.GetSuccessor())
-
 	if err != nil {
-		log.Printf("error in stabilize[GetPredecessor]: %+v\n", err)
+		log.Warn.Printf("Successor %v is down: %+v\n", n.GetSuccessor(), err)
 		n.fixSuccessorList()
 		return
 	}
@@ -31,24 +40,21 @@ func (n *Node) stabilize() {
 		if n.healthCheck(x) {
 			n.SetSuccessor(x)
 		} else {
-			log.Printf("Predecessor of %s is down. Notify the successor.\n", n.GetSuccessor())
+			log.Warn.Printf("Predecessor of %s is down. Notifying successor.\n", n.GetSuccessor())
 			n.notify(n.GetSuccessor())
 			return
 		}
 	}
 
 	// Get succ list of new successor
-	succSuccList, err := n.Gossiper.GetSuccessorList(n.GetID(), n.GetSuccessor())
-
+	successor_SuccessorList, err := n.Gossiper.GetSuccessorList(n.GetID(), n.GetSuccessor())
 	if err != nil {
-		log.Printf("error in stabilize[GetSuccessorList]: %+v\n", err)
+		log.Warn.Printf("Successor %v is down: %+v\n", n.GetSuccessor(), err)
 		n.fixSuccessorList()
 		return
 	}
 
-	n.updateSuccessorList(succSuccList, prevSuccessorList)
-
-	log.Println("Value of successorList: ", n.successorList)
+	n.updateSuccessorList(successor_SuccessorList, prevSuccessorList)
 
 	n.notify(n.GetSuccessor())
 }
@@ -66,20 +72,19 @@ func (n *Node) healthCheck(id string) bool {
 
 // TODO: Mutex locks for this
 func (n *Node) fixSuccessorList() {
-	log.Printf("Fixing Successor List: %+v\n", n.GetSuccessorList())
-
 	n.successorList = n.successorList[1:]
 	n.successorList = append(n.successorList, "")
 
 	isNewSuccessorAlive := n.healthCheck(n.GetSuccessor())
 	if !isNewSuccessorAlive {
+		log.Warn.Printf("Successor %v is down.\n", n.GetSuccessor())
 		n.fixSuccessorList()
-	} else {
 
+	} else {
 		if n.GetSuccessor() != "" {
 			n.migrationFault(n.GetSuccessor())
 		} else {
-			// TODO: How to find the missing successor? Ring break
+			log.Error.Fatalf("Break in chord logical structure. Shutting down node.\n")
 			return
 		}
 
@@ -87,13 +92,14 @@ func (n *Node) fixSuccessorList() {
 
 }
 
-func (n *Node) updateSuccessorList(succSuccList []string, prevSuccessorList []string) {
-	copy(n.successorList[1:], succSuccList[:n.replicaCount-1])
+func (n *Node) updateSuccessorList(successor_SuccessorList []string, prevSuccessorList []string) {
+	copy(n.successorList[1:], successor_SuccessorList[:n.replicaCount-1])
 
 	newElements, missingElements := compareList(prevSuccessorList, n.GetSuccessorList())
 
 	if len(newElements) > 0 || len(missingElements) > 0 {
-		keys, values := getAllLocalFiles()
+		log.Info.Printf("Updated SuccessorList: %+v\n", n.GetSuccessorList())
+		keys, values := stringifyAllLocalFiles()
 
 		if len(newElements) > 0 && keys != "" {
 			// Replicate local files to new replica(s)
@@ -108,27 +114,6 @@ func (n *Node) updateSuccessorList(succSuccList []string, prevSuccessorList []st
 
 }
 
-func (n *Node) replicateToNodeList(nodeList []string, fileName, ip string) {
-	for i := range nodeList {
-		if nodeList[i] != n.GetID() {
-			log.Printf("[REPLICATION] From Node %s to Node %s.\n", n.GetID(), nodeList[i])
-			n.replicateToNode(nodeList[i], fileName, ip)
-		}
-	}
-}
-
-func (n *Node) deleteFromNodeList(nodeList []string, fileName string) {
-	for i := range nodeList {
-		if nodeList[i] != n.GetID() {
-			log.Printf("[DELETE FROM REPLICA] From Node %s to Node %s.\n", n.GetID(), nodeList[i])
-			_, err := n.Gossiper.DeleteFileFromNode(nodeList[i], fileName, "replica")
-			if err != nil {
-				print("Error in Deleting file: %+v\n", err)
-			}
-		}
-	}
-}
-
 //implemented differently from pseudocode, n thinks it might be the predecessor of id
 func (n *Node) notify(id string) {
 	if id == n.GetID() {
@@ -139,7 +124,6 @@ func (n *Node) notify(id string) {
 
 // used as a handler func for gossip.Gossiper.NotifyHandler
 func (n *Node) NotifyHandler(possiblePredecessor string) {
-	// log.Printf("[NOTIFY HANDLER] Possible Predecessor of %s is %s.\n", n.GetID(), possiblePredecessor)
 	//possiblePredecessor is Request's pred
 	if (n.GetPredecessor() == "") ||
 		(hash.IsInRange(
@@ -147,7 +131,7 @@ func (n *Node) NotifyHandler(possiblePredecessor string) {
 			hash.Hash(n.GetPredecessor()),
 			hash.Hash(n.GetID()),
 		)) {
-		// log.Printf("[NOTIFY HANDLER - Set Predecessor] Predecessor of %s is %s.\n", n.GetID(), possiblePredecessor)
+
 		n.SetPredecessor(possiblePredecessor)
 	}
 }
@@ -164,8 +148,7 @@ func (n *Node) fixFingers() {
 func (n *Node) checkPredecessor() {
 
 	if !n.healthCheck(n.predecessor) {
-		log.Printf("%s's Predecessor is down.\n", n.GetID())
+		log.Warn.Printf("Predecessor %s is down.\n", n.predecessor)
 		n.SetPredecessor("")
-
 	}
 }

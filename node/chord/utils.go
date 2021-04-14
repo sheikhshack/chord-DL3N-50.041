@@ -1,8 +1,7 @@
 package chord
 
 import (
-	"log"
-
+	"github.com/sheikhshack/distributed-chaos-50.041/log"
 	"github.com/sheikhshack/distributed-chaos-50.041/node/hash"
 	"github.com/sheikhshack/distributed-chaos-50.041/node/store"
 
@@ -30,7 +29,7 @@ func isElementInList(element string, list []string) bool {
 	return false
 }
 
-func getAllLocalFiles() (keys, values string) {
+func stringifyAllLocalFiles() (keys, values string) {
 
 	// Get all the replica files in the store
 	files, err := store.GetAll("local")
@@ -42,7 +41,7 @@ func getAllLocalFiles() (keys, values string) {
 	values = ""
 
 	for _, i := range files {
-		log.Printf("Has Filename:%v, HashedFile: %v", i.Name(), hash.Hash(i.Name()))
+		log.Info.Printf("Has Filename:%v, HashedFile: %v", i.Name(), hash.Hash(i.Name()))
 		keys += i.Name() + ","
 		val, _ := store.Get("local", i.Name())
 		values += string(val) + ","

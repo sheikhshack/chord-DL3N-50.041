@@ -25,12 +25,14 @@ type InternalListenerClient interface {
 	WriteFile(ctx context.Context, in *ModRequest, opts ...grpc.CallOption) (*ModResponse, error)
 	WriteFileAndReplicate(ctx context.Context, in *ModRequest, opts ...grpc.CallOption) (*ModResponse, error)
 	DeleteFile(ctx context.Context, in *FetchChordRequest, opts ...grpc.CallOption) (*ModResponse, error)
+	DeleteFileAndReplicate(ctx context.Context, in *FetchChordRequest, opts ...grpc.CallOption) (*ModResponse, error)
 	FetchChordIp(ctx context.Context, in *FetchChordRequest, opts ...grpc.CallOption) (*ModResponse, error)
 	MigrationJoin(ctx context.Context, in *MigrationRequest, opts ...grpc.CallOption) (*MigrationResponse, error)
 	MigrationFault(ctx context.Context, in *MigrationRequest, opts ...grpc.CallOption) (*MigrationResponse, error)
 	// D3L bridge protocol (external)
 	StoreKeyHash(ctx context.Context, in *DLUploadRequest, opts ...grpc.CallOption) (*DLResponse, error)
 	GetFileLocation(ctx context.Context, in *DLDownloadRequest, opts ...grpc.CallOption) (*DLDownloadResponse, error)
+	DeleteClientFile(ctx context.Context, in *DLDeleteRequest, opts ...grpc.CallOption) (*DLDeleteResponse, error)
 	Debug(ctx context.Context, in *DebugMessage, opts ...grpc.CallOption) (*DebugResponse, error)
 }
 
@@ -87,6 +89,15 @@ func (c *internalListenerClient) DeleteFile(ctx context.Context, in *FetchChordR
 	return out, nil
 }
 
+func (c *internalListenerClient) DeleteFileAndReplicate(ctx context.Context, in *FetchChordRequest, opts ...grpc.CallOption) (*ModResponse, error) {
+	out := new(ModResponse)
+	err := c.cc.Invoke(ctx, "/internal.InternalListener/DeleteFileAndReplicate", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *internalListenerClient) FetchChordIp(ctx context.Context, in *FetchChordRequest, opts ...grpc.CallOption) (*ModResponse, error) {
 	out := new(ModResponse)
 	err := c.cc.Invoke(ctx, "/internal.InternalListener/FetchChordIp", in, out, opts...)
@@ -132,6 +143,15 @@ func (c *internalListenerClient) GetFileLocation(ctx context.Context, in *DLDown
 	return out, nil
 }
 
+func (c *internalListenerClient) DeleteClientFile(ctx context.Context, in *DLDeleteRequest, opts ...grpc.CallOption) (*DLDeleteResponse, error) {
+	out := new(DLDeleteResponse)
+	err := c.cc.Invoke(ctx, "/internal.InternalListener/DeleteClientFile", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *internalListenerClient) Debug(ctx context.Context, in *DebugMessage, opts ...grpc.CallOption) (*DebugResponse, error) {
 	out := new(DebugResponse)
 	err := c.cc.Invoke(ctx, "/internal.InternalListener/Debug", in, out, opts...)
@@ -152,12 +172,14 @@ type InternalListenerServer interface {
 	WriteFile(context.Context, *ModRequest) (*ModResponse, error)
 	WriteFileAndReplicate(context.Context, *ModRequest) (*ModResponse, error)
 	DeleteFile(context.Context, *FetchChordRequest) (*ModResponse, error)
+	DeleteFileAndReplicate(context.Context, *FetchChordRequest) (*ModResponse, error)
 	FetchChordIp(context.Context, *FetchChordRequest) (*ModResponse, error)
 	MigrationJoin(context.Context, *MigrationRequest) (*MigrationResponse, error)
 	MigrationFault(context.Context, *MigrationRequest) (*MigrationResponse, error)
 	// D3L bridge protocol (external)
 	StoreKeyHash(context.Context, *DLUploadRequest) (*DLResponse, error)
 	GetFileLocation(context.Context, *DLDownloadRequest) (*DLDownloadResponse, error)
+	DeleteClientFile(context.Context, *DLDeleteRequest) (*DLDeleteResponse, error)
 	Debug(context.Context, *DebugMessage) (*DebugResponse, error)
 	mustEmbedUnimplementedInternalListenerServer()
 }
@@ -181,6 +203,9 @@ func (UnimplementedInternalListenerServer) WriteFileAndReplicate(context.Context
 func (UnimplementedInternalListenerServer) DeleteFile(context.Context, *FetchChordRequest) (*ModResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteFile not implemented")
 }
+func (UnimplementedInternalListenerServer) DeleteFileAndReplicate(context.Context, *FetchChordRequest) (*ModResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteFileAndReplicate not implemented")
+}
 func (UnimplementedInternalListenerServer) FetchChordIp(context.Context, *FetchChordRequest) (*ModResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method FetchChordIp not implemented")
 }
@@ -195,6 +220,9 @@ func (UnimplementedInternalListenerServer) StoreKeyHash(context.Context, *DLUplo
 }
 func (UnimplementedInternalListenerServer) GetFileLocation(context.Context, *DLDownloadRequest) (*DLDownloadResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetFileLocation not implemented")
+}
+func (UnimplementedInternalListenerServer) DeleteClientFile(context.Context, *DLDeleteRequest) (*DLDeleteResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteClientFile not implemented")
 }
 func (UnimplementedInternalListenerServer) Debug(context.Context, *DebugMessage) (*DebugResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Debug not implemented")
@@ -302,6 +330,24 @@ func _InternalListener_DeleteFile_Handler(srv interface{}, ctx context.Context, 
 	return interceptor(ctx, in, info, handler)
 }
 
+func _InternalListener_DeleteFileAndReplicate_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(FetchChordRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(InternalListenerServer).DeleteFileAndReplicate(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/internal.InternalListener/DeleteFileAndReplicate",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(InternalListenerServer).DeleteFileAndReplicate(ctx, req.(*FetchChordRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _InternalListener_FetchChordIp_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(FetchChordRequest)
 	if err := dec(in); err != nil {
@@ -392,6 +438,24 @@ func _InternalListener_GetFileLocation_Handler(srv interface{}, ctx context.Cont
 	return interceptor(ctx, in, info, handler)
 }
 
+func _InternalListener_DeleteClientFile_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DLDeleteRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(InternalListenerServer).DeleteClientFile(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/internal.InternalListener/DeleteClientFile",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(InternalListenerServer).DeleteClientFile(ctx, req.(*DLDeleteRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _InternalListener_Debug_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(DebugMessage)
 	if err := dec(in); err != nil {
@@ -438,6 +502,10 @@ var InternalListener_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _InternalListener_DeleteFile_Handler,
 		},
 		{
+			MethodName: "DeleteFileAndReplicate",
+			Handler:    _InternalListener_DeleteFileAndReplicate_Handler,
+		},
+		{
 			MethodName: "FetchChordIp",
 			Handler:    _InternalListener_FetchChordIp_Handler,
 		},
@@ -456,6 +524,10 @@ var InternalListener_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetFileLocation",
 			Handler:    _InternalListener_GetFileLocation_Handler,
+		},
+		{
+			MethodName: "DeleteClientFile",
+			Handler:    _InternalListener_DeleteClientFile_Handler,
 		},
 		{
 			MethodName: "Debug",
