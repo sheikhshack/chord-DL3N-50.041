@@ -38,6 +38,7 @@ type Sentry struct {
 }
 
 func NewSentry(ctx context.Context, network string, replicaCount int, master string, slaves []string) *Sentry {
+	log.Println("--Sentry: Setting up docker environment")
 	client, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
 	if err != nil {
 		log.Fatal("Error connecting to Docker engine", err)
@@ -146,16 +147,18 @@ func (s *Sentry) BuildMikeImage() {
 
 // SetupTestNetwork sets up the common docker network
 func (s *Sentry) SetupTestNetwork() {
+	log.Println("--Sentry: Setting up chord network")
+
 	// resets and remove current Network first
 	if err := s.client.NetworkRemove(s.ctx, s.network); err != nil {
-		log.Printf("Failed to remove network, %v\n", err)
+		//log.Printf("Failed to remove network, %v\n", err)
 	}
 	opt := types.NetworkCreate{Attachable: true}
-	response, err := s.client.NetworkCreate(s.ctx, s.network, opt)
+	_, err := s.client.NetworkCreate(s.ctx, s.network, opt)
 	if err != nil {
 		log.Fatalf("Failed building network: %v", err)
 	}
-	log.Print(response)
+
 
 }
 
@@ -254,6 +257,8 @@ func (s *Sentry) StartContainerAgain(name string)  {
 
 // Writes a file via a directed chord node
 func (s *Sentry) WriteFileToChord(viaNode, fileName, content string) {
+	log.Printf("--Sentry: Writing to ringFS for fileName %s\n", fileName)
+
 	command1 := fmt.Sprintf("-f=%s", fileName)
 	command2 := fmt.Sprintf("-c=%s", content)
 	s.FireOffMikeNode(viaNode, "mike_test", command1, command2)
@@ -283,6 +288,8 @@ func (s *Sentry) ReestablishConnection (name, networkName string) {
 
 // Procedure to bring up the test case ring
 func (s *Sentry) BringUpChordRing() {
+	log.Println("--Sentry: Setting up RING")
+
 	s.SetupTestNetwork()
 	// fireoff the master first, then the slaves
 	s.FireOffChordNode(true, s.master)
@@ -293,6 +300,8 @@ func (s *Sentry) BringUpChordRing() {
 }
 
 func (s *Sentry) BringDownRing() {
+	log.Println("--Sentry: Bringing down docker environment")
+
 	containers, err := s.client.ContainerList(s.ctx, types.ContainerListOptions{})
 	if err != nil {
 		panic(err)
