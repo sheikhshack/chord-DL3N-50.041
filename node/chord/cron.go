@@ -9,7 +9,6 @@ import (
 )
 
 func (n *Node) cron() {
-	time.Sleep(time.Millisecond * 10000)
 	for {
 		n.checkPredecessor()
 		n.stabilize()
@@ -25,11 +24,14 @@ func (n *Node) stabilize() {
 	}
 
 	x, err := n.Gossiper.GetPredecessor(n.GetID(), n.GetSuccessor())
+
 	if err != nil {
 		log.Warn.Printf("Successor %v is down: %+v\n", n.GetSuccessor(), err)
 		n.fixSuccessorList()
 		return
 	}
+
+
 
 	// Init temp previous successorList variable
 	prevSuccessorList := make([]string, n.replicaCount)
@@ -72,6 +74,7 @@ func (n *Node) healthCheck(id string) bool {
 
 // TODO: Mutex locks for this
 func (n *Node) fixSuccessorList() {
+	log.Warn.Printf("Value of succ %+v\n",n.successorList)
 	n.successorList = n.successorList[1:]
 	n.successorList = append(n.successorList, "")
 
@@ -85,11 +88,9 @@ func (n *Node) fixSuccessorList() {
 			n.migrationFault(n.GetSuccessor())
 		} else {
 			log.Error.Fatalf("Break in chord logical structure. Shutting down node.\n")
-			return
+			//return
 		}
-
 	}
-
 }
 
 func (n *Node) updateSuccessorList(successor_SuccessorList []string, prevSuccessorList []string) {

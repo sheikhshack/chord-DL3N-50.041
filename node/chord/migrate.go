@@ -10,7 +10,7 @@ import (
 func (n *Node) replicateToNode(toID, fileName, ip string) {
 	_, err := n.Gossiper.WriteFileToNode(toID, fileName, "replica", ip)
 	if err != nil {
-		log.Error.Printf("Error in instructing node %v to replicate file: %+v\n", toID, ip)
+		log.Warn.Printf("Error in instructing node %v to replicate file: %+v\n", toID, ip)
 	}
 }
 
@@ -37,7 +37,7 @@ func (n *Node) replicateToNodeList(nodeList []string, fileName, ip string) {
 func (n *Node) deleteFromNode(toID, fileName string) {
 	_, err := n.Gossiper.DeleteFileFromNode(toID, fileName, "replica")
 	if err != nil {
-		log.Error.Printf("Error in instructing node %v to deleting file: %+v\n", toID, err)
+		log.Warn.Printf("Error in instructing node %v to deleting file: %+v\n", toID, err)
 	}
 }
 

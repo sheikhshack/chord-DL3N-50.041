@@ -4,15 +4,11 @@ version: '3.5'
 services:
 #  mike:
 #    container_name: mike
-#    image: mike_node
+#    image: sheikhshack/mike_node_tester
 #    environment:
-#      - APP_NODE=bravo
-#      - FILE_NAME=forgotten_sailor.rar
-#      - CONTAINER_IP=godbless_DL3N_DNS
-#    depends_on:
-#      - alpha
-#      - bravo
-#      - charlie
+#      - APP_NODE=alpha
+#    stdin_open: true
+#    tty: true
 
   alpha:
     container_name: chord_alpha
@@ -27,7 +23,6 @@ services:
       - LOG=info
     networks:
       - chord-network
-
 
   # TODO: @Lowen, would be good if this dockerfile also has the build and run command of your binaries
   chord_member:

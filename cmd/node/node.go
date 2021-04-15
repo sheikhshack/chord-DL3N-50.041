@@ -8,15 +8,22 @@ import (
 )
 
 func main() {
-
-	id, err := os.Hostname()
-	if err != nil {
-		log.Fatal("Docker engine -- hostname issues", err)
+	var currHostname string
+	manualDNS := os.Getenv("MY_PEER_DNS")
+	if manualDNS == "DEFAULT" {
+		id, err := os.Hostname()
+		if err != nil {
+			log.Fatal("Docker engine -- hostname issues", err)
+		}
+		currHostname = id
+	} else {
+		currHostname = manualDNS
 	}
-	knownPeerID := os.Getenv("PEER_HOSTNAME")
-	log.Printf("Starting NODE_ID: %v\n", id)
 
-	node := chord.New(id)
+	knownPeerID := os.Getenv("PEER_HOSTNAME")
+	log.Printf("Starting NODE_ID: %v\n", currHostname)
+
+	node := chord.New(currHostname)
 
 	if knownPeerID == "" {
 		node.InitRing()
