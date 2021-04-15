@@ -382,7 +382,7 @@ func test1() {
 	sentry := NewSentry(ctx, "apache1", testReplica, master, slaves)
 	sentry.BringUpChordRing()
 	time.Sleep(time.Second * 15)
-	sentry.WriteFileToChord("slave-node1", "wombat.txt", "I hate this shit")
+	sentry.WriteFileToChord("slave-node1", "slave-node1", "I love 50.041: Distributed Systems and Computing!")
 	fmt.Println("-- TEST1: Sending the file over to a node (random) w/ system replica set to ", testReplica)
 	time.Sleep(time.Second * 10)
 	sentryFS.ReadFileInVolume()
@@ -390,7 +390,7 @@ func test1() {
 
 	current_replica := "slave-node1"
 	sentry.ForceStopContainer(current_replica)
-	fmt.Println("-- TEST2: Removing current primary ", current_replica)
+	fmt.Println("-- TEST2: Removing current primary", current_replica)
 	sentryFS.DeleteFilesystemLink(current_replica)
 	time.Sleep(time.Second * 5)
 	sentryFS.ReadFileInVolume()
@@ -434,7 +434,7 @@ func test4 () {
 	sentry.BringUpChordRing()
 	time.Sleep(time.Second *  15)
 	fmt.Println("-- TEST4: Bringing slave-node1 out of network")
-	sentry.WriteFileToChord("slave-node1", "slave-node1", "I hate this shit")
+	sentry.WriteFileToChord("slave-node1", "slave-node1", "I love 50.041: Distributed Systems and Computing!")
 	time.Sleep(time.Second * 10)
 	fmt.Println("-- TEST4: Current file system before fault")
 	sentryFS.ReadFileInVolume()
@@ -454,5 +454,8 @@ func test4 () {
 
 
 func main() {
-	test4()
+	//test1()
+	test2()
+	//test3()
+	//test4()
 }

@@ -19,7 +19,6 @@ func (n *Node) cron() {
 
 //TODO: Handle the case when the node is in the successorList as well
 func (n *Node) stabilize() {
-	log.Warn.Printf("Running stabelize, value of succList: %+v\n", n.successorList)
 	if n.GetSuccessor() == n.GetID() {
 		return
 	}
@@ -31,7 +30,6 @@ func (n *Node) stabilize() {
 		n.fixSuccessorList()
 		return
 	}
-	log.Warn.Printf("Running stabelize, value of x: %+v\n", x)
 
 
 
