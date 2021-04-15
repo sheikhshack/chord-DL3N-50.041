@@ -177,7 +177,6 @@ func (s *Sentry) FireOffMikeNode(contactNode, name, cmd1, cmd2 string) {
 	if err != nil {
 		log.Fatalf("Failed building container: %v", err)
 	}
-	fmt.Println(container)
 	s.client.NetworkConnect(s.ctx, s.network, name, &network.EndpointSettings{})
 	if err := s.client.ContainerStart(s.ctx, container.ID, types.ContainerStartOptions{}); err != nil {
 		log.Fatalf("Failed to run container: %v", err)
@@ -228,7 +227,6 @@ func (s *Sentry) FireOffChordNode(ringLeader bool, name string) {
 	if err != nil {
 		log.Fatalf("Failed building container: %v", err)
 	}
-	fmt.Println(container)
 	s.client.NetworkConnect(s.ctx, s.network, name, &network.EndpointSettings{})
 	if err := s.client.ContainerStart(s.ctx, container.ID, types.ContainerStartOptions{}); err != nil {
 		log.Fatalf("Failed to run container: %v", err)
