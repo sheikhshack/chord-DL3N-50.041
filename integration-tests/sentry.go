@@ -278,15 +278,7 @@ func (s *Sentry) ReestablishConnection (name, networkName string) {
 
 }
 
-//func (s *Sentry) RestartContainer(name string) {
-//	contID := s.FindContainerID(name)
-//
-//	dur:= 50 * time.Second
-//	fmt.Println("-- MECH: Restarting node", contID)
-//	s.client.ContainerRestart(s.ctx, contID, &dur)
-//}
 
-// Procedure to bring up the test case ring
 func (s *Sentry) BringUpChordRing() {
 	log.Println("--Sentry: Setting up RING")
 
@@ -455,7 +447,7 @@ func test4 () {
 
 func main() {
 	//test1()
-	test2()
-	//test3()
+	//test2()
+	test3()
 	//test4()
 }

@@ -26,7 +26,6 @@ services:
 
   # TODO: @Lowen, would be good if this dockerfile also has the build and run command of your binaries
   chord_member:
-    container_name: mouse
     build:
       context: .
       dockerfile: Dockerfile
@@ -39,7 +38,6 @@ services:
     restart: "no"
     depends_on:
       - alpha
-
 
     networks:
       - chord-network
