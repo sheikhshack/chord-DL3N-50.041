@@ -1,7 +1,14 @@
 # distributed-chaos-50.041
 
+## Integration-Tests
+For validating our Chord protocol, we have implemented several tests to simulate certain test cases using the in-house validation tool, Sentry. The details of these test cases can be found in Section 8 of our Final Report. The command to run the test case (as selected in code) is: 
+```
+cd ./integration-tests/
+go run sentry.go
+```
+
 ## Panopticon
-The Panopticon is a debugger tool for viewing all chord nodes' predecessor and successor. Panopticon exists as a docker container that will sustain a consistent and easy to read table. Below is such an example 
+The Panopticon is an in-house debugger tool for viewing all chord nodes' predecessor and successor. Panopticon exists as a docker container that will sustain a consistent and easy to read table. Below is such an example 
  ```
                                      ID             predecessor               successor stabilized
 panopticon    |           alpha (68601):     nodeCharlie (53816)       nodeBravo (96447)      true
